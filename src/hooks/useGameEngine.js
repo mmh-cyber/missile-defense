@@ -175,25 +175,36 @@ export default function useGameEngine() {
   }, []);
 
   // Compute where a threat blip currently IS on the radar
-  // Entry direction vectors (GPS-verified bearings, must match RadarDisplay.jsx)
-  const ENTRY_DIRS = {
-    gaza: { x: -0.48, y: 0.0 }, north: { x: 0.0, y: -0.48 },
-    northeast: { x: 0.38, y: -0.30 }, east: { x: 0.46, y: -0.12 },
-    southeast: { x: 0.24, y: 0.42 }, south: { x: 0.0, y: 0.48 },
-    southwest: { x: -0.34, y: 0.34 },
+  // Spawn origin system — must match RadarDisplay.jsx
+  // Short-range threats (rockets, nearby drones) spawn from the border
+  // Long-range threats (missiles, distant drones) spawn from off-map
+  const SPAWN_NEAR = {
+    gaza: { x: 0.10, y: 0.48 }, north: { x: 0.42, y: 0.02 },
+    northeast: { x: 0.70, y: 0.02 }, east: { x: 0.75, y: 0.35 },
+    southeast: { x: 0.55, y: 0.80 },
   };
+  const SPAWN_FAR = {
+    gaza: { x: 0.02, y: 0.48 }, north: { x: 0.42, y: -0.15 },
+    northeast: { x: 0.85, y: -0.10 }, east: { x: 1.08, y: 0.58 },
+    southeast: { x: 0.75, y: 1.05 }, south: { x: 0.50, y: 1.10 },
+    southwest: { x: 0.10, y: 0.95 },
+  };
+  const getSpawnOrigin = useCallback((type, origin) => {
+    if (type === 'rocket') return SPAWN_NEAR[origin] || SPAWN_NEAR.gaza;
+    if (type === 'drone' && ['gaza', 'north', 'northeast'].includes(origin)) {
+      return SPAWN_NEAR[origin] || SPAWN_NEAR.north;
+    }
+    return SPAWN_FAR[origin] || SPAWN_FAR.east;
+  }, []);
   const getBlipPosition = useCallback((threat) => {
     const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
     const linearProgress = 1 - threat.timeLeft / threat.countdown;
     let progress = linearProgress;
     if (threat.type === 'ballistic') progress = linearProgress ** 3;
     else if (threat.type === 'hypersonic') progress = linearProgress ** 4;
-    const cx = 0.5, cy = 0.5;
-    const dir = ENTRY_DIRS[threat.origin] || ENTRY_DIRS.southeast;
-    const startX = cx + dir.x;
-    const startY = cy + dir.y;
-    return { x: startX + (target.x - startX) * progress, y: startY + (target.y - startY) * progress };
-  }, []);
+    const start = getSpawnOrigin(threat.type, threat.origin);
+    return { x: start.x + (target.x - start.x) * progress, y: start.y + (target.y - start.y) * progress };
+  }, [getSpawnOrigin]);
 
   // Launch interceptor trail with delayed impact flash
   const addTrail = useCallback((action, threat, impactType) => {

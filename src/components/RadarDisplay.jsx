@@ -40,16 +40,44 @@ function easeProgress(linearProgress, type) {
   return linearProgress;
 }
 
-// Entry direction vectors for threat origins
-// x = 0.48 * sin(bearing), y = -0.48 * cos(bearing) where 0°=north clockwise
-const ENTRY_DIRS = {
-  gaza:      { x: -0.48, y: 0.0 },     // due west (270°) — Gaza
-  north:     { x: 0.0, y: -0.48 },     // due north (0°) — Lebanon
-  northeast: { x: 0.38, y: -0.30 },    // NE ~52° — Syria
-  east:      { x: 0.46, y: -0.12 },    // ENE ~76° — Iran
-  southeast: { x: 0.24, y: 0.42 },     // SSE ~150° — Yemen
-  south:     { x: 0.0, y: 0.48 },
-  southwest: { x: -0.34, y: 0.34 },
+// Spawn origin system — absolute map-space coordinates
+// Short-range threats (rockets, nearby drones) spawn from the border
+// Long-range threats (missiles, distant drones) spawn from off-map
+const SPAWN_NEAR = {
+  gaza:      { x: 0.10, y: 0.48 },    // Gaza border
+  north:     { x: 0.42, y: 0.02 },    // Lebanese border
+  northeast: { x: 0.70, y: 0.02 },    // Syrian/Golan border
+  east:      { x: 0.75, y: 0.35 },    // Eastern border
+  southeast: { x: 0.55, y: 0.80 },    // SE border
+};
+const SPAWN_FAR = {
+  gaza:      { x: 0.02, y: 0.48 },    // Beyond Gaza
+  north:     { x: 0.42, y: -0.15 },   // Well north of Lebanon
+  northeast: { x: 0.85, y: -0.10 },   // NE of Syria
+  east:      { x: 1.08, y: 0.58 },    // Iran (~100° bearing, off-map east)
+  southeast: { x: 0.75, y: 1.05 },    // Yemen (off-map south)
+  south:     { x: 0.50, y: 1.10 },
+  southwest: { x: 0.10, y: 0.95 },
+};
+
+function getSpawnOrigin(type, origin) {
+  // Rockets are always short-range
+  if (type === 'rocket') return SPAWN_NEAR[origin] || SPAWN_NEAR.gaza;
+  // Drones from nearby origins (Gaza, Lebanon, Syria) are short/medium range
+  if (type === 'drone' && ['gaza', 'north', 'northeast'].includes(origin)) {
+    return SPAWN_NEAR[origin] || SPAWN_NEAR.north;
+  }
+  // Everything else (missiles, distant drones) is long-range
+  return SPAWN_FAR[origin] || SPAWN_FAR.east;
+}
+
+// Blip dot radius by threat type — larger threats are more visible
+const BLIP_RADIUS = {
+  drone: 1.2,
+  rocket: 1.4,
+  cruise: 1.7,
+  ballistic: 2.0,
+  hypersonic: 2.2,
 };
 
 function getBlipPosition(threat) {
@@ -57,15 +85,12 @@ function getBlipPosition(threat) {
   const timeLeft = threat.intercepted ? threat.frozenTimeLeft : threat.timeLeft;
   const linearProgress = 1 - timeLeft / threat.countdown;
   const progress = easeProgress(linearProgress, threat.type);
-  const cx = 0.5, cy = 0.5;
-  const dir = ENTRY_DIRS[threat.origin] || ENTRY_DIRS.southeast;
-  const startX = cx + dir.x;
-  const startY = cy + dir.y;
+  const start = getSpawnOrigin(threat.type, threat.origin);
   return {
-    x: startX + (target.x - startX) * progress,
-    y: startY + (target.y - startY) * progress,
-    originX: startX,
-    originY: startY,
+    x: start.x + (target.x - start.x) * progress,
+    y: start.y + (target.y - start.y) * progress,
+    originX: start.x,
+    originY: start.y,
   };
 }
 
@@ -74,16 +99,18 @@ function getBlipPosition(threat) {
 // ============================================
 
 function InterceptEffect({ flash, viewport }) {
-  const { cx, cy, particles } = flash;
+  const { cx, cy, particles, threatType } = flash;
   const p = mapToSVG(cx, cy, viewport);
+  // Scale intercept effect by threat severity — bigger threats = more dramatic
+  const scale = { drone: 0.6, rocket: 0.8, cruise: 1.0, ballistic: 1.3, hypersonic: 1.6 }[threatType] || 1.0;
   return (
     <g>
-      <circle cx={p.x} cy={p.y} r="2" fill="white" className="intercept-flash-center" />
-      <circle cx={p.x} cy={p.y} r="3" fill="none" stroke="#22c55e" strokeWidth="1" className="intercept-shockwave" />
-      <circle cx={p.x} cy={p.y} r="3" fill="none" stroke="rgba(34, 197, 94, 0.5)" strokeWidth="0.5" className="intercept-shockwave-secondary" />
+      <circle cx={p.x} cy={p.y} r={2 * scale} fill="white" className="intercept-flash-center" />
+      <circle cx={p.x} cy={p.y} r={3 * scale} fill="none" stroke="#22c55e" strokeWidth={Math.max(0.5, 1 * scale)} className="intercept-shockwave" />
+      <circle cx={p.x} cy={p.y} r={3 * scale} fill="none" stroke="rgba(34, 197, 94, 0.5)" strokeWidth={Math.max(0.3, 0.5 * scale)} className="intercept-shockwave-secondary" />
       {particles.map((pt, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={0.6} fill="#22c55e" className="intercept-particle"
-          style={{ '--end-x': `${pt.endX}px`, '--end-y': `${pt.endY}px`, animationDelay: `${pt.delay}s` }} />
+        <circle key={i} cx={p.x} cy={p.y} r={Math.max(0.3, 0.6 * scale)} fill="#22c55e" className="intercept-particle"
+          style={{ '--end-x': `${pt.endX * scale}px`, '--end-y': `${pt.endY * scale}px`, animationDelay: `${pt.delay}s` }} />
       ))}
     </g>
   );
@@ -319,7 +346,15 @@ export default function RadarDisplay({
               const dotRadius = viewport.scale >= 2.0 ? 1.2 : viewport.scale >= 1.5 ? 1.0 : 0.7;
               const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.5 : 1.2;
 
-              return Object.entries(visibleCities).map(([name, city]) => {
+              // At L3+ (zoomed out), hide tier 2 cities unless actively targeted
+              const citiesToRender = Object.entries(visibleCities).filter(([name, city]) => {
+                if (city.tier === 1) return true;
+                if (viewport.scale >= 1.5) return true; // zoomed in (L1/L2)
+                if (activeThreatTargets.has(name)) return true; // being targeted
+                return false;
+              });
+
+              return citiesToRender.map(([name, city]) => {
                 const p = mapToSVG(city.x, city.y, viewport);
                 const flash = impactFlashes.find((f) => f.zone === name);
 
@@ -339,10 +374,8 @@ export default function RadarDisplay({
                   }
                 }
 
-                // Tier-based label visibility
-                const showLabel = city.tier === 1
-                  || viewport.scale >= 1.5
-                  || activeThreatTargets.has(name);
+                // Always show labels for visible cities (tier 2 already filtered above)
+                const showLabel = true;
 
                 // Per-city label direction offset
                 const offset = LABEL_OFFSETS[city.labelDir || 'e'];
@@ -465,16 +498,16 @@ export default function RadarDisplay({
                       className="selection-ring-spin"
                     />
                   )}
-                  {/* Pulse ring */}
+                  {/* Pulse ring — scaled by threat type */}
                   <circle
-                    cx={svgPos.x} cy={svgPos.y} r="2.5"
+                    cx={svgPos.x} cy={svgPos.y} r={(BLIP_RADIUS[threat.type] || 1.4) + 1.0}
                     fill="none" stroke={color} strokeWidth="0.3" opacity="0.4"
                     className="radar-pulse"
                   />
-                  {/* Blip */}
+                  {/* Blip — sized by threat type (drones small, missiles large) */}
                   <circle
                     cx={svgPos.x} cy={svgPos.y}
-                    r="1.8"
+                    r={BLIP_RADIUS[threat.type] || 1.4}
                     fill={color}
                     stroke={isSelected ? '#ffffff' : color}
                     strokeWidth={isSelected ? '0.6' : '0.3'}

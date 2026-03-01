@@ -44,11 +44,11 @@ export const CITIES = {
   'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
   'Holon':          { x: 0.27, y: 0.37, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
 
-  // === L4: Negev ===
-  'Beersheba':      { x: 0.29, y: 0.53, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
-  'Dimona':         { x: 0.37, y: 0.57, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
+  // === L4: Negev === (pushed south for spacing from Otef Aza / Jerusalem)
+  'Beersheba':      { x: 0.29, y: 0.57, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
+  'Dimona':         { x: 0.37, y: 0.62, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
   'Eilat':          { x: 0.35, y: 0.90, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
-  'Arad':           { x: 0.40, y: 0.53, region: 'negev', tier: 2, revealLevel: 4, labelDir: 'ne' },
+  'Arad':           { x: 0.42, y: 0.58, region: 'negev', tier: 2, revealLevel: 4, labelDir: 'ne' },
 };
 
 // --- Level Viewport Configuration ---
@@ -59,11 +59,11 @@ export const LEVEL_VIEWPORTS = [
   null, // index 0 unused (levels are 1-indexed)
   { centerX: 0.27, centerY: 0.48, scale: 2.5 },   // L1: tight on Otef Aza, cities near Gaza arc on left
   { centerX: 0.48, centerY: 0.15, scale: 1.8 },   // L2: Galil/Golan + battery (slightly wider)
-  { centerX: 0.35, centerY: 0.30, scale: 1.1 },   // L3: zoom out — center + both fronts
-  { centerX: 0.35, centerY: 0.38, scale: 0.95 },  // L4: includes Negev
-  { centerX: 0.35, centerY: 0.42, scale: 0.85 },  // L5: full country + Eilat
-  { centerX: 0.35, centerY: 0.42, scale: 0.85 },  // L6: same
-  { centerX: 0.35, centerY: 0.42, scale: 0.85 },  // L7: same
+  { centerX: 0.28, centerY: 0.35, scale: 1.0 },   // L3: zoom out — shifted up-right toward Gaza/Lebanon/Syria
+  { centerX: 0.28, centerY: 0.44, scale: 0.80 },  // L4: includes Negev + Eilat visible
+  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L5: full country, Eilat clearly visible
+  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L6: same
+  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L7: same
 ];
 
 // --- Per-Level Battery Positions (Regional HQs) ---
@@ -131,11 +131,11 @@ export const REGIONS = [
     revealLevel: 4,
     color: 'rgba(255, 200, 100, 0.15)',
     polygon: [
-      [0.22, 0.52], [0.48, 0.52], [0.46, 0.65],
+      [0.22, 0.55], [0.48, 0.55], [0.46, 0.68],
       [0.42, 0.80], [0.37, 0.92], [0.33, 0.92],
-      [0.28, 0.72], [0.22, 0.58],
+      [0.28, 0.75], [0.22, 0.62],
     ],
-    labelPos: { x: 0.35, y: 0.65 },
+    labelPos: { x: 0.35, y: 0.70 },
   },
   // L5 unpopulated regions — outlines only, no cities
   {
@@ -194,9 +194,9 @@ export const GAZA_STRIP = {
 export const THREAT_ORIGINS = [
   { name: 'Gaza',    angle: 270, arcSpan: 20, activeLevels: [1, 3, 4, 5, 6, 7] },    // W (verified: ~270°)
   { name: 'Lebanon', angle: 0,   arcSpan: 35, activeLevels: [2, 3, 4, 5, 6, 7] },    // N — spans northern border (~342.5° to 17.5°)
-  { name: 'Syria',   angle: 52,  arcSpan: 50, activeLevels: [2, 3, 4, 5, 6, 7] },    // NE-E — spans Golan/eastern border (~27° to 77°)
-  { name: 'Iran',    angle: 76,  arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // ENE (verified: ~76°)
-  { name: 'Yemen',   angle: 150, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // SSE (verified: ~150°)
+  { name: 'Syria',   angle: 48,  arcSpan: 35, activeLevels: [2, 3, 4, 5, 6, 7] },    // NE — Golan/eastern border (~30° to 66°)
+  { name: 'Iran',    angle: 100, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // E-ESE — between Syria and Yemen (~87° to 113°)
+  { name: 'Yemen',   angle: 155, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // SSE (~142° to 168°)
 ];
 
 // --- Israel outline vertices (GPS-verified) ---
