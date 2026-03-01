@@ -50,12 +50,14 @@ export default function useGameEngine() {
   const gameStateRef = useRef(gameState);
   const selectedThreatIdRef = useRef(selectedThreatId);
   const activeThreatsRef = useRef(activeThreats);
+  const ammoRef = useRef(ammo);
   const volumeRef = useRef(volume);
   const currentLevelRef = useRef(currentLevel);
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { selectedThreatIdRef.current = selectedThreatId; }, [selectedThreatId]);
   useEffect(() => { activeThreatsRef.current = activeThreats; }, [activeThreats]);
+  useEffect(() => { ammoRef.current = ammo; }, [ammo]);
   useEffect(() => { volumeRef.current = volume; }, [volume]);
   useEffect(() => { currentLevelRef.current = currentLevel; }, [currentLevel]);
 
@@ -247,7 +249,7 @@ export default function useGameEngine() {
     }, 3000);
   }, [stopSiren]);
 
-  // Handle threat timeout (countdown reached 0)
+  // Handle threat timeout (countdown reached 0) — covers both unactioned timeouts and held threats
   const handleThreatTimeout = useCallback((threat) => {
     setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
 
@@ -255,16 +257,29 @@ export default function useGameEngine() {
       setSelectedThreatId(null);
     }
 
-    const effectivePopulated = threat.is_populated;
-
-    if (effectivePopulated) {
-      setResultLog((prev) => [...prev, { ...threat, result: 'timeout', siren: true }]);
+    if (threat.is_populated) {
+      // City hit — either player held fire (wrong) or didn't act in time
+      const result = threat.held ? 'hold_populated' : 'timeout';
+      setResultLog((prev) => [...prev, { ...threat, result, siren: true }]);
       playSound(failRef);
       addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
       playCityHitSound(volumeRef.current);
       setStreak(0);
       triggerTzevaAdom();
+    } else if (threat.held) {
+      // Correct hold — player let it through, lands harmlessly
+      setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
+      playSound(successRef);
+      addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
+      playGroundImpactSound(volumeRef.current);
+      setStreak((s) => {
+        const next = s + 1;
+        setBestStreak((b) => Math.max(b, next));
+        return next;
+      });
+      showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammunition conserved.`, 'success');
     } else {
+      // Unactioned timeout — player didn't respond in time
       setResultLog((prev) => [...prev, { ...threat, result: 'timeout_open', siren: false }]);
       addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
       playGroundImpactSound(volumeRef.current);
@@ -282,34 +297,17 @@ export default function useGameEngine() {
     if (!threat) return;
 
     if (action === 'hold_fire') {
-      // Compute blip position BEFORE removing the threat
-      const blipPos = getBlipPosition(threat);
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
+      // Mark threat as "held" — it continues on its trajectory to the city.
+      // Effects (tzeva adom / success feedback) trigger when it actually impacts.
+      setActiveThreats((prev) => prev.map((t) =>
+        t.id === threat.id ? { ...t, held: true } : t
+      ));
       setSelectedThreatId(null);
-
-      if (threat.is_populated) {
-        setResultLog((prev) => [...prev, { ...threat, result: 'hold_populated', siren: true }]);
-        playSound(failRef);
-        addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
-        playCityHitSound(volumeRef.current);
-        setStreak(0);
-        triggerTzevaAdom();
-      } else {
-        setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
-        playSound(successRef);
-        addImpactFlash(threat.impact_zone, 'hold_clear', threat.type, blipPos);
-        playGroundImpactSound(volumeRef.current);
-        setStreak((s) => {
-          const next = s + 1;
-          setBestStreak((b) => Math.max(b, next));
-          return next;
-        });
-        showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammunition conserved.`, 'success');
-      }
       return;
     }
 
-    // Interceptor action — consume ammo
+    // Interceptor action — validate ammo before firing
+    if (ammoRef.current[action] <= 0) return;
     setAmmo((prev) => ({ ...prev, [action]: prev[action] - 1 }));
 
     const isCorrect = action === threat.correct_action;
@@ -392,8 +390,9 @@ export default function useGameEngine() {
             _corrected: false,
           };
           const newThreats = [...prev, newThreat];
-          if (newThreats.length === 1) {
-            setSelectedThreatId(newThreats[0].id);
+          const selectable = newThreats.filter((t) => !t.intercepted && !t.held);
+          if (selectable.length === 1) {
+            setSelectedThreatId(selectable[0].id);
           }
           return newThreats;
         });

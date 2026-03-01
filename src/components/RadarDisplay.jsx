@@ -396,12 +396,12 @@ export default function RadarDisplay({
             return (
               <g
                 key={threat.id}
-                onClick={() => !threat.intercepted && onSelectThreat(threat.id)}
-                style={{ cursor: threat.intercepted ? 'default' : 'pointer' }}
-                className={`${threat.intercepted ? 'intercepted-blip-fade' : 'blip-hover'}`}
+                onClick={() => !threat.intercepted && !threat.held && onSelectThreat(threat.id)}
+                style={{ cursor: (threat.intercepted || threat.held) ? 'default' : 'pointer' }}
+                className={`${threat.intercepted ? 'intercepted-blip-fade' : threat.held ? 'held-blip-fade' : 'blip-hover'}`}
               >
                 {/* Invisible hit target — larger radius for easier clicking */}
-                {!threat.intercepted && (
+                {!threat.intercepted && !threat.held && (
                   <circle
                     cx={pos.x * size} cy={pos.y * size}
                     r="4.5" fill="transparent" stroke="none"

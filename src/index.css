@@ -192,6 +192,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
+   Held Blip — dimmed, still moving toward target
+   ============================================ */
+.held-blip-fade {
+  opacity: 0.35;
+}
+
+/* ============================================
    Tzeva Adom Flash (non-blocking, 3s)
    ============================================ */
 .tzeva-adom-flash {

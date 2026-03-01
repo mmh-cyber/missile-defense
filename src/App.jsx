@@ -127,7 +127,7 @@ export default function App() {
         e.preventDefault();
         if (activeThreats.length === 0) return;
 
-        const sortedThreats = [...activeThreats].filter((t) => !t.intercepted).sort((a, b) => a.timeLeft - b.timeLeft);
+        const sortedThreats = [...activeThreats].filter((t) => !t.intercepted && !t.held).sort((a, b) => a.timeLeft - b.timeLeft);
         const currentIndex = sortedThreats.findIndex((t) => t.id === selectedThreatId);
 
         let nextIndex;
