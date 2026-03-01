@@ -431,6 +431,55 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
+   Hold Clear Effect (Correct Hold Fire)
+   ============================================ */
+.hold-clear-flash {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holdClearFlash 2s ease-out forwards;
+}
+
+@keyframes holdClearFlash {
+  0% { opacity: 0; r: 1; }
+  15% { opacity: 0.6; r: 4; }
+  100% { opacity: 0; r: 6; }
+}
+
+.hold-clear-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holdClearRing 1.5s ease-out forwards;
+}
+
+@keyframes holdClearRing {
+  0% { r: 1; opacity: 0.8; stroke-width: 0.8; }
+  100% { r: 6; opacity: 0; stroke-width: 0.2; }
+}
+
+.hold-clear-check {
+  animation: holdClearCheckPop 2s ease-out forwards;
+}
+
+@keyframes holdClearCheckPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1.3); }
+  40% { transform: scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.hold-clear-label {
+  animation: holdClearLabel 2s ease-out forwards;
+}
+
+@keyframes holdClearLabel {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
    Screen Shake (City Hit)
    ============================================ */
 .screen-shake {
@@ -673,23 +722,26 @@ button:focus-visible {
    Educational Briefing — Quiz Feedback
    ============================================ */
 .quiz-correct-flash {
-  animation: quizCorrect 0.5s ease-out;
+  animation: quizCorrect 0.6s ease-out forwards;
 }
 
 @keyframes quizCorrect {
-  0%  { transform: scale(1); }
-  30% { transform: scale(1.03); box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1); box-shadow: none; }
+  30%  { transform: scale(1.04); box-shadow: 0 0 25px rgba(34, 197, 94, 0.5); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
 }
 
 .quiz-wrong-flash {
-  animation: quizWrong 0.4s ease-out;
+  animation: quizWrong 0.5s ease-out forwards;
 }
 
 @keyframes quizWrong {
-  0%, 100% { transform: translateX(0); }
-  25%      { transform: translateX(-4px); }
-  75%      { transform: translateX(4px); }
+  0%   { transform: translateX(0); box-shadow: none; }
+  20%  { transform: translateX(-5px); }
+  40%  { transform: translateX(5px); }
+  60%  { transform: translateX(-3px); }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
 }
 
 /* ============================================

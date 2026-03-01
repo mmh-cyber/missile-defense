@@ -30,11 +30,12 @@ function easeProgress(linearProgress, type) {
 
 // Entry direction vectors for threat origins
 const ENTRY_DIRS = {
-  south:     { x: 0.0, y: 0.48 },   // Yemen — from bottom
-  southeast: { x: 0.34, y: 0.34 },  // Yemen/Iran — from bottom-right
-  east:      { x: 0.48, y: 0.0 },   // Iran — from right
-  north:     { x: 0.0, y: -0.48 },  // Hezbollah/Lebanon — from top
-  northeast: { x: 0.34, y: -0.34 }, // Syria — from upper-right
+  south:     { x: 0.0, y: 0.48 },    // Yemen — from bottom
+  southwest: { x: -0.34, y: 0.34 },  // Gaza — from bottom-left
+  southeast: { x: 0.34, y: 0.34 },   // Yemen/Iran — from bottom-right
+  east:      { x: 0.48, y: 0.0 },    // Iran/Iraq — from right
+  north:     { x: 0.0, y: -0.48 },   // Hezbollah/Lebanon — from top
+  northeast: { x: 0.34, y: -0.34 },  // Syria — from upper-right
 };
 
 function getBlipPosition(threat) {
@@ -170,6 +171,40 @@ function GroundImpactEffect({ flash }) {
           }}
         />
       ))}
+    </g>
+  );
+}
+
+function HoldClearEffect({ flash }) {
+  const { cx, cy } = flash;
+  return (
+    <g>
+      {/* Green celebration flash */}
+      <circle cx={cx} cy={cy} r="3"
+        fill="rgba(34, 197, 94, 0.4)"
+        className="hold-clear-flash" />
+
+      {/* Expanding green ring */}
+      <circle cx={cx} cy={cy} r="2.5"
+        fill="none" stroke="#22c55e" strokeWidth="0.6"
+        className="hold-clear-ring" />
+
+      {/* Checkmark — drawn as two lines forming a ✓ */}
+      <g className="hold-clear-check">
+        <line x1={cx - 1.5} y1={cy + 0.3} x2={cx - 0.3} y2={cy + 1.5}
+          stroke="#22c55e" strokeWidth="0.6" strokeLinecap="round" />
+        <line x1={cx - 0.3} y1={cy + 1.5} x2={cx + 2} y2={cy - 1.5}
+          stroke="#22c55e" strokeWidth="0.6" strokeLinecap="round" />
+      </g>
+
+      {/* "CLEAR" label */}
+      <text x={cx} y={cy - 3.5}
+        fill="#22c55e" fontSize="2" fontFamily="monospace"
+        textAnchor="middle" fontWeight="bold"
+        className="hold-clear-label"
+      >
+        CLEAR
+      </text>
     </g>
   );
 }
@@ -319,6 +354,9 @@ export default function RadarDisplay({
             }
             if (flash.type === 'ground_impact') {
               return <GroundImpactEffect key={flash.id} flash={flash} />;
+            }
+            if (flash.type === 'hold_clear') {
+              return <HoldClearEffect key={flash.id} flash={flash} />;
             }
             return null;
           })}

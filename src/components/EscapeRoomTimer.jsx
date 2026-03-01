@@ -9,12 +9,17 @@ export default function EscapeRoomTimer({ escapeRoomTime }) {
     escapeRoomTime < 60
       ? 'text-red-400 animate-pulse'
       : escapeRoomTime < 180
-      ? 'text-yellow-400'
-      : 'text-green-400';
+      ? 'text-amber-400'
+      : 'text-purple-300';
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-[10px] text-gray-600 font-mono tracking-widest">
+    <div
+      className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full
+        bg-purple-950/80 border border-purple-800/60 backdrop-blur-sm
+        shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+    >
+      <span className="text-sm">&#x1F512;</span>
+      <span className="text-[10px] text-purple-500 font-mono tracking-widest">
         ESCAPE ROOM
       </span>
       <span className={`font-mono text-lg font-bold tabular-nums ${colorClass}`}>

@@ -175,15 +175,51 @@ function HypersonicMissileAnimation() {
   );
 }
 
+function RocketAnimation() {
+  return (
+    <div className="mt-4 flex justify-center">
+      <svg viewBox="0 0 300 110" width="300" height="110" className="overflow-visible">
+        {/* Ground */}
+        <line x1="0" y1="100" x2="300" y2="100" stroke="#22c55e" strokeWidth="0.5" opacity="0.2" />
+
+        {/* Arc path */}
+        <path
+          d="M40,98 Q100,20 260,98"
+          fill="none" stroke="#f97316" strokeWidth="0.5" opacity="0.12"
+          strokeDasharray="4,4"
+        />
+
+        {/* Labels */}
+        <circle cx="40" cy="98" r="2" fill="#f97316" opacity="0.25" />
+        <text x="40" y="108" fill="#f97316" fontSize="5" textAnchor="middle" opacity="0.25" fontFamily="monospace">LAUNCH</text>
+        <circle cx="260" cy="98" r="2" fill="#f97316" opacity="0.35" className="ballistic-impact-pulse" />
+        <text x="260" y="108" fill="#f97316" fontSize="5" textAnchor="middle" opacity="0.35" fontFamily="monospace">IMPACT</text>
+
+        {/* Rocket on arc */}
+        <g className="ballistic-missile-arc">
+          <ellipse cx="-6" cy="0" rx="4" ry="1.5" fill="#f97316" opacity="0.2" className="ballistic-glow" />
+          <path d="M-5,-1.5 L5,-1.5 L7,0 L5,1.5 L-5,1.5 L-6,0 Z" fill="#f97316" opacity="0.85" />
+          <path d="M5,-1.5 L10,0 L5,1.5" fill="#fb923c" opacity="0.9" />
+          <path d="M-5,-1.5 L-7,-3.5 L-6,-3 L-5,-1.5" fill="#f97316" opacity="0.6" />
+          <path d="M-5,1.5 L-7,3.5 L-6,3 L-5,1.5" fill="#f97316" opacity="0.6" />
+          <circle cx="8" cy="0" r="2" fill="#f97316" opacity="0.15" className="ballistic-glow" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────
 
 // Level-specific subtitles
 const LEVEL_TITLES = {
   1: 'DRONE DEFENSE',
-  2: 'CRUISE THREAT',
-  3: 'BALLISTIC STORM',
-  4: 'HYPERSONIC STRIKE',
-  5: 'FINAL STAND',
+  2: 'ROCKET BARRAGE',
+  3: 'CRUISE THREAT',
+  4: 'BALLISTIC ARC',
+  5: 'HYPERSONIC STRIKE',
+  6: 'WAVE ASSAULT',
+  7: 'FINAL STAND',
 };
 
 export default function LevelIntro({ level, onReady }) {
@@ -192,6 +228,7 @@ export default function LevelIntro({ level, onReady }) {
 
   // Pick the right animation for the level
   const ThreatAnimation = {
+    rocket: RocketAnimation,
     cruise: CruiseMissileAnimation,
     ballistic: BallisticMissileAnimation,
     hypersonic: HypersonicMissileAnimation,
@@ -310,6 +347,21 @@ export default function LevelIntro({ level, onReady }) {
                   Press <span style={{ color: config.new_system.color }} className="font-bold">{config.new_system.shortcut}</span> to intercept {config.new_threat?.name?.toLowerCase() || 'threats'}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Levels 6-7: No new threat/system — show challenge description */}
+        {!config.new_threat && !config.new_system && level > 1 && (
+          <div className="mb-6 border rounded-lg p-5 bg-gray-900/30 border-gray-700/50">
+            <div className="text-xs font-mono tracking-widest mb-3 text-gray-400">
+              {level === 6 ? 'CHALLENGE MODE' : 'FINAL CHALLENGE'}
+            </div>
+            <div className="text-sm font-mono text-gray-300 leading-relaxed">
+              {level === 6
+                ? 'All threat types in coordinated waves. Identify each threat and match it to the correct interceptor.'
+                : 'Massive salvos with severely limited ammunition. Every interceptor must count.'
+              }
             </div>
           </div>
         )}

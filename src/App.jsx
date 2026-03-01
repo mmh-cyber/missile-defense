@@ -23,9 +23,12 @@ function formatCountdown(seconds) {
 export default function App() {
   const game = useGameEngine();
   const [showFacilitator, setShowFacilitator] = useState(false);
+  const showFacilitatorRef = useRef(false);
+  useEffect(() => { showFacilitatorRef.current = showFacilitator; }, [showFacilitator]);
   const [facilitatorUnlocked, setFacilitatorUnlocked] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const hasSeenBriefingRef = useRef(false);
+  const [skipBriefings, setSkipBriefings] = useState(false);
+  const seenBriefingsRef = useRef(new Set());
 
   const {
     gameState,
@@ -66,24 +69,28 @@ export default function App() {
 
   const config = getLevelConfig(currentLevel);
 
-  // Auto-skip briefing on replay
+  // Auto-skip briefing if facilitator toggle is on, or if this level's briefing was already seen
   useEffect(() => {
-    if (gameState === GAME_STATES.BRIEFING && hasSeenBriefingRef.current) {
+    if (gameState === GAME_STATES.BRIEFING && (skipBriefings || seenBriefingsRef.current.has(currentLevel))) {
       skipBriefing();
     }
-  }, [gameState, skipBriefing, GAME_STATES]);
+  }, [gameState, currentLevel, skipBriefing, skipBriefings, GAME_STATES]);
 
   // Keyboard handling
   useEffect(() => {
     const handleKeyDown = (e) => {
       // ESC: toggle facilitator panel (available from any game state)
+      // Opens → auto-pause, Closes → auto-resume
       if (e.key === 'Escape') {
-        setShowFacilitator((prev) => {
-          if (!prev && gameState === GAME_STATES.ACTIVE) {
-            if (!paused) togglePause();
-          }
-          return !prev;
-        });
+        const wasOpen = showFacilitatorRef.current;
+        if (!wasOpen && gameState === GAME_STATES.ACTIVE && !paused) {
+          // Opening panel — pause the game
+          togglePause();
+        } else if (wasOpen && gameState === GAME_STATES.ACTIVE && paused) {
+          // Closing panel — resume the game
+          togglePause();
+        }
+        setShowFacilitator((prev) => !prev);
         return;
       }
 
@@ -141,7 +148,17 @@ export default function App() {
 
   const handleCloseFacilitator = useCallback(() => {
     setShowFacilitator(false);
-  }, []);
+    // Resume game if we auto-paused it
+    if (paused && gameState === GAME_STATES.ACTIVE) togglePause();
+  }, [paused, gameState, togglePause, GAME_STATES]);
+
+  // Stable callback for EducationalBriefing — avoids re-creating on every render
+  // which would cascade through useCallback deps and reset quiz answer colors
+  const handleBriefingComplete = useCallback(({ quizPoints: pts }) => {
+    seenBriefingsRef.current.add(currentLevel);
+    if (pts > 0) addQuizPoints(pts);
+    skipBriefing();
+  }, [currentLevel, addQuizPoints, skipBriefing]);
 
   const handlePause = useCallback(() => {
     if (!paused) togglePause();
@@ -158,8 +175,14 @@ export default function App() {
       onClose={handleCloseFacilitator}
       onPause={handlePause}
       onResume={handleResume}
-      onReset={resetGame}
-      onJumpToLevel={jumpToLevel}
+      onReset={() => {
+        seenBriefingsRef.current.clear();
+        resetGame();
+      }}
+      onJumpToLevel={(level) => {
+        seenBriefingsRef.current.clear();
+        jumpToLevel(level);
+      }}
       paused={paused}
       volume={volume}
       onVolumeChange={setVolume}
@@ -169,6 +192,8 @@ export default function App() {
       onUnlock={() => setFacilitatorUnlocked(true)}
       escapeRoomStartTime={escapeRoomStartTime}
       onSetEscapeTime={setEscapeRoomStartTime}
+      skipBriefings={skipBriefings}
+      onToggleSkipBriefings={() => setSkipBriefings((prev) => !prev)}
     />
   );
 
@@ -203,7 +228,10 @@ export default function App() {
           </div>
 
           <button
-            onClick={() => startCampaign()}
+            onClick={() => {
+              seenBriefingsRef.current.clear();
+              startCampaign();
+            }}
             className="px-12 py-5 bg-green-900/30 border-2 border-green-500 text-green-400
               font-mono font-bold text-xl tracking-widest rounded-lg
               hover:bg-green-900/50 hover:border-green-300 hover:text-green-300
@@ -267,12 +295,9 @@ export default function App() {
           <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
         </div>
         <EducationalBriefing
-          level={1}
-          onComplete={({ quizPoints: pts }) => {
-            hasSeenBriefingRef.current = true;
-            if (pts > 0) addQuizPoints(pts);
-            skipBriefing();
-          }}
+          key={`briefing-${currentLevel}`}
+          level={currentLevel}
+          onComplete={handleBriefingComplete}
         />
         {facilitatorOverlay}
       </div>
@@ -323,7 +348,10 @@ export default function App() {
   if (gameState === GAME_STATES.SUMMARY) {
     return (
       <>
-        <Summary stats={getCampaignStats()} levelStats={getLevelStats()} onReset={resetGame} />
+        <Summary stats={getCampaignStats()} levelStats={getLevelStats()} onReset={() => {
+          seenBriefingsRef.current.clear();
+          resetGame();
+        }} />
         {facilitatorOverlay}
       </>
     );
@@ -334,6 +362,11 @@ export default function App() {
   // ========================
   return (
     <div className={`h-screen bg-[#0a0e1a] flex flex-col overflow-hidden relative ${screenShake ? 'screen-shake border-flash-red' : ''}`}>
+      {/* Escape Room Timer — floating overlay, visually separate from game */}
+      <div className="absolute top-2 right-4 z-30">
+        <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
+      </div>
+
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800/50 bg-[#080c16]">
         <div className="flex items-center gap-4">
@@ -345,11 +378,9 @@ export default function App() {
             LEVEL {currentLevel}
           </span>
         </div>
-        {/* Escape Room Timer — center */}
-        <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
 
-        {/* Score + Level timer — right */}
-        <div className="flex items-center gap-4">
+        {/* Score + Level timer — right (with padding-right for escape room pill) */}
+        <div className="flex items-center gap-4 mr-52">
           <div className="font-mono text-xs">
             <span className="text-gray-600">SCORE </span>
             <span className="text-cyan-400 text-sm font-bold tabular-nums">{getRunningScore()}</span>

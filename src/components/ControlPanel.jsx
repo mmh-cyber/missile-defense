@@ -74,17 +74,19 @@ export default function ControlPanel({
                 }
               `}
             >
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold tracking-wider" style={{ color: depleted ? '#4b5563' : color }}>{label}</span>
+              {/* Shortcut badge + system name — centered together */}
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <span
-                  className="w-6 h-6 rounded border-2 flex items-center justify-center text-sm font-mono font-bold"
+                  className="w-6 h-6 rounded border-2 flex items-center justify-center text-xs font-bold flex-shrink-0"
                   style={{ borderColor: depleted ? '#4b5563' : color, color: depleted ? '#4b5563' : color }}
                 >
                   {shortcut}
                 </span>
+                <span className="text-xs font-bold tracking-wider" style={{ color: depleted ? '#4b5563' : color }}>{label}</span>
               </div>
+              {/* Ammo count + dots — centered */}
               <div className="text-center">
-                <span className="text-xl font-bold tabular-nums" style={{ color: depleted ? '#4b5563' : color }}>
+                <span className="text-2xl font-bold tabular-nums" style={{ color: depleted ? '#4b5563' : color }}>
                   {depleted ? '—' : count}
                 </span>
                 {!depleted && (
@@ -116,14 +118,15 @@ export default function ControlPanel({
             }
           `}
         >
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-bold tracking-wider text-gray-400">HOLD FIRE</span>
-            <span className="w-6 h-6 rounded border-2 border-gray-500 flex items-center justify-center text-sm font-mono font-bold text-gray-400">
+          {/* Shortcut badge + label — centered together */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="w-6 h-6 rounded border-2 border-gray-500 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0">
               5
             </span>
+            <span className="text-xs font-bold tracking-wider text-gray-400">HOLD FIRE</span>
           </div>
-          <div className="text-center text-gray-300 text-lg font-bold tracking-wider">
-            NO FIRE
+          <div className="text-center text-gray-300 text-2xl font-bold tracking-wider">
+            —
           </div>
         </button>
       </div>

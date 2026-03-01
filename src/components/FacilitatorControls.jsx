@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 
 const FACILITATOR_CODE = '1948';
-const TOTAL_LEVELS = 5;
+const TOTAL_LEVELS = 7;
 
 export default function FacilitatorControls({
   onClose,
@@ -18,17 +18,14 @@ export default function FacilitatorControls({
   onUnlock,
   escapeRoomStartTime,
   onSetEscapeTime,
+  skipBriefings,
+  onToggleSkipBriefings,
 }) {
   const [codeInput, setCodeInput] = useState('');
   const [codeError, setCodeError] = useState(false);
   const codeInputRef = useRef(null);
 
-  // Auto-focus code input when showing
-  useEffect(() => {
-    if (!unlocked && codeInputRef.current) {
-      codeInputRef.current.focus();
-    }
-  }, [unlocked]);
+  // No autofocus — player must click on the input field manually
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
@@ -109,6 +106,31 @@ export default function FacilitatorControls({
             </div>
             <div className="text-[10px] text-gray-600 font-mono text-center mt-1">
               RESETS ON NEW CAMPAIGN
+            </div>
+          </div>
+        )}
+
+        {/* Skip Briefings toggle — unlocked only */}
+        {unlocked && (
+          <div className="mb-6">
+            <div className="h-px bg-gray-800 mb-4" />
+            <div className="flex items-center justify-between">
+              <label className="text-xs text-gray-500 font-mono tracking-wider">
+                SKIP BRIEFINGS
+              </label>
+              <button
+                onClick={onToggleSkipBriefings}
+                className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${
+                  skipBriefings ? 'bg-green-600' : 'bg-gray-700'
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                  skipBriefings ? 'translate-x-5' : ''
+                }`} />
+              </button>
+            </div>
+            <div className="text-[10px] text-gray-600 font-mono mt-1">
+              {skipBriefings ? 'BRIEFINGS WILL BE SKIPPED' : 'ALL BRIEFINGS WILL PLAY'}
             </div>
           </div>
         )}
