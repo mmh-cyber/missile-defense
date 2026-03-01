@@ -5,6 +5,7 @@ import ThreatPanel from './components/ThreatPanel.jsx';
 import ControlPanel from './components/ControlPanel.jsx';
 import TzevaAdom from './components/TzevaAdom.jsx';
 import Summary from './components/Summary.jsx';
+import Leaderboard from './components/Leaderboard.jsx';
 import FacilitatorControls from './components/FacilitatorControls.jsx';
 import { GAME_MODES, getConfig } from './config/threats.js';
 
@@ -17,6 +18,7 @@ function formatCountdown(seconds) {
 export default function App() {
   const game = useGameEngine();
   const [showFacilitator, setShowFacilitator] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const {
     gameState,
@@ -32,8 +34,10 @@ export default function App() {
     totalPenaltyTime,
     streak,
     incomingCount,
-    finalSalvoWarning,
+    activeSalvoWarning,
     impactFlashes,
+    upcomingThreats,
+    leaderboardMode,
     startGame,
     resetGame,
     togglePause,
@@ -42,6 +46,7 @@ export default function App() {
     setSelectedThreatId,
     setVolume,
     setGameMode,
+    setLeaderboardMode,
     getSummaryStats,
     GAME_STATES,
   } = game;
@@ -50,10 +55,15 @@ export default function App() {
   const studyTimeLeft = Math.max(0, config.study_duration - sessionTime);
   const isStudy = gameState === GAME_STATES.STUDY;
 
-  // ESC toggles facilitator panel
+  // ESC toggles facilitator panel, Ctrl+R quick reset
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        // Close leaderboard if open
+        if (showLeaderboard) {
+          setShowLeaderboard(false);
+          return;
+        }
         if (gameState !== GAME_STATES.PRE_GAME) {
           setShowFacilitator((prev) => {
             if (!prev) {
@@ -63,10 +73,16 @@ export default function App() {
           });
         }
       }
+
+      // Ctrl+R quick reset (prevent browser reload)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        resetGame();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, paused, togglePause, GAME_STATES]);
+  }, [gameState, paused, togglePause, showLeaderboard, resetGame, GAME_STATES]);
 
   const handleCloseFacilitator = useCallback(() => {
     setShowFacilitator(false);
@@ -87,13 +103,23 @@ export default function App() {
   if (gameState === GAME_STATES.PRE_GAME) {
     return (
       <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center relative">
-        <button
-          onClick={() => setShowFacilitator(true)}
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-400 transition-colors cursor-pointer text-2xl"
-          title="Settings"
-        >
-          &#9881;
-        </button>
+        {/* Top-right controls */}
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <button
+            onClick={() => setShowLeaderboard(true)}
+            className="text-gray-600 hover:text-yellow-400 transition-colors cursor-pointer text-2xl"
+            title="Leaderboard"
+          >
+            &#127942;
+          </button>
+          <button
+            onClick={() => setShowFacilitator(true)}
+            className="text-gray-600 hover:text-gray-400 transition-colors cursor-pointer text-2xl"
+            title="Settings"
+          >
+            &#9881;
+          </button>
+        </div>
 
         <div className="text-center">
           <div className="text-green-900 font-mono text-xs tracking-[1em] mb-4">
@@ -156,8 +182,14 @@ export default function App() {
             paused={paused}
             volume={volume}
             onVolumeChange={setVolume}
+            leaderboardMode={leaderboardMode}
+            onLeaderboardModeChange={setLeaderboardMode}
             isPreGame
           />
+        )}
+
+        {showLeaderboard && (
+          <Leaderboard onClose={() => setShowLeaderboard(false)} />
         )}
       </div>
     );
@@ -167,7 +199,13 @@ export default function App() {
   // SUMMARY SCREEN
   // ========================
   if (gameState === GAME_STATES.SUMMARY) {
-    return <Summary stats={getSummaryStats()} onReset={resetGame} />;
+    return (
+      <Summary
+        stats={getSummaryStats()}
+        onReset={resetGame}
+        leaderboardMode={leaderboardMode}
+      />
+    );
   }
 
   // ========================
@@ -272,6 +310,7 @@ export default function App() {
               activeThreats={activeThreats}
               selectedThreatId={selectedThreatId}
               onSelectThreat={setSelectedThreatId}
+              upcomingThreats={upcomingThreats}
             />
           )}
         </div>
@@ -291,18 +330,32 @@ export default function App() {
         />
       </div>
 
-      {/* FINAL SALVO WARNING overlay */}
-      {finalSalvoWarning && (
+      {/* SALVO WARNING overlay — level-based intensity */}
+      {activeSalvoWarning && (
         <div className="absolute inset-x-0 top-12 z-20 flex justify-center pointer-events-none">
-          <div className="bg-red-950/90 border-2 border-red-600 rounded-lg px-8 py-4 text-center final-salvo-warning">
-            <div className="text-red-400 font-mono text-xs tracking-[0.4em] mb-1">
-              INCOMING
+          <div
+            className={`rounded-lg px-8 py-4 text-center ${
+              activeSalvoWarning.level === 2
+                ? 'bg-red-950/90 border-2 border-red-600 salvo-warning-level2'
+                : 'bg-amber-950/90 border-2 border-amber-600 salvo-warning-level1'
+            }`}
+          >
+            <div className={`font-mono text-xs tracking-[0.4em] mb-1 ${
+              activeSalvoWarning.level === 2 ? 'text-red-400' : 'text-amber-400'
+            }`}>
+              ⚠ ALERT
             </div>
-            <div className="text-red-300 font-mono text-2xl font-bold tracking-wider">
-              OPERATION IRON STORM
+            <div className={`font-mono text-2xl font-bold tracking-wider ${
+              activeSalvoWarning.level === 2 ? 'text-red-300' : 'text-amber-300'
+            }`}>
+              {activeSalvoWarning.message}
             </div>
-            <div className="text-red-500 font-mono text-xs mt-1 tracking-widest animate-pulse">
-              MASS SALVO DETECTED — BRACE FOR IMPACT
+            <div className={`font-mono text-xs mt-1 tracking-widest animate-pulse ${
+              activeSalvoWarning.level === 2 ? 'text-red-500' : 'text-amber-500'
+            }`}>
+              {activeSalvoWarning.level === 2
+                ? 'BRACE FOR IMPACT — MULTIPLE THREATS INBOUND'
+                : 'PREPARE DEFENSE SYSTEMS'}
             </div>
           </div>
         </div>
@@ -337,6 +390,8 @@ export default function App() {
           paused={paused}
           volume={volume}
           onVolumeChange={setVolume}
+          leaderboardMode={leaderboardMode}
+          onLeaderboardModeChange={setLeaderboardMode}
         />
       )}
     </div>

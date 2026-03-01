@@ -15,8 +15,37 @@ export const GAME_STATES = {
   SUMMARY: 'summary',
 };
 
+// Leaderboard localStorage key
+const LB_KEY = 'missile_defense_leaderboard';
+
+export function calculateScore(stats) {
+  const base = (stats.correctIntercepts * 100) + (stats.correctHolds * 50);
+  const penalties = (stats.sirenCount * -200) + (stats.wastedIntercepts * -30) + (stats.wrongIntercepts * -20);
+  const ammoTotal = Object.values(stats.ammoRemaining).reduce((sum, v) => sum + v, 0);
+  const bonuses = (stats.bestStreak * 25) + (ammoTotal * 10);
+  return Math.max(0, base + penalties + bonuses);
+}
+
+export function getLeaderboard() {
+  try {
+    return JSON.parse(localStorage.getItem(LB_KEY)) || [];
+  } catch { return []; }
+}
+
+export function saveToLeaderboard(entry) {
+  const lb = getLeaderboard();
+  lb.push(entry);
+  lb.sort((a, b) => b.score - a.score);
+  localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 50)));
+  return lb;
+}
+
+export function clearLeaderboard() {
+  localStorage.removeItem(LB_KEY);
+}
+
 export default function useGameEngine() {
-  const [gameMode, setGameMode] = useState('SHORT'); // 'SHORT' or 'FULL'
+  const [gameMode, setGameMode] = useState('SHORT');
   const [gameState, setGameState] = useState(GAME_STATES.PRE_GAME);
   const [sessionTime, setSessionTime] = useState(0);
   const [ammo, setAmmo] = useState({ ...GAME_MODES.SHORT.ammo });
@@ -33,10 +62,12 @@ export default function useGameEngine() {
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [incomingCount, setIncomingCount] = useState(0);
-  const [finalSalvoWarning, setFinalSalvoWarning] = useState(false);
-  const [impactFlashes, setImpactFlashes] = useState([]); // { zone, type:'success'|'fail', id }
+  const [activeSalvoWarning, setActiveSalvoWarning] = useState(null);
+  const [impactFlashes, setImpactFlashes] = useState([]);
+  const [upcomingThreats, setUpcomingThreats] = useState([]);
+  const [leaderboardMode, setLeaderboardMode] = useState(true);
 
-  // Refs to avoid stale closures in callbacks
+  // Refs for stale closure avoidance
   const gameStateRef = useRef(gameState);
   const selectedThreatIdRef = useRef(selectedThreatId);
   const activeThreatsRef = useRef(activeThreats);
@@ -55,6 +86,7 @@ export default function useGameEngine() {
   const feedbackTimerRef = useRef(null);
   const tzevaAdomQueueRef = useRef([]);
   const allSpawnedRef = useRef(false);
+  const autoEndTimerRef = useRef(null);
 
   // Audio refs
   const sirenRef = useRef(null);
@@ -76,10 +108,10 @@ export default function useGameEngine() {
     });
   }, [volume]);
 
-  const playSound = useCallback((ref) => {
+  const playSound = useCallback((ref, vol) => {
     if (ref.current) {
       ref.current.currentTime = 0;
-      ref.current.volume = volumeRef.current;
+      ref.current.volume = vol !== undefined ? vol : volumeRef.current;
       ref.current.play().catch(() => {});
     }
   }, []);
@@ -99,7 +131,7 @@ export default function useGameEngine() {
     }, duration);
   }, []);
 
-  // Add impact flash effect
+  // Impact flash: zone = impact zone name, type = 'intercept' | 'ground_impact' | 'city_hit'
   const addImpactFlash = useCallback((zone, type) => {
     const flashId = Date.now() + Math.random();
     setImpactFlashes((prev) => [...prev, { zone, type, id: flashId }]);
@@ -108,7 +140,7 @@ export default function useGameEngine() {
     }, 2000);
   }, []);
 
-  // Trigger tzeva adom — handles Dimona priority (longer siren)
+  // Trigger tzeva adom — Dimona priority = longer siren
   const triggerTzevaAdom = useCallback((isPriority = false) => {
     const duration = isPriority ? DIMONA_PENALTY_DURATION : TZEVA_ADOM_DURATION;
     setSirenCount((c) => c + 1);
@@ -129,36 +161,29 @@ export default function useGameEngine() {
     }
   }, []);
 
-  // Handle threat timeout (countdown reached 0)
+  // Handle threat timeout
   const handleThreatTimeout = useCallback((threat) => {
     setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
-
     if (selectedThreatIdRef.current === threat.id) {
       setSelectedThreatId(null);
     }
 
-    // Decoys just disappear silently
-    if (threat.is_decoy) {
-      showFeedback('Radar contact faded — false signature.', 'neutral');
-      return;
-    }
-
-    // Check effective populated status (after any course correction)
-    const effectivePopulated = threat._corrected ? threat.is_populated : threat.is_populated;
-
-    if (effectivePopulated) {
+    if (threat.is_populated) {
       setResultLog((prev) => [...prev, { ...threat, result: 'timeout', siren: true }]);
       playSound(failRef);
-      addImpactFlash(threat.impact_zone, 'fail');
+      addImpactFlash(threat.impact_zone, 'city_hit');
       setStreak(0);
       triggerTzevaAdom(threat.priority);
     } else {
       setResultLog((prev) => [...prev, { ...threat, result: 'timeout_open', siren: false }]);
+      addImpactFlash(threat.impact_zone, 'ground_impact');
+      // Quiet ping for ground impact
+      playSound(pingRef, Math.max(0.1, volumeRef.current * 0.3));
       showFeedback(`Threat landed in ${threat.impact_zone} — no damage.`, 'neutral');
     }
   }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash]);
 
-  // Handle player action on selected threat
+  // Handle player action
   const handleAction = useCallback((action) => {
     if (gameStateRef.current !== GAME_STATES.ACTIVE) return;
 
@@ -167,27 +192,6 @@ export default function useGameEngine() {
     const threat = currentThreats.find((t) => t.id === currentSelected);
     if (!threat) return;
 
-    // Can't interact with decoys via interceptors
-    if (threat.is_decoy && action !== 'hold_fire') {
-      setAmmo((prev) => ({ ...prev, [action]: prev[action] - 1 }));
-      playSound(failRef);
-      showFeedback('TARGET LOST — False radar contact!', 'error');
-      setStreak(0);
-      // Remove the decoy since player engaged it
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
-      setSelectedThreatId(null);
-      setResultLog((prev) => [...prev, { ...threat, result: 'wasted_on_decoy', siren: false }]);
-      return;
-    }
-
-    if (threat.is_decoy && action === 'hold_fire') {
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
-      setSelectedThreatId(null);
-      showFeedback('Radar contact dismissed — false signature confirmed.', 'success');
-      setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold_decoy', siren: false }]);
-      return;
-    }
-
     if (action === 'hold_fire') {
       setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
       setSelectedThreatId(null);
@@ -195,18 +199,19 @@ export default function useGameEngine() {
       if (threat.is_populated) {
         setResultLog((prev) => [...prev, { ...threat, result: 'hold_populated', siren: true }]);
         playSound(failRef);
-        addImpactFlash(threat.impact_zone, 'fail');
+        addImpactFlash(threat.impact_zone, 'city_hit');
         setStreak(0);
         triggerTzevaAdom(threat.priority);
       } else {
         setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
         playSound(successRef);
+        addImpactFlash(threat.impact_zone, 'ground_impact');
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
           return next;
         });
-        showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammunition conserved.`, 'success');
+        showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammo conserved.`, 'success');
       }
       return;
     }
@@ -223,7 +228,7 @@ export default function useGameEngine() {
       if (threat.is_populated) {
         setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
         playSound(successRef);
-        addImpactFlash(threat.impact_zone, 'success');
+        addImpactFlash(threat.impact_zone, 'intercept');
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
@@ -232,8 +237,8 @@ export default function useGameEngine() {
         showFeedback('INTERCEPTION SUCCESSFUL', 'success');
       } else {
         setResultLog((prev) => [...prev, { ...threat, result: 'wasted_intercept', siren: false }]);
-        showFeedback('INTERCEPTION SUCCESSFUL — but threat was headed for open ground. Interceptor wasted.', 'warning');
-        // Don't break streak for wasted but still correct
+        addImpactFlash(threat.impact_zone, 'intercept');
+        showFeedback('INTERCEPTION SUCCESSFUL — but open ground. Interceptor wasted.', 'warning');
       }
     } else {
       setWrongInterceptAttempts((c) => c + 1);
@@ -243,7 +248,7 @@ export default function useGameEngine() {
     }
   }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash]);
 
-  // Main game loop — drives sessionTime via requestAnimationFrame
+  // Main game loop — drives sessionTime
   const tick = useCallback((timestamp) => {
     if (!lastTickRef.current) lastTickRef.current = timestamp;
     const delta = (timestamp - lastTickRef.current) / 1000;
@@ -259,7 +264,7 @@ export default function useGameEngine() {
     animFrameRef.current = requestAnimationFrame(tick);
   }, []);
 
-  // Spawn threats + progressive reveal + course correction
+  // Spawn threats + salvo warnings + upcoming threats
   useEffect(() => {
     if (gameState !== GAME_STATES.ACTIVE && gameState !== GAME_STATES.STUDY) return;
 
@@ -268,19 +273,14 @@ export default function useGameEngine() {
 
     let spawned = false;
     let unspawnedCount = 0;
+    const upcoming = [];
 
-    threats.forEach((threat) => {
-      if (sessionTime >= threat.appear_time && !spawnedIdsRef.current.has(threat.id)) {
-        spawnedIdsRef.current.add(threat.id);
+    threats.forEach((t) => {
+      if (sessionTime >= t.appear_time && !spawnedIdsRef.current.has(t.id)) {
+        spawnedIdsRef.current.add(t.id);
         spawned = true;
         setActiveThreats((prev) => {
-          // Add with reveal state
-          const newThreat = {
-            ...threat,
-            timeLeft: threat.countdown,
-            impactRevealed: threat.is_decoy ? true : false,
-            _corrected: false,
-          };
+          const newThreat = { ...t, timeLeft: t.countdown, impactRevealed: false };
           const newThreats = [...prev, newThreat];
           if (newThreats.length === 1) {
             setSelectedThreatId(newThreats[0].id);
@@ -289,30 +289,29 @@ export default function useGameEngine() {
         });
         playSound(pingRef);
       }
-      if (!spawnedIdsRef.current.has(threat.id)) {
+      if (!spawnedIdsRef.current.has(t.id)) {
         unspawnedCount++;
+        if (upcoming.length < 3) {
+          upcoming.push({ ...t, timeUntil: t.appear_time - sessionTime });
+        }
       }
     });
 
-    // Track incoming count (unspawned threats)
     setIncomingCount(unspawnedCount);
-
-    // Track if all threats have been spawned
+    setUpcomingThreats(upcoming);
     allSpawnedRef.current = unspawnedCount === 0;
 
-    // Final salvo warning
-    if (config.final_salvo_warning_time && sessionTime >= config.final_salvo_warning_time && sessionTime < config.final_salvo_start_time) {
-      setFinalSalvoWarning(true);
-    } else {
-      setFinalSalvoWarning(false);
-    }
+    // Salvo warnings
+    const warnings = config.salvo_warnings || [];
+    const active = warnings.find((w) => sessionTime >= w.time && sessionTime < w.end_time);
+    setActiveSalvoWarning(active || null);
 
     // Transition study → active
     if (gameState === GAME_STATES.STUDY && (spawned || sessionTime >= config.study_duration)) {
       setGameState(GAME_STATES.ACTIVE);
     }
 
-    // End game — either time ran out or all threats resolved
+    // End game on time
     if (sessionTime >= config.game_duration) {
       setGameState(GAME_STATES.SUMMARY);
       stopSiren();
@@ -320,8 +319,7 @@ export default function useGameEngine() {
     }
   }, [sessionTime, gameState, gameMode, playSound, stopSiren]);
 
-  // Auto-end game when all threats resolved (10s after last threat gone)
-  const autoEndTimerRef = useRef(null);
+  // Auto-end when all threats resolved
   useEffect(() => {
     if (gameState !== GAME_STATES.ACTIVE) return;
     if (allSpawnedRef.current && activeThreats.length === 0) {
@@ -348,7 +346,7 @@ export default function useGameEngine() {
     };
   }, [gameState, activeThreats.length, stopSiren]);
 
-  // Tick active threat countdowns + progressive reveal + course correction
+  // Tick active threat countdowns + progressive reveal
   useEffect(() => {
     if (gameState !== GAME_STATES.ACTIVE) return;
 
@@ -366,20 +364,9 @@ export default function useGameEngine() {
           const pctRemaining = newTimeLeft / t.countdown;
           let updatedThreat = { ...t, timeLeft: newTimeLeft };
 
-          // Progressive reveal: show impact zone when pctRemaining drops below reveal_pct
+          // Progressive reveal
           if (!t.impactRevealed && t.reveal_pct && pctRemaining <= t.reveal_pct) {
             updatedThreat.impactRevealed = true;
-          }
-
-          // Course correction: change target mid-flight
-          if (t.course_correct && !t._corrected && pctRemaining <= t.course_correct.at_pct) {
-            updatedThreat.impact_zone = t.course_correct.new_impact_zone;
-            updatedThreat.is_populated = t.course_correct.new_is_populated;
-            updatedThreat._corrected = true;
-            updatedThreat.impactRevealed = false; // Hide again briefly after course change
-            // Re-reveal after 1.5 seconds worth of countdown
-            const revealDelay = 1.5 / t.countdown;
-            updatedThreat.reveal_pct = Math.max(0, pctRemaining - revealDelay);
           }
 
           return updatedThreat;
@@ -484,8 +471,9 @@ export default function useGameEngine() {
     setStreak(0);
     setBestStreak(0);
     setIncomingCount(0);
-    setFinalSalvoWarning(false);
+    setActiveSalvoWarning(null);
     setImpactFlashes([]);
+    setUpcomingThreats([]);
     setPaused(false);
     spawnedIdsRef.current = new Set();
     tzevaAdomQueueRef.current = [];
@@ -517,8 +505,9 @@ export default function useGameEngine() {
     setStreak(0);
     setBestStreak(0);
     setIncomingCount(0);
-    setFinalSalvoWarning(false);
+    setActiveSalvoWarning(null);
     setImpactFlashes([]);
+    setUpcomingThreats([]);
     setPaused(false);
     spawnedIdsRef.current = new Set();
     tzevaAdomQueueRef.current = [];
@@ -537,15 +526,14 @@ export default function useGameEngine() {
   }, []);
 
   const getSummaryStats = useCallback(() => {
-    const nonDecoyLog = resultLog.filter((r) => !r.is_decoy);
-    const totalThreats = nonDecoyLog.length;
-    const correctIntercepts = nonDecoyLog.filter((r) => r.result === 'correct_intercept').length;
-    const populatedThreats = nonDecoyLog.filter((r) => r.is_populated).length;
-    const correctHolds = nonDecoyLog.filter((r) => r.result === 'correct_hold').length;
-    const openGroundThreats = nonDecoyLog.filter((r) => !r.is_populated).length;
-    const timeouts = nonDecoyLog.filter((r) => r.result === 'timeout').length;
-    const wastedIntercepts = nonDecoyLog.filter((r) => r.result === 'wasted_intercept').length;
-    const holdOnPopulated = nonDecoyLog.filter((r) => r.result === 'hold_populated').length;
+    const totalThreats = resultLog.length;
+    const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
+    const populatedThreats = resultLog.filter((r) => r.is_populated).length;
+    const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
+    const openGroundThreats = resultLog.filter((r) => !r.is_populated).length;
+    const timeouts = resultLog.filter((r) => r.result === 'timeout').length;
+    const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
+    const holdOnPopulated = resultLog.filter((r) => r.result === 'hold_populated').length;
 
     let rating;
     if (sirenCount === 0) rating = { label: 'IRON WALL', stars: 5 };
@@ -568,8 +556,10 @@ export default function useGameEngine() {
       sirenCount,
       bestStreak,
       rating,
+      resultLog,
+      gameMode,
     };
-  }, [resultLog, ammo, totalPenaltyTime, sirenCount, wrongInterceptAttempts, bestStreak]);
+  }, [resultLog, ammo, totalPenaltyTime, sirenCount, wrongInterceptAttempts, bestStreak, gameMode]);
 
   return {
     gameState,
@@ -588,8 +578,10 @@ export default function useGameEngine() {
     streak,
     bestStreak,
     incomingCount,
-    finalSalvoWarning,
+    activeSalvoWarning,
     impactFlashes,
+    upcomingThreats,
+    leaderboardMode,
     startGame,
     resetGame,
     togglePause,
@@ -598,6 +590,7 @@ export default function useGameEngine() {
     setSelectedThreatId,
     setVolume,
     setGameMode,
+    setLeaderboardMode,
     getSummaryStats,
     GAME_STATES,
   };

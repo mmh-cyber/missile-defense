@@ -49,6 +49,13 @@ const IMPACT_POSITIONS = {
   'Off-course (Jordan)': { x: 0.65, y: 0.45 },
 };
 
+// Flash type → color mapping
+const FLASH_COLORS = {
+  intercept: 'rgba(34, 197, 94, 0.9)',       // green
+  ground_impact: 'rgba(245, 158, 11, 0.7)',   // amber
+  city_hit: 'rgba(239, 68, 68, 0.9)',          // red
+};
+
 function getBlipPosition(threat) {
   const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
   const progress = 1 - threat.timeLeft / threat.countdown;
@@ -112,11 +119,8 @@ export default function RadarDisplay({
 
           {/* Populated zones */}
           {POPULATED_ZONES.map((zone) => {
-            // Check if any impact flash is active for this zone
             const flash = impactFlashes.find((f) => f.zone === zone.name);
-            const flashColor = flash
-              ? flash.type === 'success' ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
-              : null;
+            const flashColor = flash ? FLASH_COLORS[flash.type] : null;
 
             return (
               <g key={zone.name}>
@@ -145,11 +149,32 @@ export default function RadarDisplay({
             );
           })}
 
+          {/* Impact flashes for open ground zones (not in POPULATED_ZONES) */}
+          {impactFlashes
+            .filter((f) => !POPULATED_ZONES.find((z) => z.name === f.zone))
+            .map((flash) => {
+              const pos = IMPACT_POSITIONS[flash.zone];
+              if (!pos) return null;
+              const flashColor = FLASH_COLORS[flash.type] || FLASH_COLORS.ground_impact;
+              return (
+                <g key={flash.id}>
+                  <circle
+                    cx={pos.x * size} cy={pos.y * size} r="3"
+                    fill="none" stroke={flashColor} strokeWidth="0.4"
+                    className="impact-flash-ring"
+                  />
+                  <circle
+                    cx={pos.x * size} cy={pos.y * size} r="1"
+                    fill={flashColor} opacity="0.6"
+                  />
+                </g>
+              );
+            })}
+
           {/* Threat blips */}
           {activeThreats.map((threat) => {
             const pos = getBlipPosition(threat);
-            const isDecoy = threat.is_decoy;
-            const color = isDecoy ? THREAT_COLORS.decoy : (THREAT_COLORS[threat.type] || '#ef4444');
+            const color = THREAT_COLORS[threat.type] || '#ef4444';
             const isSelected = threat.id === selectedThreatId;
 
             return (
@@ -162,16 +187,15 @@ export default function RadarDisplay({
                 <circle
                   cx={pos.x * size} cy={pos.y * size} r="2.5"
                   fill="none" stroke={color} strokeWidth="0.3" opacity="0.4"
-                  className={isDecoy ? 'decoy-pulse' : 'radar-pulse'}
+                  className="radar-pulse"
                 />
                 {/* Blip */}
                 <circle
                   cx={pos.x * size} cy={pos.y * size}
-                  r={isDecoy ? '1' : '1.5'}
+                  r="1.5"
                   fill={color}
                   stroke={isSelected ? '#ffffff' : color}
                   strokeWidth={isSelected ? '0.6' : '0.3'}
-                  opacity={isDecoy ? 0.5 : 1}
                   style={{ filter: `drop-shadow(0 0 3px ${color})` }}
                 />
                 {/* Label */}
@@ -179,9 +203,8 @@ export default function RadarDisplay({
                   x={pos.x * size} y={pos.y * size - 3}
                   fill={color} fontSize="1.8" fontFamily="monospace"
                   textAnchor="middle" fontWeight="bold"
-                  opacity={isDecoy ? 0.5 : 1}
                 >
-                  {isDecoy ? '?' : `T${threat.id}`}
+                  T{threat.id}
                 </text>
               </g>
             );

@@ -5,10 +5,19 @@ function formatTime(seconds) {
   return `${s}s`;
 }
 
+function formatTimeUntil(seconds) {
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s >= 60) {
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return `${m}m ${rem}s`;
+  }
+  return `${s}s`;
+}
+
 function ThreatCard({ threat, isSelected, onSelect }) {
   const color = THREAT_COLORS[threat.type] || '#ef4444';
   const urgency = threat.timeLeft < 5 ? 'animate-pulse' : '';
-  const isDecoy = threat.is_decoy;
   const intel = threat.intel || 'full';
 
   return (
@@ -31,7 +40,7 @@ function ThreatCard({ threat, isSelected, onSelect }) {
             className="text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider"
             style={{ backgroundColor: `${color}30`, color }}
           >
-            {isDecoy ? 'UNKNOWN' : threat.type === 'hypersonic' ? 'HYPERSONIC' : threat.type.toUpperCase()}
+            {threat.type === 'hypersonic' ? 'HYPERSONIC' : threat.type.toUpperCase()}
           </span>
           {threat.priority && (
             <span className="text-xs font-bold px-2 py-0.5 rounded bg-red-900/50 text-red-400 border border-red-700 tracking-wider animate-pulse">
@@ -49,54 +58,41 @@ function ThreatCard({ threat, isSelected, onSelect }) {
 
       {/* Threat name */}
       <div className="text-sm font-bold font-mono text-green-400 mb-2 tracking-wide">
-        {isDecoy ? 'UNIDENTIFIED CONTACT' : intel === 'minimal' ? 'UNKNOWN DESIGNATION' : threat.name.toUpperCase()}
+        {intel === 'minimal' ? 'UNKNOWN DESIGNATION' : threat.name.toUpperCase()}
       </div>
 
       {/* Stats — variable based on intel level */}
-      {!isDecoy && (
-        <div className="text-xs font-mono space-y-1">
-          <div className="flex justify-between">
-            <span className="text-gray-500">SPEED</span>
-            <span className="text-gray-300">
-              {intel === 'minimal' ? '---' : `Mach ${threat.speed_mach}`}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">ALTITUDE</span>
-            <span className="text-gray-300">
-              {intel === 'minimal' || intel === 'partial' ? '---' : `${threat.altitude_km} km`}
-            </span>
-          </div>
-          {intel === 'full' && (
-            <div>
-              <span className="text-gray-500">TRAJECTORY: </span>
-              <span className="text-gray-300">{threat.trajectory}</span>
-            </div>
-          )}
+      <div className="text-xs font-mono space-y-1">
+        <div className="flex justify-between">
+          <span className="text-gray-500">SPEED</span>
+          <span className="text-gray-300">
+            {intel === 'minimal' ? '---' : `Mach ${threat.speed_mach}`}
+          </span>
         </div>
-      )}
-
-      {isDecoy && (
-        <div className="text-xs font-mono text-gray-600 italic">
-          ANALYZING RADAR SIGNATURE...
+        <div className="flex justify-between">
+          <span className="text-gray-500">ALTITUDE</span>
+          <span className="text-gray-300">
+            {intel === 'minimal' || intel === 'partial' ? '---' : `${threat.altitude_km} km`}
+          </span>
         </div>
-      )}
+        {intel === 'full' && (
+          <div>
+            <span className="text-gray-500">TRAJECTORY: </span>
+            <span className="text-gray-300">{threat.trajectory}</span>
+          </div>
+        )}
+      </div>
 
       {/* Impact zone — progressive reveal */}
       <div className="mt-2 flex items-center gap-2">
         <span className="text-xs text-gray-500 font-mono">IMPACT:</span>
-        {isDecoy ? (
-          <span className="text-sm font-mono text-gray-600">UNKNOWN</span>
-        ) : threat.impactRevealed ? (
+        {threat.impactRevealed ? (
           <span
             className={`text-sm font-bold font-mono ${
               threat.is_populated ? 'text-red-500' : 'text-gray-500'
-            } ${threat._corrected ? 'impact-reveal-flash' : ''}`}
+            }`}
           >
             {threat.impact_zone.toUpperCase()}
-            {threat._corrected && (
-              <span className="text-xs text-yellow-500 ml-2">⚠ COURSE CHANGE</span>
-            )}
           </span>
         ) : (
           <span className="text-sm font-mono text-yellow-600 animate-pulse tracking-wider">
@@ -135,8 +131,9 @@ export default function ThreatPanel({
   activeThreats,
   selectedThreatId,
   onSelectThreat,
+  upcomingThreats = [],
 }) {
-  if (activeThreats.length === 0) {
+  if (activeThreats.length === 0 && upcomingThreats.length === 0) {
     return (
       <div className="h-full flex flex-col">
         <div className="text-xs text-green-500/50 font-mono tracking-widest mb-4 uppercase">
@@ -170,6 +167,39 @@ export default function ThreatPanel({
             />
           ))}
       </div>
+
+      {/* Upcoming Threats Preview */}
+      {upcomingThreats.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-800/50">
+          <div className="text-[10px] text-gray-600 font-mono tracking-widest mb-2">
+            INCOMING THREATS
+          </div>
+          {upcomingThreats.slice(0, 3).map((t) => {
+            const color = THREAT_COLORS[t.type] || '#ef4444';
+            return (
+              <div
+                key={t.id}
+                className="flex items-center gap-2 py-1 px-2 mb-1 rounded bg-gray-900/30"
+              >
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+                <span
+                  className="text-[10px] font-bold font-mono uppercase tracking-wider"
+                  style={{ color }}
+                >
+                  {t.type}
+                </span>
+                <span className="flex-1" />
+                <span className="text-[10px] font-mono text-gray-600 tabular-nums">
+                  {formatTimeUntil(t.timeUntil)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

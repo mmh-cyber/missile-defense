@@ -6,6 +6,8 @@ export default function FacilitatorControls({
   paused,
   volume,
   onVolumeChange,
+  leaderboardMode,
+  onLeaderboardModeChange,
   isPreGame,
 }) {
   return (
@@ -47,6 +49,30 @@ export default function FacilitatorControls({
           </div>
         </div>
 
+        {/* Leaderboard Mode Toggle */}
+        <div className="mb-6">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-xs text-gray-500 font-mono tracking-wider">
+              LEADERBOARD MODE
+            </span>
+            <div
+              onClick={() => onLeaderboardModeChange && onLeaderboardModeChange(!leaderboardMode)}
+              className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
+                leaderboardMode ? 'bg-green-600' : 'bg-gray-700'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                  leaderboardMode ? 'translate-x-5' : 'translate-x-0.5'
+                }`}
+              />
+            </div>
+          </label>
+          <div className="text-[10px] text-gray-600 font-mono mt-1">
+            {leaderboardMode ? 'TEAM NAMES + SCORES WILL BE RECORDED' : 'SCORES NOT RECORDED'}
+          </div>
+        </div>
+
         {/* Game controls */}
         {!isPreGame && (
           <div className="space-y-3">
@@ -76,10 +102,11 @@ export default function FacilitatorControls({
           </div>
         )}
 
-        {/* Keyboard hint */}
+        {/* Keyboard hints */}
         <div className="mt-6 pt-4 border-t border-gray-800">
-          <div className="text-[10px] text-gray-600 font-mono text-center">
-            PRESS ESC TO TOGGLE THIS PANEL
+          <div className="text-[10px] text-gray-600 font-mono text-center space-y-1">
+            <div>ESC — TOGGLE THIS PANEL</div>
+            <div>CTRL+R — QUICK RESET</div>
           </div>
         </div>
       </div>

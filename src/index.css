@@ -160,25 +160,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
-   Decoy Pulse (slower, fading)
-   ============================================ */
-.decoy-pulse {
-  animation: decoyPulse 2.5s ease-in-out infinite;
-}
-
-@keyframes decoyPulse {
-  0%, 100% {
-    r: 1.5;
-    opacity: 0.2;
-  }
-  50% {
-    r: 3;
-    opacity: 0;
-  }
-}
-
-/* ============================================
-   Impact Flash Ring (on city hit/save)
+   Impact Flash Ring (on city hit/save/ground)
    ============================================ */
 .impact-flash-ring {
   animation: impactFlash 2s ease-out forwards;
@@ -215,20 +197,54 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
-   Final Salvo Warning
+   Salvo Warning — Level 1 (Amber)
    ============================================ */
-.final-salvo-warning {
-  animation: salvoWarningPulse 1s ease-in-out infinite alternate;
+.salvo-warning-level1 {
+  animation: salvoWarningAmber 1s ease-in-out infinite alternate;
 }
 
-@keyframes salvoWarningPulse {
+@keyframes salvoWarningAmber {
   from {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
     transform: scale(1);
   }
   to {
-    box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.6);
     transform: scale(1.02);
+  }
+}
+
+/* ============================================
+   Salvo Warning — Level 2 (Red, more intense)
+   ============================================ */
+.salvo-warning-level2 {
+  animation: salvoWarningRed 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes salvoWarningRed {
+  from {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
+    transform: scale(1.03);
+  }
+}
+
+/* ============================================
+   Ammo Low Flash
+   ============================================ */
+.ammo-low-flash {
+  animation: ammoLowFlash 1.2s ease-in-out infinite;
+}
+
+@keyframes ammoLowFlash {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
   }
 }
 

@@ -77,6 +77,7 @@ export default function ControlPanel({
         {INTERCEPTORS.map(({ key, label, color }) => {
           const count = ammo[key];
           const depleted = count <= 0;
+          const isLow = count === 1;
           const disabled = depleted || !hasSelection;
 
           return (
@@ -91,6 +92,7 @@ export default function ControlPanel({
                   ? 'opacity-40 cursor-not-allowed border-gray-700 bg-gray-900 text-gray-600'
                   : 'cursor-pointer hover:scale-[1.02] active:scale-95'
                 }
+                ${isLow && !disabled ? 'ammo-low-flash' : ''}
               `}
               style={
                 !disabled
@@ -107,15 +109,22 @@ export default function ControlPanel({
               <div className="text-lg tabular-nums">
                 {depleted ? 'DEPLETED' : count}
               </div>
+              {/* Ammo dots */}
               {!depleted && (
                 <div className="flex justify-center gap-1 mt-1">
-                  {Array.from({ length: ammo[key] }).map((_, i) => (
+                  {Array.from({ length: count }).map((_, i) => (
                     <div
                       key={i}
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: color }}
                     />
                   ))}
+                </div>
+              )}
+              {/* Low ammo warning */}
+              {isLow && !disabled && (
+                <div className="absolute -top-1 -right-1 text-[8px] bg-red-900 text-red-300 px-1 rounded font-bold tracking-wider">
+                  LOW
                 </div>
               )}
             </button>
