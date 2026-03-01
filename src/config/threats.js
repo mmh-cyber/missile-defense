@@ -13,25 +13,21 @@
 //   1.0 = revealed immediately, 0.4 = revealed at 40% time remaining
 // course_correct: { new_impact_zone, new_is_populated, at_pct }
 // priority: true for Dimona targets (triggers longer siren)
-// is_decoy: Auto-resolving false contacts on radar
 // is_final_salvo: Part of the named final salvo wave
 // ============================================================
 
-export const TZEVA_ADOM_DURATION = 15;
-export const DIMONA_PENALTY_DURATION = 20;
-
 // Command center — single launch point for ALL interceptors
-export const COMMAND_CENTER = { x: 0.35, y: 0.40 };
+export const COMMAND_CENTER = { x: 0.29, y: 0.40 };
 
 export const POPULATED_ZONES = [
-  { name: 'Tel Aviv', x: 0.35, y: 0.38 },
+  { name: 'Tel Aviv', x: 0.29, y: 0.38 },
   { name: 'Jerusalem', x: 0.45, y: 0.43 },
-  { name: 'Haifa', x: 0.35, y: 0.18 },
+  { name: 'Haifa', x: 0.28, y: 0.18 },
   { name: 'Ashdod', x: 0.30, y: 0.48 },
   { name: 'Beersheba', x: 0.40, y: 0.60 },
   { name: 'Eilat', x: 0.45, y: 0.90 },
   { name: 'Dimona', x: 0.48, y: 0.65 },
-  { name: 'Netanya', x: 0.33, y: 0.32 },
+  { name: 'Netanya', x: 0.30, y: 0.32 },
   { name: 'Ashkelon', x: 0.28, y: 0.52 },
   { name: 'Teveriah', x: 0.42, y: 0.22 },
   { name: 'Tzfat', x: 0.40, y: 0.15 },
@@ -39,23 +35,22 @@ export const POPULATED_ZONES = [
 ];
 
 export const THREAT_COLORS = {
-  ballistic: '#ef4444',
-  cruise: '#f97316',
-  hypersonic: '#a855f7',
   drone: '#eab308',
-  decoy: '#6b7280',
+  cruise: '#3b82f6',
+  ballistic: '#ef4444',
+  hypersonic: '#a855f7',
 };
 
 // Shared map of all impact zone names to radar coordinates
 export const IMPACT_POSITIONS = {
-  'Tel Aviv': { x: 0.35, y: 0.38 },
+  'Tel Aviv': { x: 0.29, y: 0.38 },
   'Jerusalem': { x: 0.45, y: 0.43 },
-  'Haifa': { x: 0.35, y: 0.18 },
+  'Haifa': { x: 0.28, y: 0.18 },
   'Ashdod': { x: 0.30, y: 0.48 },
   'Beersheba': { x: 0.40, y: 0.60 },
   'Eilat': { x: 0.45, y: 0.90 },
   'Dimona': { x: 0.48, y: 0.65 },
-  'Netanya': { x: 0.33, y: 0.32 },
+  'Netanya': { x: 0.30, y: 0.32 },
   'Ashkelon': { x: 0.28, y: 0.52 },
   'Teveriah': { x: 0.42, y: 0.22 },
   'Tzfat': { x: 0.40, y: 0.15 },
@@ -81,12 +76,12 @@ export const IMPACT_POSITIONS = {
   'Off-course (Jordan)': { x: 0.65, y: 0.45 },
 };
 
-// Interceptor system colors (matches Briefing/ControlPanel)
+// Interceptor system colors — matched to threat type colors
 export const INTERCEPTOR_COLORS = {
-  iron_dome:    '#22c55e',
-  davids_sling: '#3b82f6',
-  arrow_2:      '#a855f7',
-  arrow_3:      '#ef4444',
+  iron_dome:    '#eab308',   // matches drone yellow
+  davids_sling: '#3b82f6',   // matches cruise blue
+  arrow_2:      '#ef4444',   // matches ballistic red
+  arrow_3:      '#a855f7',   // matches hypersonic purple
 };
 
 // -----------------------------------------------------------
@@ -143,202 +138,191 @@ function threat(id, time, type, zone, populated, cdn, intel, reveal, extra = {})
     countdown: cdn,
     intel,
     reveal_pct: reveal,
+    origin: 'southeast', // default: Yemen direction
     priority: false,
-    is_decoy: false,
     is_final_salvo: false,
     course_correct: null,
     ...extra,
   };
 }
 
-function buildDecoy(id, time, cdn) {
-  return {
-    id,
-    name: 'Radar Contact',
-    type: 'decoy',
-    speed_mach: null,
-    altitude_km: null,
-    trajectory: null,
-    impact_zone: null,
-    is_populated: false,
-    correct_action: null,
-    appear_time: time,
-    countdown: cdn,
-    intel: 'minimal',
-    reveal_pct: null,
-    priority: false,
-    is_decoy: true,
-    is_final_salvo: false,
-    course_correct: null,
-  };
-}
-
 // ============================================================
-// LEVEL 1: FIRST CONTACT — Drones only, Iron Dome only
-// Duration: 105s | 10 threats | Teaches: intercept + hold fire
+// LEVEL 1: Drones only, Iron Dome only
+// Duration: 90s | 15 threats | Teaches: intercept + hold fire
+// Pacing: fast start, quick escalation, ends with closing wave
 // ============================================================
 const THREATS_L1 = [
-  // t=4: First threat — Tel Aviv, generous countdown
-  threat(1,  4,  'drone', 'Tel Aviv',        true,  18, 'full', 1.0),
-  // t=14: Hold fire lesson — Negev Desert (open ground)
-  threat(2,  14, 'drone', 'Negev Desert',    false, 16, 'full', 1.0),
-  // t=26: Reinforce intercept
-  threat(3,  26, 'drone', 'Haifa',           true,  16, 'full', 1.0),
-  // t=36: Second hold-fire test
-  threat(4,  36, 'drone', 'Golan Heights',   false, 16, 'full', 1.0),
-  // t=46: Countdown tightens
-  threat(5,  46, 'drone', 'Ashdod',          true,  14, 'full', 1.0),
-  // t=55: FIRST PAIR — two simultaneous!
-  threat(6,  55, 'drone', 'Jerusalem',       true,  16, 'full', 1.0),
-  threat(7,  55, 'drone', 'Northern Negev',  false, 14, 'full', 1.0),
-  // t=68: Short countdown = urgency
-  threat(8,  68, 'drone', 'Beersheba',       true,  12, 'full', 1.0),
-  // t=76: SECOND PAIR — close it out
-  threat(9,  76, 'drone', 'Netanya',         true,  14, 'full', 1.0),
-  threat(10, 76, 'drone', 'Arava Valley',    false, 14, 'full', 1.0),
+  // t=3: First threat — Beersheba (south), generous countdown
+  threat(1,  3,  'drone', 'Beersheba',       true,  16, 'full', 1.0),
+  // t=11: Hold fire lesson — Negev Desert (open ground, south)
+  threat(2,  11, 'drone', 'Negev Desert',    false, 14, 'full', 1.0),
+  // t=19: Reinforce intercept — Ashdod
+  threat(3,  19, 'drone', 'Ashdod',          true,  14, 'full', 1.0),
+  // t=27: Second hold-fire test
+  threat(4,  27, 'drone', 'Arava Valley',    false, 14, 'full', 1.0),
+  // t=34: Countdown tightens, pair!
+  threat(5,  34, 'drone', 'Jerusalem',       true,  14, 'full', 1.0),
+  threat(6,  36, 'drone', 'Northern Negev',  false, 13, 'full', 1.0),
+  // t=45: Tempo up
+  threat(7,  45, 'drone', 'Tel Aviv',        true,  12, 'full', 1.0),
+  threat(8,  52, 'drone', 'Dimona',          true,  12, 'full', 1.0),
+  // t=60: Triple overlap
+  threat(9,  60, 'drone', 'Ashkelon',        true,  13, 'full', 1.0),
+  threat(10, 62, 'drone', 'Central Negev',   false, 12, 'full', 1.0),
+  // ESCALATION — final burst
+  threat(11, 70, 'drone', 'Netanya',         true,  11, 'full', 1.0, { origin: 'south' }),
+  threat(12, 70, 'drone', 'Beersheba',       true,  11, 'full', 1.0),
+  // CLIMAX — closing wave
+  threat(13, 76, 'drone', 'Haifa',           true,  11, 'full', 1.0, { origin: 'north' }),
+  threat(14, 78, 'drone', 'Judean Hills',    false, 11, 'full', 1.0),  // hold fire
+  threat(15, 80, 'drone', 'Tel Aviv',        true,  10, 'full', 1.0),
 ];
 
 // ============================================================
 // LEVEL 2: ESCALATION — Drones + Cruise Missiles
-// Duration: 150s | 14 threats | Introduces: David's Sling
+// Duration: 105s | 16 threats | Introduces: David's Sling
 // ============================================================
 const THREATS_L2 = [
-  // Opening: familiar drone, then NEW cruise missile
-  threat(1,  4,  'drone',  'Ashkelon',       true,  16, 'full', 1.0),
-  threat(2,  12, 'cruise', 'Tel Aviv',       true,  13, 'full', 1.0),  // First cruise — faster than drones
-  threat(3,  24, 'drone',  'Jordan Valley',  false, 15, 'full', 1.0),  // hold fire
-  threat(4,  35, 'cruise', 'Haifa',          true,  12, 'full', 1.0),
+  // Opening: familiar drone, then cruise missile
+  threat(1,  3,  'drone',  'Beersheba',      true,  14, 'full', 1.0),
+  threat(2,  10, 'cruise', 'Tel Aviv',       true,  12, 'full', 1.0),  // First cruise — faster!
+  threat(3,  18, 'drone',  'Arava Valley',   false, 13, 'full', 1.0),  // hold fire
+  threat(4,  26, 'cruise', 'Dimona',         true,  11, 'full', 1.0),
   // Mixed pair
-  threat(5,  46, 'drone',  'Beersheba',      true,  14, 'full', 1.0),
-  threat(6,  47, 'cruise', 'Negev Desert',   false, 12, 'full', 1.0),  // hold fire
-  // Tempo increases
-  threat(7,  60, 'cruise', 'Jerusalem',      true,  11, 'full', 1.0),
-  threat(8,  70, 'drone',  'Western Galilee',false, 14, 'full', 1.0),  // hold fire
-  threat(9,  80, 'cruise', 'Netanya',        true,  11, 'full', 1.0),
-  // Simultaneous mixed pair
-  threat(10, 92, 'drone',  'Ashdod',         true,  13, 'full', 1.0),
-  threat(11, 92, 'cruise', 'Teveriah',       true,  11, 'full', 1.0),
-  // Final push
-  threat(12, 106,'drone',  'Coastal Plain',  false, 13, 'full', 1.0),  // hold fire
-  threat(13, 118,'cruise', 'Tel Aviv',       true,  10, 'full', 1.0),
-  threat(14, 118,'drone',  'Haifa',          true,  12, 'full', 1.0),
+  threat(5,  34, 'drone',  'Ashkelon',       true,  13, 'full', 1.0),
+  threat(6,  35, 'cruise', 'Negev Desert',   false, 11, 'full', 1.0),  // hold fire
+  // Tempo picks up
+  threat(7,  44, 'cruise', 'Jerusalem',      true,  10, 'full', 1.0),
+  threat(8,  52, 'drone',  'Northern Negev', false, 13, 'full', 1.0),  // hold fire
+  threat(9,  60, 'cruise', 'Ashdod',         true,  10, 'full', 1.0),
+  threat(10, 67, 'drone',  'Netanya',        true,  12, 'full', 1.0),
+  // Pairs start overlapping
+  threat(11, 74, 'cruise', 'Tel Aviv',       true,  10, 'full', 1.0),
+  threat(12, 76, 'drone',  'Beersheba',      true,  12, 'full', 1.0),
+  // Build-up to final burst
+  threat(16, 82, 'drone',  'Ashdod',         true,  12, 'full', 1.0),
+  // ESCALATION — final triple
+  threat(13, 86, 'cruise', 'Dimona',         true,  10, 'full', 1.0),
+  threat(14, 86, 'drone',  'Jerusalem',      true,  11, 'full', 1.0),
+  threat(15, 88, 'cruise', 'Central Negev',  false, 10, 'full', 1.0),  // hold fire
 ];
 
 // ============================================================
 // LEVEL 3: BALLISTIC ARC — + Ballistic Missiles + Arrow 2
-// Duration: 180s | 18 threats | Introduces: Arrow 2, course corrections
+// Duration: 100s | 19 threats | Introduces: Arrow 2, course corrections
+// Pacing: quick escalation, course correction surprise, ends with quad
 // ============================================================
 const THREATS_L3 = [
-  // Start with familiar types, then introduce ballistic
-  threat(1,  4,  'drone',     'Ashkelon',        true,  15, 'full', 1.0),
-  threat(2,  12, 'cruise',    'Haifa',           true,  12, 'full', 1.0),
-  threat(3,  22, 'ballistic', 'Negev Desert',    false, 14, 'full', 0.45),  // First ballistic! Open ground.
-  threat(4,  34, 'ballistic', 'Tel Aviv',        true,  13, 'full', 0.40),  // Ballistic on city
-  threat(5,  44, 'drone',     'Golan Heights',   false, 14, 'full', 1.0),   // hold fire
-  // Mixed pair with ballistic
-  threat(6,  55, 'cruise',    'Jerusalem',       true,  11, 'full', 1.0),
-  threat(7,  56, 'ballistic', 'Beersheba',       true,  13, 'partial', 0.40),
+  // Familiar opening
+  threat(1,  3,  'drone',     'Beersheba',       true,  14, 'full', 1.0),
+  threat(2,  10, 'cruise',    'Haifa',           true,  11, 'full', 1.0, { origin: 'north' }),
+  // First ballistic! Safe intro on open ground
+  threat(3,  17, 'ballistic', 'Negev Desert',    false, 14, 'full', 0.45),
+  threat(4,  24, 'ballistic', 'Tel Aviv',        true,  13, 'full', 0.40),
+  threat(5,  30, 'drone',     'Golan Heights',   false, 13, 'full', 1.0, { origin: 'north' }),  // hold fire
+  // Mixed pair
+  threat(6,  37, 'cruise',    'Jerusalem',       true,  10, 'full', 1.0),
+  threat(7,  38, 'ballistic', 'Beersheba',       true,  12, 'partial', 0.40),
   // Course correction!
-  threat(8,  68, 'ballistic', 'Central Negev',   false, 13, 'full', 0.45, {
+  threat(8,  46, 'ballistic', 'Central Negev',   false, 13, 'full', 0.45, {
     course_correct: { new_impact_zone: 'Beersheba', new_is_populated: true, at_pct: 0.55 },
   }),
-  threat(9,  78, 'drone',     'Ashdod',          true,  13, 'full', 1.0),
-  threat(10, 88, 'cruise',    'Dead Sea Region', false, 11, 'full', 1.0),   // hold fire
+  threat(9,  53, 'drone',     'Ashdod',          true,  12, 'full', 1.0),
+  threat(10, 58, 'cruise',    'Dead Sea Region', false, 10, 'full', 1.0),   // hold fire
   // Triple!
-  threat(11, 100,'ballistic', 'Dimona',          true,  13, 'full', 0.35, { priority: true }),
-  threat(12, 100,'drone',     'Netanya',         true,  14, 'full', 1.0),
-  threat(13, 101,'cruise',    'Arava Valley',    false, 11, 'full', 1.0),   // hold fire
-  // Late push
-  threat(14, 116,'ballistic', 'Haifa',           true,  12, 'partial', 0.40),
-  threat(15, 126,'cruise',    'Tel Aviv',        true,  10, 'full', 1.0),
-  threat(16, 136,'drone',     'Sinai Border Region', false, 13, 'full', 1.0), // hold fire
-  // Final pair
-  threat(17, 148,'ballistic', 'Jerusalem',       true,  12, 'full', 0.35),
-  threat(18, 148,'cruise',    'Ashkelon',        true,  10, 'full', 1.0),
+  threat(11, 64, 'ballistic', 'Dimona',          true,  12, 'full', 0.35, { priority: true }),
+  threat(12, 65, 'drone',     'Netanya',         true,  12, 'full', 1.0),
+  threat(13, 66, 'cruise',    'Arava Valley',    false, 10, 'full', 1.0),   // hold fire
+  // ESCALATION — final quad
+  threat(14, 78, 'ballistic', 'Jerusalem',       true,  11, 'full', 0.35),
+  threat(15, 78, 'cruise',    'Haifa',           true,  10, 'full', 1.0, { origin: 'north' }),
+  threat(16, 80, 'drone',     'Ashkelon',        true,  11, 'full', 1.0),
+  threat(17, 80, 'ballistic', 'Northern Negev',  false, 12, 'partial', 0.40),  // hold fire
+  // Extended climax
+  threat(18, 84, 'cruise',    'Ashdod',          true,  10, 'full', 1.0),
+  threat(19, 86, 'drone',     'Sinai Border Region', false, 11, 'full', 1.0),  // hold fire
 ];
 
 // ============================================================
-// LEVEL 4: FOG OF WAR — Partial intel, decoys, delayed reveal
-// Duration: 210s | 20 threats + 3 decoys | Same 3 systems
+// LEVEL 4: HYPERSONIC — All 4 systems, introduces Arrow 3
+// Duration: 120s | 22 threats
+// Pacing: intro hypersonic early, quad escalation, ends intense
 // ============================================================
 const THREATS_L4 = [
-  // Familiar opening, then intel starts degrading
-  threat(1,  4,  'drone',     'Tel Aviv',        true,  15, 'full', 1.0),
-  threat(2,  14, 'cruise',    'Haifa',           true,  11, 'full', 0.50),  // delayed reveal
-  threat(3,  24, 'ballistic', 'Negev Desert',    false, 13, 'partial', 0.45),
-  buildDecoy(21, 32, 12),  // First decoy!
-  threat(4,  38, 'drone',     'Jerusalem',       true,  14, 'partial', 0.50),
-  threat(5,  48, 'cruise',    'Coastal Plain',   false, 11, 'minimal', 0.50), // hold fire, minimal intel
-  threat(6,  58, 'ballistic', 'Beersheba',       true,  12, 'partial', 0.40),
-  // Mixed pair under fog
-  threat(7,  68, 'drone',     'Ashkelon',        true,  13, 'full', 1.0),
-  threat(8,  69, 'cruise',    'Jordan Valley',   false, 10, 'minimal', 0.50), // hold fire
-  buildDecoy(22, 78, 10),  // Another decoy
-  threat(9,  84, 'ballistic', 'Tel Aviv',        true,  12, 'partial', 0.35),
-  threat(10, 94, 'drone',     'Golan Heights',   false, 12, 'full', 1.0),  // hold fire
-  // Course correction under fog
-  threat(11, 104,'ballistic', 'Northern Negev',  false, 13, 'partial', 0.45, {
+  // Quick warm-up with familiar types
+  threat(1,  3,  'drone',      'Beersheba',       true,  13, 'full', 1.0),
+  threat(2,  9,  'cruise',     'Haifa',           true,  10, 'full', 1.0, { origin: 'north' }),
+  threat(3,  16, 'ballistic',  'Negev Desert',    false, 12, 'full', 0.45),   // hold fire
+  // Introduce hypersonic!
+  threat(4,  23, 'hypersonic', 'Tel Aviv',        true,  10, 'full', 0.40),
+  threat(5,  30, 'drone',      'Golan Heights',   false, 12, 'full', 1.0, { origin: 'north' }),   // hold fire
+  threat(6,  36, 'hypersonic', 'Jerusalem',       true,   9, 'full', 0.35),
+  // Mixed pairs — tempo up
+  threat(7,  43, 'cruise',     'Netanya',         true,  10, 'full', 1.0),
+  threat(8,  44, 'ballistic',  'Beersheba',       true,  11, 'full', 0.40),
+  threat(9,  52, 'hypersonic', 'Dead Sea Region', false,  9, 'full', 0.50),   // hold fire
+  threat(10, 58, 'drone',      'Ashkelon',        true,  12, 'full', 1.0),
+  // Course correction
+  threat(11, 64, 'ballistic',  'Central Negev',   false, 12, 'full', 0.45, {
     course_correct: { new_impact_zone: 'Dimona', new_is_populated: true, at_pct: 0.50 },
     priority: true,
   }),
-  threat(12, 114,'cruise',    'Netanya',         true,  10, 'full', 1.0),
-  threat(13, 114,'drone',     'Western Galilee', false, 13, 'partial', 0.50), // hold fire
-  // Triple under fog
-  threat(14, 128,'ballistic', 'Haifa',           true,  12, 'minimal', 0.40),
-  threat(15, 128,'cruise',    'Ashdod',          true,  10, 'partial', 0.45),
-  threat(16, 130,'drone',     'Judean Hills',    false, 12, 'minimal', 0.50), // hold fire
-  buildDecoy(23, 140, 10),
-  // Final push
-  threat(17, 150,'ballistic', 'Jerusalem',       true,  11, 'partial', 0.35),
-  threat(18, 160,'cruise',    'Tel Aviv',        true,  10, 'full', 1.0),
-  threat(19, 170,'drone',     'Beersheba',       true,  12, 'partial', 0.45),
-  threat(20, 170,'ballistic', 'Arava Valley',    false, 11, 'minimal', 0.50), // hold fire
+  threat(12, 70, 'cruise',     'Arava Valley',    false, 10, 'full', 1.0),    // hold fire
+  // Triple
+  threat(13, 76, 'hypersonic', 'Haifa',           true,   9, 'full', 0.35, { origin: 'north' }),
+  threat(14, 77, 'drone',      'Ashdod',          true,  12, 'full', 1.0),
+  threat(15, 78, 'ballistic',  'Jerusalem',       true,  11, 'full', 0.35),
+  // ESCALATION — final quad
+  threat(16, 90, 'hypersonic', 'Tel Aviv',        true,   9, 'full', 0.35),
+  threat(17, 90, 'cruise',     'Haifa',           true,  10, 'full', 1.0, { origin: 'north' }),
+  threat(18, 92, 'ballistic',  'Beersheba',       true,  11, 'full', 0.40),
+  threat(19, 92, 'drone',      'Netanya',         true,  11, 'full', 1.0),
+  threat(20, 94, 'hypersonic', 'Northern Negev',  false,  9, 'full', 0.50),   // hold fire
 ];
 
 // ============================================================
-// LEVEL 5: IRON STORM — All 4 systems, hypersonics, final salvo
-// Duration: 240s | 22 threats + 3 decoys | Full chaos
+// LEVEL 5: IRON STORM — All 4 systems + final salvo
+// Duration: 150s | 24 threats | Degraded intel, chaos
+// Pacing: relentless escalation, 5-threat final salvo
 // ============================================================
 const THREATS_L5 = [
-  // Quick warm-up with familiar threats
-  threat(1,  4,  'drone',      'Ashkelon',       true,  14, 'full', 1.0),
-  threat(2,  12, 'cruise',     'Haifa',          true,  10, 'full', 1.0),
-  threat(3,  20, 'ballistic',  'Negev Desert',   false, 12, 'partial', 0.45), // hold fire
-  // Introduce hypersonic!
-  threat(4,  30, 'hypersonic', 'Tel Aviv',       true,  10, 'full', 0.40),  // First hypersonic — fast!
-  threat(5,  40, 'drone',      'Golan Heights',  false, 12, 'full', 1.0),   // hold fire
-  threat(6,  50, 'hypersonic', 'Jerusalem',      true,   9, 'partial', 0.35),
-  buildDecoy(23, 58, 10),
-  // Mixed pairs
-  threat(7,  64, 'cruise',     'Netanya',        true,  10, 'full', 1.0),
-  threat(8,  65, 'ballistic',  'Beersheba',      true,  11, 'partial', 0.40),
-  threat(9,  76, 'drone',      'Coastal Plain',  false, 12, 'minimal', 0.50), // hold fire
-  threat(10, 86, 'hypersonic', 'Dead Sea Region',false,  9, 'full', 0.50),  // hold fire
+  // Opening — intel already degraded
+  threat(1,  3,  'drone',      'Tel Aviv',        true,  13, 'full', 1.0),
+  threat(2,  9,  'cruise',     'Haifa',           true,  10, 'partial', 0.50, { origin: 'north' }),
+  threat(3,  16, 'ballistic',  'Negev Desert',    false, 12, 'partial', 0.45),  // hold fire
+  threat(4,  28, 'hypersonic', 'Jerusalem',       true,  10, 'partial', 0.35),
+  threat(5,  34, 'drone',      'Coastal Plain',   false, 12, 'minimal', 0.50),  // hold fire
+  threat(6,  40, 'cruise',     'Beersheba',       true,  10, 'partial', 0.45),
+  // Mixed pair
+  threat(7,  47, 'ballistic',  'Ashkelon',        true,  11, 'minimal', 0.40),
+  threat(8,  48, 'drone',      'Jordan Valley',   false, 12, 'minimal', 0.50),  // hold fire
+  threat(9,  58, 'hypersonic', 'Tel Aviv',        true,   9, 'partial', 0.35),
+  threat(10, 64, 'cruise',     'Golan Heights',   false, 10, 'full', 1.0, { origin: 'north' }),  // hold fire
   // Course correction
-  threat(11, 96, 'ballistic',  'Central Negev',  false, 12, 'partial', 0.45, {
+  threat(11, 70, 'ballistic',  'Northern Negev',  false, 12, 'partial', 0.45, {
     course_correct: { new_impact_zone: 'Dimona', new_is_populated: true, at_pct: 0.50 },
     priority: true,
   }),
-  buildDecoy(24, 104, 8),
+  threat(12, 76, 'hypersonic', 'Haifa',           true,   9, 'partial', 0.35, { origin: 'north' }),
+  threat(13, 77, 'drone',      'Western Galilee', false, 11, 'minimal', 0.50, { origin: 'north' }),  // hold fire
   // Triple
-  threat(12, 110,'cruise',     'Tel Aviv',       true,   9, 'full', 1.0),
-  threat(13, 110,'drone',      'Ashdod',         true,  11, 'partial', 0.45),
-  threat(14, 112,'hypersonic', 'Haifa',          true,   9, 'partial', 0.35),
+  threat(14, 86, 'ballistic',  'Jerusalem',       true,  11, 'minimal', 0.35),
+  threat(15, 87, 'cruise',     'Ashdod',          true,  10, 'partial', 0.45),
+  threat(16, 88, 'hypersonic', 'Judean Hills',    false,  8, 'minimal', 0.50),  // hold fire
   // Quad
-  threat(15, 126,'ballistic',  'Jerusalem',      true,  11, 'full', 0.35),
-  threat(16, 126,'cruise',     'Ashkelon',       true,   9, 'partial', 0.40),
-  threat(17, 128,'drone',      'Sinai Border Region', false, 11, 'minimal', 0.50), // hold fire
-  threat(18, 130,'hypersonic', 'Teveriah',       true,   8, 'partial', 0.35),
-  buildDecoy(25, 145, 8),
+  threat(17, 96, 'drone',      'Netanya',         true,  11, 'partial', 0.45),
+  threat(18, 96, 'ballistic',  'Ashkelon',        true,  11, 'minimal', 0.40),
+  threat(19, 98, 'cruise',     'Beersheba',       true,  10, 'partial', 0.45),
+  threat(20, 98, 'hypersonic', 'Teveriah',        true,   8, 'partial', 0.35, { origin: 'north' }),
   // Pre-salvo
-  threat(19, 155,'ballistic',  'Southern Negev', false, 11, 'minimal', 0.50), // hold fire
+  threat(21, 110,'ballistic',  'Southern Negev',  false, 11, 'minimal', 0.50),  // hold fire
 
   // FINAL SALVO — "OPERATION IRON STORM"
-  threat(20, 195,'drone',      'Beersheba',      true,  14, 'full', 0.35, { is_final_salvo: true }),
-  threat(21, 195,'cruise',     'Jerusalem',      true,  10, 'partial', 0.35, { is_final_salvo: true }),
-  threat(22, 195,'ballistic',  'Dimona',         true,  12, 'full', 0.30, { priority: true, is_final_salvo: true }),
-  threat(23, 195,'hypersonic', 'Tel Aviv',       true,   9, 'partial', 0.35, { is_final_salvo: true }),
-  threat(24, 195,'cruise',     'Negev Desert',   false, 10, 'minimal', 0.50, { is_final_salvo: true }),
+  threat(22, 130,'drone',      'Beersheba',       true,  13, 'full', 0.35, { is_final_salvo: true }),
+  threat(23, 130,'cruise',     'Jerusalem',       true,  10, 'partial', 0.35, { is_final_salvo: true }),
+  threat(24, 130,'ballistic',  'Dimona',          true,  12, 'full', 0.30, { priority: true, is_final_salvo: true }),
+  threat(25, 130,'hypersonic', 'Tel Aviv',        true,   9, 'partial', 0.35, { is_final_salvo: true }),
+  threat(26, 130,'cruise',     'Negev Desert',    false, 10, 'minimal', 0.50, { is_final_salvo: true }),
 ];
 
 // ============================================================
@@ -347,10 +331,8 @@ const THREATS_L5 = [
 export const LEVELS = [
   {
     id: 1,
-    name: 'FIRST CONTACT',
-    subtitle: 'Drone Interception',
-    duration: 105,
-    ammo: { iron_dome: 10 },
+    duration: 90,
+    ammo: { iron_dome: 12 },
     available_systems: ['iron_dome'],
     auto_end_delay: 3000,
     new_system: null,
@@ -361,9 +343,7 @@ export const LEVELS = [
   },
   {
     id: 2,
-    name: 'ESCALATION',
-    subtitle: 'Cruise Missile Threat',
-    duration: 150,
+    duration: 105,
     ammo: { iron_dome: 8, davids_sling: 6 },
     available_systems: ['iron_dome', 'davids_sling'],
     auto_end_delay: 5000,
@@ -375,13 +355,11 @@ export const LEVELS = [
   },
   {
     id: 3,
-    name: 'BALLISTIC ARC',
-    subtitle: 'Ballistic Missile Defense',
-    duration: 180,
+    duration: 100,
     ammo: { iron_dome: 6, davids_sling: 5, arrow_2: 6 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
     auto_end_delay: 5000,
-    new_system: { key: 'arrow_2', name: 'ARROW 2', shortcut: '3', color: '#a855f7' },
+    new_system: { key: 'arrow_2', name: 'ARROW 2', shortcut: '3', color: '#ef4444' },
     new_threat: { type: 'ballistic', name: 'BALLISTIC MISSILES', description: 'High arc, fast reentry', speed: 'Mach 7–9.5' },
     final_salvo_warning_time: null,
     final_salvo_start_time: null,
@@ -389,31 +367,27 @@ export const LEVELS = [
   },
   {
     id: 4,
-    name: 'FOG OF WAR',
-    subtitle: 'Degraded Intel & Decoys',
-    duration: 210,
-    ammo: { iron_dome: 6, davids_sling: 5, arrow_2: 6 },
-    available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
+    duration: 120,
+    ammo: { iron_dome: 5, davids_sling: 4, arrow_2: 5, arrow_3: 4 },
+    available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 5000,
-    new_system: null,
-    new_threat: null,
-    new_mechanic: { name: 'FOG OF WAR', description: 'Intel is degraded. Impact zones reveal late. Decoy contacts appear on radar — dismiss with HOLD FIRE or waste precious interceptors.' },
+    new_system: { key: 'arrow_3', name: 'ARROW 3', shortcut: '4', color: '#a855f7' },
+    new_threat: { type: 'hypersonic', name: 'HYPERSONIC MISSILES', description: 'Exo-atmospheric, extreme speed', speed: 'Mach 12–16' },
     final_salvo_warning_time: null,
     final_salvo_start_time: null,
     threats: THREATS_L4,
   },
   {
     id: 5,
-    name: 'IRON STORM',
-    subtitle: 'Full Spectrum Defense',
-    duration: 240,
+    duration: 150,
     ammo: { iron_dome: 5, davids_sling: 4, arrow_2: 5, arrow_3: 4 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 8000,
-    new_system: { key: 'arrow_3', name: 'ARROW 3', shortcut: '4', color: '#ef4444' },
-    new_threat: { type: 'hypersonic', name: 'HYPERSONIC MISSILES', description: 'Exo-atmospheric, extreme speed', speed: 'Mach 12–16' },
-    final_salvo_warning_time: 175,
-    final_salvo_start_time: 195,
+    new_system: null,
+    new_threat: null,
+    new_mechanic: null,
+    final_salvo_warning_time: 110,
+    final_salvo_start_time: 130,
     threats: THREATS_L5,
   },
 ];

@@ -1,27 +1,23 @@
-export default function TzevaAdom({ timeLeft }) {
+export default function TzevaAdom() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center tzeva-adom-overlay">
-      <div className="absolute inset-0 bg-red-900/90 animate-pulse" />
-      <div className="relative z-10 text-center">
-        <div className="text-6xl md:text-8xl font-bold text-white mb-4 font-mono tracking-wider drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">
-          TZEVA ADOM
-        </div>
-        <div className="text-3xl md:text-5xl font-bold text-white/90 mb-2 font-mono">
-          RED ALERT
-        </div>
-        <div className="text-4xl md:text-6xl font-bold text-white mt-8 mb-4 font-mono animate-bounce">
-          TAKE COVER
-        </div>
-        <div className="text-5xl md:text-7xl font-bold text-white font-mono tabular-nums mt-8">
-          {Math.ceil(timeLeft)}
-        </div>
-        <div className="text-sm text-white/60 font-mono mt-4 tracking-widest">
-          ALL SYSTEMS PAUSED
-        </div>
-      </div>
+    <div className="fixed inset-0 z-30 pointer-events-none tzeva-adom-flash">
+      {/* Translucent red overlay — player sees through it */}
+      <div className="absolute inset-0 bg-red-900/40" />
 
       {/* Flashing red border */}
-      <div className="absolute inset-0 border-[8px] border-red-500 animate-pulse pointer-events-none" />
+      <div className="absolute inset-0 border-[6px] border-red-500/60" />
+
+      {/* Alert text */}
+      <div className="relative z-10 w-full h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl md:text-8xl font-bold text-white font-mono tracking-[0.3em] drop-shadow-[0_0_40px_rgba(255,0,0,0.8)]">
+            TZEVA ADOM
+          </div>
+          <div className="text-3xl md:text-5xl font-bold text-white/80 font-mono tracking-widest mt-2">
+            RED ALERT
+          </div>
+        </div>
+      </div>
 
       {/* Corner warning triangles */}
       {[
@@ -33,9 +29,9 @@ export default function TzevaAdom({ timeLeft }) {
         <div
           key={i}
           className={`absolute ${pos} text-4xl animate-pulse`}
-          style={{ animationDelay: `${i * 0.2}s` }}
+          style={{ animationDelay: `${i * 0.15}s` }}
         >
-          <span className="text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+          <span className="text-red-500/80 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
             &#9888;
           </span>
         </div>

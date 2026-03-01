@@ -1,33 +1,93 @@
+import { THREAT_COLORS, INTERCEPTOR_COLORS } from '../config/threats.js';
+
 const ALL_MATCHINGS = [
   {
     system: 'IRON DOME',
-    systemColor: '#22c55e',
+    systemColor: INTERCEPTOR_COLORS.iron_dome,
     shortcut: '1',
     threat: 'DRONES',
+    threatColor: THREAT_COLORS.drone,
     description: 'Low altitude, slow moving',
   },
   {
     system: "DAVID'S SLING",
-    systemColor: '#3b82f6',
+    systemColor: INTERCEPTOR_COLORS.davids_sling,
     shortcut: '2',
     threat: 'CRUISE MISSILES',
+    threatColor: THREAT_COLORS.cruise,
     description: 'Low altitude, terrain-following',
   },
   {
     system: 'ARROW 2',
-    systemColor: '#a855f7',
+    systemColor: INTERCEPTOR_COLORS.arrow_2,
     shortcut: '3',
     threat: 'BALLISTIC MISSILES',
+    threatColor: THREAT_COLORS.ballistic,
     description: 'High arc, fast reentry',
   },
   {
     system: 'ARROW 3',
-    systemColor: '#ef4444',
+    systemColor: INTERCEPTOR_COLORS.arrow_3,
     shortcut: '4',
     threat: 'HYPERSONIC MISSILES',
+    threatColor: THREAT_COLORS.hypersonic,
     description: 'Exo-atmospheric, extreme speed',
   },
 ];
+
+function DroneAnimation() {
+  return (
+    <div className="mt-5 mb-2 flex justify-center">
+      <svg viewBox="0 0 300 80" width="300" height="80" className="overflow-visible">
+        {/* Ground reference */}
+        <line x1="0" y1="72" x2="300" y2="72" stroke="#22c55e" strokeWidth="0.3" opacity="0.15" />
+        {/* Altitude reference */}
+        <line x1="0" y1="40" x2="300" y2="40" stroke="#eab308" strokeWidth="0.3" opacity="0.06" strokeDasharray="4,8" />
+        <text x="6" y="38" fill="#eab308" fontSize="5" fontFamily="monospace" opacity="0.2">LOW ALT</text>
+
+        {/* Drone — side profile, flying left to right */}
+        <g className="drone-fly">
+          {/* Propeller blur at rear */}
+          <circle cx="-14" cy="0" r="4" fill="#eab308" opacity="0.12" className="drone-rotor-spin" />
+          <line x1="-14" y1="-3.5" x2="-14" y2="3.5" stroke="#eab308" strokeWidth="0.8" opacity="0.3" className="drone-rotor-spin" />
+
+          {/* Fuselage — long narrow body */}
+          <path
+            d="M16,0 L12,-1.2 L-10,-1.2 L-13,0 L-10,1.2 L12,1.2 Z"
+            fill="#eab308" opacity="0.85"
+          />
+
+          {/* Wing — delta swept back, seen from side as a thick profile */}
+          <path
+            d="M4,-1.2 L-2,-8 L-8,-7 L-6,-1.2"
+            fill="#eab308" opacity="0.7"
+          />
+          <path
+            d="M4,1.2 L-2,8 L-8,7 L-6,1.2"
+            fill="#eab308" opacity="0.7"
+          />
+
+          {/* Tail fins — V-tail */}
+          <path
+            d="M-10,-1.2 L-13,-5 L-11,-4.5 L-10,-1.2"
+            fill="#eab308" opacity="0.6"
+          />
+          <path
+            d="M-10,1.2 L-13,5 L-11,4.5 L-10,1.2"
+            fill="#eab308" opacity="0.6"
+          />
+
+          {/* Nose / sensor dome */}
+          <ellipse cx="15" cy="0" rx="2" ry="1" fill="#fbbf24" opacity="0.9" />
+          <circle cx="16.5" cy="0" r="0.5" fill="#fef08a" opacity="0.8" />
+
+          {/* Engine exhaust glow */}
+          <circle cx="-15" cy="0" r="2" fill="#f59e0b" opacity="0.3" className="drone-exhaust-glow" />
+        </g>
+      </svg>
+    </div>
+  );
+}
 
 export default function Briefing({ onReady, level = 1 }) {
   // For Level 1: only show Iron Dome
@@ -62,7 +122,7 @@ export default function Briefing({ onReady, level = 1 }) {
           </div>
 
           <div className="space-y-3">
-            {matchings.map(({ system, systemColor, shortcut, threat, description }) => (
+            {matchings.map(({ system, systemColor, shortcut, threat, threatColor, description }) => (
               <div
                 key={system}
                 className="flex items-center gap-4 p-3 rounded-lg bg-gray-900/50 border border-gray-800"
@@ -80,12 +140,15 @@ export default function Briefing({ onReady, level = 1 }) {
                 </div>
                 <div className="flex-shrink-0 text-green-600 font-mono text-xl px-2">&#x2192;</div>
                 <div className="flex-1">
-                  <div className="font-mono font-bold text-sm tracking-wider text-gray-200">{threat}</div>
+                  <div className="font-mono font-bold text-sm tracking-wider" style={{ color: threatColor }}>{threat}</div>
                   <div className="text-[10px] text-gray-500 font-mono mt-0.5">{description}</div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Drone animation for Level 1 */}
+          {level === 1 && <DroneAnimation />}
         </div>
 
         {/* Hold Fire Doctrine */}

@@ -160,21 +160,49 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
-   Decoy Pulse (slower, fading)
+   Blip Hover & Selection
    ============================================ */
-.decoy-pulse {
-  animation: decoyPulse 2.5s ease-in-out infinite;
+.blip-hover:hover circle:nth-child(4) {
+  filter: drop-shadow(0 0 6px currentColor) !important;
 }
 
-@keyframes decoyPulse {
-  0%, 100% {
-    r: 1.5;
-    opacity: 0.2;
-  }
-  50% {
-    r: 3;
-    opacity: 0;
-  }
+.selection-ring-spin {
+  animation: selectionSpin 3s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes selectionSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Intercepted Blip Fade (600ms to match trail)
+   ============================================ */
+.intercepted-blip-fade {
+  animation: interceptedFade 600ms linear forwards;
+}
+
+@keyframes interceptedFade {
+  0%   { opacity: 0.7; }
+  65%  { opacity: 0.55; }
+  85%  { opacity: 0.2; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
+   Tzeva Adom Flash (non-blocking, 3s)
+   ============================================ */
+.tzeva-adom-flash {
+  animation: tzevaFlash 3s ease-out forwards;
+}
+
+@keyframes tzevaFlash {
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ============================================
@@ -473,6 +501,148 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
+   Level Intro — Drone Animation (Level 1)
+   ============================================ */
+.drone-fly {
+  animation: droneFly 5s linear infinite;
+}
+
+@keyframes droneFly {
+  0%   { transform: translate(-30px, 38px); }
+  15%  { transform: translate(50px, 34px); }
+  30%  { transform: translate(100px, 40px); }
+  50%  { transform: translate(170px, 35px); }
+  70%  { transform: translate(230px, 42px); }
+  85%  { transform: translate(270px, 37px); }
+  100% { transform: translate(320px, 39px); }
+}
+
+.drone-rotor-spin {
+  animation: rotorSpin 0.1s linear infinite;
+}
+
+@keyframes rotorSpin {
+  0%   { opacity: 0.08; }
+  50%  { opacity: 0.25; }
+  100% { opacity: 0.08; }
+}
+
+.drone-exhaust-glow {
+  animation: droneExhaust 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes droneExhaust {
+  from { opacity: 0.15; r: 1.5; }
+  to   { opacity: 0.4; r: 2.5; }
+}
+
+/* ============================================
+   Level Intro — Cruise Missile Animation
+   ============================================ */
+.cruise-missile-fly {
+  animation: cruiseFly 3s linear infinite;
+}
+
+@keyframes cruiseFly {
+  0%   { transform: translate(-20px, 48px); }
+  100% { transform: translate(300px, 48px); }
+}
+
+.cruise-exhaust-pulse {
+  animation: exhaustPulse 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes exhaustPulse {
+  from { opacity: 0.2; r: 2; }
+  to   { opacity: 0.5; r: 4; }
+}
+
+.cruise-trail {
+  animation: trailShimmer 1s linear infinite;
+}
+
+@keyframes trailShimmer {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -18; }
+}
+
+/* ============================================
+   Level Intro — Ballistic Missile Animation
+   ============================================ */
+.ballistic-missile-arc {
+  offset-path: path("M35,116 Q75,10 150,6 Q225,4 270,116");
+  offset-rotate: auto;
+  animation: ballisticArc 4s ease-in infinite;
+}
+
+@keyframes ballisticArc {
+  0%   { offset-distance: 0%; opacity: 0; }
+  3%   { opacity: 1; }
+  /* Slow rise phase — takes 60% of time to reach apogee (50% of path) */
+  60%  { offset-distance: 50%; opacity: 1; }
+  /* Fast descent — remaining 40% of time for second half of path */
+  90%  { offset-distance: 95%; opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.ballistic-glow {
+  animation: ballisticGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes ballisticGlow {
+  from { opacity: 0.15; r: 4; }
+  to   { opacity: 0.3; r: 6; }
+}
+
+.ballistic-impact-pulse {
+  animation: impactPulseIntro 1.5s ease-in-out infinite;
+}
+
+@keyframes impactPulseIntro {
+  0%, 100% { r: 2; opacity: 0.2; }
+  50%      { r: 5; opacity: 0.5; }
+}
+
+/* ============================================
+   Level Intro — Hypersonic Missile Animation
+   ============================================ */
+.hypersonic-missile-dive {
+  offset-path: path("M280,8 Q200,10 150,40 Q120,65 90,116");
+  offset-rotate: auto;
+  animation: hypersonicDive 1.5s ease-in infinite;
+}
+
+@keyframes hypersonicDive {
+  0%   { offset-distance: 0%; opacity: 0; }
+  5%   { opacity: 1; }
+  /* Glide phase — first 40% of path covered quickly */
+  30%  { offset-distance: 40%; opacity: 1; }
+  /* Terminal dive — accelerating into the ground */
+  70%  { offset-distance: 85%; opacity: 1; }
+  90%  { offset-distance: 98%; opacity: 0.8; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.hypersonic-plasma {
+  animation: plasmaFlicker 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes plasmaFlicker {
+  from { opacity: 0.1; }
+  to   { opacity: 0.3; }
+}
+
+.hypersonic-speed-line {
+  animation: speedLineFlash 2s ease-in-out infinite;
+}
+
+@keyframes speedLineFlash {
+  0%, 100% { opacity: 0; }
+  30%      { opacity: 0.2; }
+  50%      { opacity: 0; }
+}
+
+/* ============================================
    Button Active States
    ============================================ */
 button:focus-visible {
@@ -485,4 +655,116 @@ button:focus-visible {
    ============================================ */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   Educational Briefing — Phase Indicator
+   ============================================ */
+.phase-active-pulse {
+  animation: phaseActivePulse 2s ease-in-out infinite;
+}
+
+@keyframes phaseActivePulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 136, 0.1); }
+  50%      { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+}
+
+/* ============================================
+   Educational Briefing — Quiz Feedback
+   ============================================ */
+.quiz-correct-flash {
+  animation: quizCorrect 0.5s ease-out;
+}
+
+@keyframes quizCorrect {
+  0%  { transform: scale(1); }
+  30% { transform: scale(1.03); box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); }
+  100% { transform: scale(1); }
+}
+
+.quiz-wrong-flash {
+  animation: quizWrong 0.4s ease-out;
+}
+
+@keyframes quizWrong {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+/* ============================================
+   Educational Briefing — Defense Animation
+   ============================================ */
+.brief-drone-approach {
+  animation: briefDroneApproach 8s linear infinite;
+}
+
+@keyframes briefDroneApproach {
+  0%   { transform: translate(30px, 50px); }
+  100% { transform: translate(260px, 50px); }
+}
+
+.tamir-launch-line {
+  animation: tamirLaunch 8s linear infinite;
+}
+
+@keyframes tamirLaunch {
+  0%, 50%  { opacity: 0; }
+  55%      { opacity: 0.8; }
+  70%      { opacity: 0.3; }
+  100%     { opacity: 0; }
+}
+
+.tamir-intercept-flash {
+  animation: tamirIntercept 8s linear infinite;
+}
+
+@keyframes tamirIntercept {
+  0%, 54%  { r: 0; opacity: 0; }
+  56%      { r: 10; opacity: 0.8; }
+  65%      { r: 15; opacity: 0.3; }
+  80%      { r: 20; opacity: 0; }
+  100%     { r: 0; opacity: 0; }
+}
+
+/* ============================================
+   Educational Briefing — Mini Radar Blip
+   ============================================ */
+.mini-radar-blip {
+  animation: miniRadarBlip 1.5s ease-out infinite;
+}
+
+@keyframes miniRadarBlip {
+  0%   { r: 4; opacity: 0.6; }
+  100% { r: 12; opacity: 0; }
+}
+
+/* ============================================
+   Educational Briefing — Exercise Intercept
+   ============================================ */
+.exercise-intercept-flash {
+  animation: exerciseFlash 1s ease-out forwards;
+}
+
+@keyframes exerciseFlash {
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+.exercise-debris {
+  animation: exerciseDebris 1s ease-out forwards;
+}
+
+@keyframes exerciseDebris {
+  0%   { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--dx, 5px), var(--dy, 5px)); }
+}
+
+.exercise-click-prompt {
+  animation: exerciseClickPrompt 1.2s ease-in-out infinite;
+}
+
+@keyframes exerciseClickPrompt {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
 }

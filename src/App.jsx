@@ -6,6 +6,8 @@ import ControlPanel from './components/ControlPanel.jsx';
 import TzevaAdom from './components/TzevaAdom.jsx';
 import Summary, { LeaderboardTable } from './components/Summary.jsx';
 import Briefing from './components/Briefing.jsx';
+import EducationalBriefing from './components/EducationalBriefing.jsx';
+import EscapeRoomTimer from './components/EscapeRoomTimer.jsx';
 import LevelIntro from './components/LevelIntro.jsx';
 import LevelComplete from './components/LevelComplete.jsx';
 import FacilitatorControls from './components/FacilitatorControls.jsx';
@@ -21,6 +23,7 @@ function formatCountdown(seconds) {
 export default function App() {
   const game = useGameEngine();
   const [showFacilitator, setShowFacilitator] = useState(false);
+  const [facilitatorUnlocked, setFacilitatorUnlocked] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const hasSeenBriefingRef = useRef(false);
 
@@ -31,11 +34,12 @@ export default function App() {
     ammo,
     activeThreats,
     selectedThreatId,
-    tzevaAdomTimeLeft,
+    tzevaAdomActive,
     paused,
     volume,
     feedbackMessage,
-    totalPenaltyTime,
+    escapeRoomTime,
+    escapeRoomStartTime,
     streak,
     finalSalvoWarning,
     impactFlashes,
@@ -48,11 +52,15 @@ export default function App() {
     resetGame,
     togglePause,
     skipBriefing,
+    jumpToLevel,
     handleAction,
     setSelectedThreatId,
     setVolume,
+    setEscapeRoomStartTime,
     getLevelStats,
+    getRunningScore,
     getCampaignStats,
+    addQuizPoints,
     GAME_STATES,
   } = game;
 
@@ -68,17 +76,14 @@ export default function App() {
   // Keyboard handling
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // ESC: toggle facilitator panel
+      // ESC: toggle facilitator panel (available from any game state)
       if (e.key === 'Escape') {
-        if (gameState !== GAME_STATES.PRE_GAME && gameState !== GAME_STATES.BRIEFING &&
-            gameState !== GAME_STATES.LEVEL_INTRO && gameState !== GAME_STATES.LEVEL_COMPLETE) {
-          setShowFacilitator((prev) => {
-            if (!prev) {
-              if (!paused) togglePause();
-            }
-            return !prev;
-          });
-        }
+        setShowFacilitator((prev) => {
+          if (!prev && gameState === GAME_STATES.ACTIVE) {
+            if (!paused) togglePause();
+          }
+          return !prev;
+        });
         return;
       }
 
@@ -115,7 +120,7 @@ export default function App() {
         e.preventDefault();
         if (activeThreats.length === 0) return;
 
-        const sortedThreats = [...activeThreats].sort((a, b) => a.timeLeft - b.timeLeft);
+        const sortedThreats = [...activeThreats].filter((t) => !t.intercepted).sort((a, b) => a.timeLeft - b.timeLeft);
         const currentIndex = sortedThreats.findIndex((t) => t.id === selectedThreatId);
 
         let nextIndex;
@@ -146,6 +151,26 @@ export default function App() {
     if (paused) togglePause();
     setShowFacilitator(false);
   }, [paused, togglePause]);
+
+  // Facilitator overlay — reusable across all screens
+  const facilitatorOverlay = showFacilitator && (
+    <FacilitatorControls
+      onClose={handleCloseFacilitator}
+      onPause={handlePause}
+      onResume={handleResume}
+      onReset={resetGame}
+      onJumpToLevel={jumpToLevel}
+      paused={paused}
+      volume={volume}
+      onVolumeChange={setVolume}
+      currentLevel={currentLevel}
+      isPreGame={gameState === GAME_STATES.PRE_GAME}
+      unlocked={facilitatorUnlocked}
+      onUnlock={() => setFacilitatorUnlocked(true)}
+      escapeRoomStartTime={escapeRoomStartTime}
+      onSetEscapeTime={setEscapeRoomStartTime}
+    />
+  );
 
   // ========================
   // PRE-GAME SCREEN
@@ -226,46 +251,49 @@ export default function App() {
           </div>
         )}
 
-        {showFacilitator && (
-          <FacilitatorControls
-            onClose={handleCloseFacilitator}
-            onPause={handlePause}
-            onResume={handleResume}
-            onReset={resetGame}
-            paused={paused}
-            volume={volume}
-            onVolumeChange={setVolume}
-            isPreGame
-          />
-        )}
+        {facilitatorOverlay}
       </div>
     );
   }
 
   // ========================
-  // BRIEFING SCREEN (Level 1 only)
+  // BRIEFING SCREEN (Level 1 — Educational Briefing)
   // ========================
   if (gameState === GAME_STATES.BRIEFING) {
+    // Auto-skip on replay is handled by the useEffect above
     return (
-      <Briefing
-        level={1}
-        onReady={() => {
-          hasSeenBriefingRef.current = true;
-          skipBriefing();
-        }}
-      />
+      <div className="relative">
+        <div className="absolute top-4 right-4 z-10">
+          <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
+        </div>
+        <EducationalBriefing
+          level={1}
+          onComplete={({ quizPoints: pts }) => {
+            hasSeenBriefingRef.current = true;
+            if (pts > 0) addQuizPoints(pts);
+            skipBriefing();
+          }}
+        />
+        {facilitatorOverlay}
+      </div>
     );
   }
 
   // ========================
-  // LEVEL INTRO (Levels 2-5)
+  // LEVEL INTRO (Levels 2+)
   // ========================
   if (gameState === GAME_STATES.LEVEL_INTRO) {
     return (
-      <LevelIntro
-        level={currentLevel}
-        onReady={() => startLevel(currentLevel)}
-      />
+      <div className="relative">
+        <div className="absolute top-4 right-4 z-10">
+          <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
+        </div>
+        <LevelIntro
+          level={currentLevel}
+          onReady={() => startLevel(currentLevel)}
+        />
+        {facilitatorOverlay}
+      </div>
     );
   }
 
@@ -274,12 +302,18 @@ export default function App() {
   // ========================
   if (gameState === GAME_STATES.LEVEL_COMPLETE) {
     return (
-      <LevelComplete
-        levelStats={getLevelStats()}
-        campaignStats={getCampaignStats()}
-        onNextLevel={advanceLevel}
-        onViewResults={finishCampaign}
-      />
+      <div className="relative">
+        <div className="absolute top-4 right-4 z-10">
+          <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
+        </div>
+        <LevelComplete
+          levelStats={getLevelStats()}
+          campaignStats={getCampaignStats()}
+          onNextLevel={advanceLevel}
+          onViewResults={finishCampaign}
+        />
+        {facilitatorOverlay}
+      </div>
     );
   }
 
@@ -287,7 +321,12 @@ export default function App() {
   // SUMMARY SCREEN (after all levels)
   // ========================
   if (gameState === GAME_STATES.SUMMARY) {
-    return <Summary stats={getCampaignStats()} levelStats={getLevelStats()} onReset={resetGame} />;
+    return (
+      <>
+        <Summary stats={getCampaignStats()} levelStats={getLevelStats()} onReset={resetGame} />
+        {facilitatorOverlay}
+      </>
+    );
   }
 
   // ========================
@@ -306,10 +345,22 @@ export default function App() {
             LEVEL {currentLevel}
           </span>
         </div>
+        {/* Escape Room Timer — center */}
+        <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
+
+        {/* Score + Level timer — right */}
         <div className="flex items-center gap-4">
-          <span className="font-mono text-xs text-gray-500 tabular-nums">
-            {formatCountdown(sessionTime)}
-          </span>
+          <div className="font-mono text-xs">
+            <span className="text-gray-600">SCORE </span>
+            <span className="text-cyan-400 text-sm font-bold tabular-nums">{getRunningScore()}</span>
+          </div>
+          <span className="text-gray-700 font-mono text-xs">|</span>
+          <div className="font-mono text-xs">
+            <span className="text-gray-600">LVL {currentLevel} </span>
+            <span className="text-green-400 text-sm font-bold tabular-nums">
+              {formatCountdown(Math.max(0, (config?.duration || 0) - sessionTime))}
+            </span>
+          </div>
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         </div>
       </div>
@@ -344,8 +395,6 @@ export default function App() {
           ammo={ammo}
           onAction={handleAction}
           selectedThreatId={selectedThreatId}
-          sessionTime={sessionTime}
-          totalPenaltyTime={totalPenaltyTime}
           feedbackMessage={feedbackMessage}
           streak={streak}
           availableSystems={config?.available_systems}
@@ -357,10 +406,10 @@ export default function App() {
         <div className="absolute inset-x-0 top-12 z-20 flex justify-center pointer-events-none">
           <div className="bg-red-950/90 border-2 border-red-600 rounded-lg px-8 py-4 text-center final-salvo-warning">
             <div className="text-red-400 font-mono text-xs tracking-[0.4em] mb-1">
-              INCOMING
+              ⚠ WARNING
             </div>
             <div className="text-red-300 font-mono text-2xl font-bold tracking-wider">
-              OPERATION IRON STORM
+              SALVO INCOMING
             </div>
             <div className="text-red-500 font-mono text-xs mt-1 tracking-widest animate-pulse">
               MASS SALVO DETECTED — BRACE FOR IMPACT
@@ -370,7 +419,7 @@ export default function App() {
       )}
 
       {/* PAUSE overlay */}
-      {paused && gameState !== GAME_STATES.TZEVA_ADOM && (
+      {paused && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="text-center">
             <div className="text-5xl font-bold font-mono text-yellow-500 tracking-[0.5em] animate-pulse">
@@ -383,23 +432,11 @@ export default function App() {
         </div>
       )}
 
-      {/* TZEVA ADOM overlay */}
-      {gameState === GAME_STATES.TZEVA_ADOM && (
-        <TzevaAdom timeLeft={tzevaAdomTimeLeft} />
-      )}
+      {/* TZEVA ADOM overlay — non-blocking, translucent */}
+      {tzevaAdomActive && <TzevaAdom />}
 
       {/* Facilitator Controls */}
-      {showFacilitator && (
-        <FacilitatorControls
-          onClose={handleCloseFacilitator}
-          onPause={handlePause}
-          onResume={handleResume}
-          onReset={resetGame}
-          paused={paused}
-          volume={volume}
-          onVolumeChange={setVolume}
-        />
-      )}
+      {facilitatorOverlay}
     </div>
   );
 }
