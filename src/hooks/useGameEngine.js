@@ -3,8 +3,6 @@ import {
   getThreats,
   getLevelConfig,
   TOTAL_LEVELS,
-  TZEVA_ADOM_DURATION,
-  DIMONA_PENALTY_DURATION,
   IMPACT_POSITIONS,
   COMMAND_CENTER,
   INTERCEPTOR_COLORS,
@@ -21,7 +19,6 @@ export const GAME_STATES = {
   BRIEFING: 'briefing',
   LEVEL_INTRO: 'level_intro',
   ACTIVE: 'active',
-  TZEVA_ADOM: 'tzeva_adom',
   LEVEL_COMPLETE: 'level_complete',
   SUMMARY: 'summary',
 };
@@ -33,12 +30,13 @@ export default function useGameEngine() {
   const [ammo, setAmmo] = useState({ ...getLevelConfig(1).ammo });
   const [activeThreats, setActiveThreats] = useState([]);
   const [selectedThreatId, setSelectedThreatId] = useState(null);
-  const [tzevaAdomTimeLeft, setTzevaAdomTimeLeft] = useState(0);
+  const [tzevaAdomActive, setTzevaAdomActive] = useState(false);
   const [paused, setPaused] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [resultLog, setResultLog] = useState([]);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
-  const [totalPenaltyTime, setTotalPenaltyTime] = useState(0);
+  const [escapeRoomTime, setEscapeRoomTime] = useState(20 * 60);
+  const [escapeRoomStartTime, setEscapeRoomStartTime] = useState(20 * 60);
   const [sirenCount, setSirenCount] = useState(0);
   const [wrongInterceptAttempts, setWrongInterceptAttempts] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -65,7 +63,7 @@ export default function useGameEngine() {
   const lastTickRef = useRef(null);
   const spawnedIdsRef = useRef(new Set());
   const feedbackTimerRef = useRef(null);
-  const tzevaAdomQueueRef = useRef([]);
+  const tzevaAdomTimerRef = useRef(null);
   const allSpawnedRef = useRef(false);
 
   // Campaign stats — accumulated across all levels
@@ -77,7 +75,6 @@ export default function useGameEngine() {
     totalSirens: 0,
     totalWrongIntercepts: 0,
     totalWastedIntercepts: 0,
-    totalPenaltyTime: 0,
     overallBestStreak: 0,
   });
 
@@ -172,28 +169,31 @@ export default function useGameEngine() {
     }, duration);
   }, []);
 
+  // Compute where a threat blip currently IS on the radar
+  const ENTRY_DIRS = {
+    south: { x: 0.0, y: 0.48 }, southwest: { x: -0.34, y: 0.34 },
+    southeast: { x: 0.34, y: 0.34 }, east: { x: 0.48, y: 0.0 },
+    north: { x: 0.0, y: -0.48 }, northeast: { x: 0.34, y: -0.34 },
+  };
+  const getBlipPosition = useCallback((threat) => {
+    const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
+    const linearProgress = 1 - threat.timeLeft / threat.countdown;
+    let progress = linearProgress;
+    if (threat.type === 'ballistic') progress = linearProgress ** 3;
+    else if (threat.type === 'hypersonic') progress = linearProgress ** 4;
+    const cx = 0.5, cy = 0.5;
+    const dir = ENTRY_DIRS[threat.origin] || ENTRY_DIRS.southeast;
+    const startX = cx + dir.x;
+    const startY = cy + dir.y;
+    return { x: startX + (target.x - startX) * progress, y: startY + (target.y - startY) * progress };
+  }, []);
+
   // Launch interceptor trail with delayed impact flash
   const addTrail = useCallback((action, threat, impactType) => {
     const battery = COMMAND_CENTER;
     if (!battery) return;
 
-    // Calculate where the threat currently IS on the radar (same easing as RadarDisplay)
-    const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
-    const linearProgress = 1 - threat.timeLeft / threat.countdown;
-    // Apply easing: ballistic = cubic, hypersonic = quartic, others = linear
-    let progress = linearProgress;
-    if (threat.type === 'ballistic') progress = linearProgress ** 3;
-    else if (threat.type === 'hypersonic') progress = linearProgress ** 4;
-
-    const cx = 0.5, cy = 0.5;
-    const dx = target.x - cx;
-    const dy = target.y - cy;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const norm = dist > 0 ? 1 / dist : 1;
-    const startX = cx + (dx * norm * 0.48);
-    const startY = cy + (dy * norm * 0.48);
-    const blipX = startX + (target.x - startX) * progress;
-    const blipY = startY + (target.y - startY) * progress;
+    const { x: blipX, y: blipY } = getBlipPosition(threat);
 
     // Immediate launch sound feedback
     playLaunchSound(volumeRef.current);
@@ -221,28 +221,30 @@ export default function useGameEngine() {
         if (impactType === 'intercept') playInterceptSound(volumeRef.current);
       }, duration);
     }
-  }, [addImpactFlash]);
+  }, [addImpactFlash, getBlipPosition]);
 
-  // Trigger tzeva adom
-  const triggerTzevaAdom = useCallback((isPriority = false) => {
-    const duration = isPriority ? DIMONA_PENALTY_DURATION : TZEVA_ADOM_DURATION;
+  // Trigger tzeva adom — non-blocking, brief flash (no timer penalty — points-based only)
+  const triggerTzevaAdom = useCallback(() => {
     setSirenCount((c) => c + 1);
-    setTotalPenaltyTime((t) => t + duration);
 
-    if (gameStateRef.current === GAME_STATES.TZEVA_ADOM) {
-      tzevaAdomQueueRef.current.push(duration);
-      return;
-    }
-
-    setGameState(GAME_STATES.TZEVA_ADOM);
-    setTzevaAdomTimeLeft(duration);
+    // Play siren briefly (non-looping, ~3s)
     if (sirenRef.current) {
       sirenRef.current.currentTime = 0;
-      sirenRef.current.loop = true;
+      sirenRef.current.loop = false;
       sirenRef.current.volume = volumeRef.current;
       sirenRef.current.play().catch(() => {});
     }
-  }, []);
+
+    // Show translucent overlay (non-blocking)
+    setTzevaAdomActive(true);
+
+    // Auto-dismiss overlay after 3 seconds
+    if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
+    tzevaAdomTimerRef.current = setTimeout(() => {
+      setTzevaAdomActive(false);
+      stopSiren();
+    }, 3000);
+  }, [stopSiren]);
 
   // Handle threat timeout (countdown reached 0)
   const handleThreatTimeout = useCallback((threat) => {
@@ -250,11 +252,6 @@ export default function useGameEngine() {
 
     if (selectedThreatIdRef.current === threat.id) {
       setSelectedThreatId(null);
-    }
-
-    if (threat.is_decoy) {
-      showFeedback('Radar contact faded — false signature.', 'neutral');
-      return;
     }
 
     const effectivePopulated = threat.is_populated;
@@ -265,7 +262,7 @@ export default function useGameEngine() {
       addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
       playCityHitSound(volumeRef.current);
       setStreak(0);
-      triggerTzevaAdom(threat.priority);
+      triggerTzevaAdom();
     } else {
       setResultLog((prev) => [...prev, { ...threat, result: 'timeout_open', siren: false }]);
       addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
@@ -283,27 +280,9 @@ export default function useGameEngine() {
     const threat = currentThreats.find((t) => t.id === currentSelected);
     if (!threat) return;
 
-    // Can't interact with decoys via interceptors
-    if (threat.is_decoy && action !== 'hold_fire') {
-      setAmmo((prev) => ({ ...prev, [action]: prev[action] - 1 }));
-      playSound(failRef);
-      showFeedback('TARGET LOST — False radar contact!', 'error');
-      setStreak(0);
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
-      setSelectedThreatId(null);
-      setResultLog((prev) => [...prev, { ...threat, result: 'wasted_on_decoy', siren: false }]);
-      return;
-    }
-
-    if (threat.is_decoy && action === 'hold_fire') {
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
-      setSelectedThreatId(null);
-      showFeedback('Radar contact dismissed — false signature confirmed.', 'success');
-      setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold_decoy', siren: false }]);
-      return;
-    }
-
     if (action === 'hold_fire') {
+      // Compute blip position BEFORE removing the threat
+      const blipPos = getBlipPosition(threat);
       setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
       setSelectedThreatId(null);
 
@@ -313,10 +292,12 @@ export default function useGameEngine() {
         addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
         playCityHitSound(volumeRef.current);
         setStreak(0);
-        triggerTzevaAdom(threat.priority);
+        triggerTzevaAdom();
       } else {
         setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
         playSound(successRef);
+        addImpactFlash(threat.impact_zone, 'hold_clear', threat.type, blipPos);
+        playGroundImpactSound(volumeRef.current);
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
@@ -333,8 +314,17 @@ export default function useGameEngine() {
     const isCorrect = action === threat.correct_action;
 
     if (isCorrect) {
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
+      // Mark threat as intercepted (stays visible while trail animates) instead of removing immediately
+      setActiveThreats((prev) => prev.map((t) =>
+        t.id === threat.id ? { ...t, intercepted: true, frozenTimeLeft: t.timeLeft } : t
+      ));
       setSelectedThreatId(null);
+
+      // Remove after trail animation completes (600ms)
+      const threatId = threat.id;
+      setTimeout(() => {
+        setActiveThreats((prev) => prev.filter((t) => t.id !== threatId));
+      }, 650);
 
       if (threat.is_populated) {
         setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
@@ -358,10 +348,13 @@ export default function useGameEngine() {
       addTrail(action, threat, null);
       showFeedback('INTERCEPTION FAILED — wrong system!', 'error');
     }
-  }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash, addTrail]);
+  }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash, addTrail, getBlipPosition]);
 
-  // Main game loop — drives sessionTime via requestAnimationFrame
+  // Main game loop — drives sessionTime via requestAnimationFrame (ACTIVE state only)
   const tick = useCallback((timestamp) => {
+    // Safety guard: only tick during ACTIVE gameplay
+    if (gameStateRef.current !== GAME_STATES.ACTIVE) return;
+
     if (!lastTickRef.current) lastTickRef.current = timestamp;
     const delta = (timestamp - lastTickRef.current) / 1000;
     lastTickRef.current = timestamp;
@@ -394,7 +387,7 @@ export default function useGameEngine() {
           const newThreat = {
             ...threat,
             timeLeft: threat.countdown,
-            impactRevealed: threat.is_decoy ? true : (threat.reveal_pct >= 1.0),
+            impactRevealed: threat.reveal_pct >= 1.0,
             _corrected: false,
           };
           const newThreats = [...prev, newThreat];
@@ -437,7 +430,8 @@ export default function useGameEngine() {
     if (gameState !== GAME_STATES.ACTIVE) return;
     const config = getLevelConfig(currentLevel);
 
-    if (allSpawnedRef.current && activeThreats.length === 0) {
+    const unresolvedThreats = activeThreats.filter((t) => !t.intercepted);
+    if (allSpawnedRef.current && unresolvedThreats.length === 0) {
       if (!autoEndTimerRef.current) {
         autoEndTimerRef.current = setTimeout(() => {
           if (gameStateRef.current === GAME_STATES.ACTIVE) {
@@ -467,7 +461,7 @@ export default function useGameEngine() {
 
   // Tick active threat countdowns + progressive reveal + course correction
   useEffect(() => {
-    if (gameState !== GAME_STATES.ACTIVE) return;
+    if (gameState !== GAME_STATES.ACTIVE || paused) return;
 
     let lastTime = performance.now();
     const processedTimeouts = new Set();
@@ -479,6 +473,9 @@ export default function useGameEngine() {
 
       setActiveThreats((prev) => {
         const updated = prev.map((t) => {
+          // Don't tick intercepted threats — they're frozen, waiting for trail to arrive
+          if (t.intercepted) return t;
+
           const newTimeLeft = Math.max(0, t.timeLeft - dt);
           const pctRemaining = newTimeLeft / t.countdown;
           let updatedThreat = { ...t, timeLeft: newTimeLeft };
@@ -488,21 +485,11 @@ export default function useGameEngine() {
             updatedThreat.impactRevealed = true;
           }
 
-          // Course correction
-          if (t.course_correct && !t._corrected && pctRemaining <= t.course_correct.at_pct) {
-            updatedThreat.impact_zone = t.course_correct.new_impact_zone;
-            updatedThreat.is_populated = t.course_correct.new_is_populated;
-            updatedThreat._corrected = true;
-            updatedThreat.impactRevealed = false;
-            const revealDelay = 1.5 / t.countdown;
-            updatedThreat.reveal_pct = Math.max(0, pctRemaining - revealDelay);
-          }
-
           return updatedThreat;
         });
 
         const timedOut = updated.filter(
-          (t) => t.timeLeft <= 0 && !processedTimeouts.has(t.id)
+          (t) => t.timeLeft <= 0 && !t.intercepted && !processedTimeouts.has(t.id)
         );
 
         if (timedOut.length > 0) {
@@ -512,53 +499,14 @@ export default function useGameEngine() {
           }, 0);
         }
 
-        return updated.filter((t) => t.timeLeft > 0);
+        return updated.filter((t) => t.timeLeft > 0 || t.intercepted);
       });
     }, 100);
 
     return () => clearInterval(interval);
-  }, [gameState, handleThreatTimeout]);
+  }, [gameState, paused, handleThreatTimeout]);
 
-  // Tzeva adom countdown
-  useEffect(() => {
-    if (gameState !== GAME_STATES.TZEVA_ADOM) return;
-
-    let lastTime = performance.now();
-
-    const interval = setInterval(() => {
-      const now = performance.now();
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-
-      setTzevaAdomTimeLeft((prev) => {
-        const newVal = prev - dt;
-        if (newVal <= 0) {
-          clearInterval(interval);
-          stopSiren();
-
-          if (tzevaAdomQueueRef.current.length > 0) {
-            const nextDuration = tzevaAdomQueueRef.current.shift();
-            setTimeout(() => {
-              setTzevaAdomTimeLeft(nextDuration);
-              if (sirenRef.current) {
-                sirenRef.current.currentTime = 0;
-                sirenRef.current.loop = true;
-                sirenRef.current.volume = volumeRef.current;
-                sirenRef.current.play().catch(() => {});
-              }
-            }, 0);
-            return nextDuration;
-          }
-
-          setGameState(GAME_STATES.ACTIVE);
-          return 0;
-        }
-        return newVal;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [gameState, stopSiren]);
+  // (Tzeva adom is now non-blocking — no countdown effect needed)
 
   // Start/stop animation frame
   useEffect(() => {
@@ -582,24 +530,22 @@ export default function useGameEngine() {
 
   // Get current level stats
   const getLevelStats = useCallback(() => {
-    const nonDecoyLog = resultLog.filter((r) => !r.is_decoy);
-    const totalThreats = nonDecoyLog.length;
-    const correctIntercepts = nonDecoyLog.filter((r) => r.result === 'correct_intercept').length;
-    const populatedThreats = nonDecoyLog.filter((r) => r.is_populated).length;
-    const correctHolds = nonDecoyLog.filter((r) => r.result === 'correct_hold').length;
-    const openGroundThreats = nonDecoyLog.filter((r) => !r.is_populated).length;
-    const timeouts = nonDecoyLog.filter((r) => r.result === 'timeout').length;
-    const wastedIntercepts = nonDecoyLog.filter((r) => r.result === 'wasted_intercept').length;
-    const holdOnPopulated = nonDecoyLog.filter((r) => r.result === 'hold_populated').length;
+    const totalThreats = resultLog.length;
+    const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
+    const populatedThreats = resultLog.filter((r) => r.is_populated).length;
+    const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
+    const openGroundThreats = resultLog.filter((r) => !r.is_populated).length;
+    const timeouts = resultLog.filter((r) => r.result === 'timeout').length;
+    const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
+    const holdOnPopulated = resultLog.filter((r) => r.result === 'hold_populated').length;
 
     const score = Math.max(0,
       (correctIntercepts * 100)
-      + (correctHolds * 50)
+      + (correctHolds * 75)
       + (bestStreak * 25)
-      - (sirenCount * 200)
+      - (sirenCount * 150)
       - (wrongInterceptAttempts * 75)
       - (wastedIntercepts * 25)
-      - (totalPenaltyTime * 2)
     );
 
     let rating;
@@ -620,13 +566,28 @@ export default function useGameEngine() {
       timeouts: timeouts + holdOnPopulated,
       wastedIntercepts,
       ammoRemaining: ammo,
-      totalPenaltyTime,
       sirenCount,
       bestStreak,
       rating,
       score,
     };
-  }, [resultLog, ammo, totalPenaltyTime, sirenCount, wrongInterceptAttempts, bestStreak, currentLevel]);
+  }, [resultLog, ammo, sirenCount, wrongInterceptAttempts, bestStreak, currentLevel]);
+
+  // Running score — same formula as getLevelStats, usable during gameplay
+  const getRunningScore = useCallback(() => {
+    const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
+    const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
+    const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
+
+    return Math.max(0,
+      (correctIntercepts * 100)
+      + (correctHolds * 75)
+      + (bestStreak * 25)
+      - (sirenCount * 150)
+      - (wrongInterceptAttempts * 75)
+      - (wastedIntercepts * 25)
+    );
+  }, [resultLog, sirenCount, wrongInterceptAttempts, bestStreak]);
 
   // Get campaign summary (all levels combined)
   const getCampaignStats = useCallback(() => {
@@ -658,7 +619,6 @@ export default function useGameEngine() {
     c.totalSirens += stats.sirenCount;
     c.totalWrongIntercepts += stats.wrongIntercepts;
     c.totalWastedIntercepts += stats.wastedIntercepts;
-    c.totalPenaltyTime += stats.totalPenaltyTime;
     c.overallBestStreak = Math.max(c.overallBestStreak, stats.bestStreak);
   }, [getLevelStats]);
 
@@ -668,8 +628,9 @@ export default function useGameEngine() {
       totalScore: 0, levelScores: [],
       totalCorrectIntercepts: 0, totalCorrectHolds: 0,
       totalSirens: 0, totalWrongIntercepts: 0,
-      totalWastedIntercepts: 0, totalPenaltyTime: 0,
+      totalWastedIntercepts: 0,
       overallBestStreak: 0,
+      quizPoints: 0,
     };
     setCurrentLevel(1);
     setGameState(GAME_STATES.BRIEFING);
@@ -679,7 +640,8 @@ export default function useGameEngine() {
     setSelectedThreatId(null);
     setResultLog([]);
     setFeedbackMessage(null);
-    setTotalPenaltyTime(0);
+    setEscapeRoomTime(escapeRoomStartTime);
+    setTzevaAdomActive(false);
     setSirenCount(0);
     setWrongInterceptAttempts(0);
     setStreak(0);
@@ -690,16 +652,18 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
-    tzevaAdomQueueRef.current = [];
     allSpawnedRef.current = false;
     lastTickRef.current = null;
+    if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
+
     if (autoEndTimerRef.current) {
       clearTimeout(autoEndTimerRef.current);
       autoEndTimerRef.current = null;
     }
-  }, []);
+  }, [escapeRoomStartTime]);
 
   // Start a specific level (called after briefing/level intro)
+  // Note: escape room timer is NOT reset between levels — it persists across the campaign
   const startLevel = useCallback((level) => {
     const config = getLevelConfig(level);
     setCurrentLevel(level);
@@ -709,7 +673,7 @@ export default function useGameEngine() {
     setSelectedThreatId(null);
     setResultLog([]);
     setFeedbackMessage(null);
-    setTotalPenaltyTime(0);
+    setTzevaAdomActive(false);
     setSirenCount(0);
     setWrongInterceptAttempts(0);
     setStreak(0);
@@ -720,9 +684,10 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
-    tzevaAdomQueueRef.current = [];
     allSpawnedRef.current = false;
     lastTickRef.current = null;
+    if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
+
     if (autoEndTimerRef.current) {
       clearTimeout(autoEndTimerRef.current);
       autoEndTimerRef.current = null;
@@ -738,7 +703,8 @@ export default function useGameEngine() {
       setGameState(GAME_STATES.SUMMARY);
     } else {
       setCurrentLevel(nextLevel);
-      setGameState(GAME_STATES.LEVEL_INTRO);
+      setSessionTime(0); // Reset so timer shows full duration during intro
+      setGameState(GAME_STATES.BRIEFING);
     }
   }, [saveLevelToCampaign]);
 
@@ -750,12 +716,58 @@ export default function useGameEngine() {
 
   const skipBriefing = useCallback(() => {
     if (gameStateRef.current !== GAME_STATES.BRIEFING) return;
-    startLevel(1);
-  }, [startLevel]);
+    setGameState(GAME_STATES.LEVEL_INTRO);
+  }, []);
+
+  // Facilitator: jump to any level's intro/briefing screen
+  const jumpToLevel = useCallback((level) => {
+    stopSiren();
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
+
+    if (autoEndTimerRef.current) {
+      clearTimeout(autoEndTimerRef.current);
+      autoEndTimerRef.current = null;
+    }
+    // Reset campaign stats fresh for the jump
+    campaignStatsRef.current = {
+      totalScore: 0, levelScores: [],
+      totalCorrectIntercepts: 0, totalCorrectHolds: 0,
+      totalSirens: 0, totalWrongIntercepts: 0,
+      totalWastedIntercepts: 0,
+      overallBestStreak: 0,
+      quizPoints: 0,
+    };
+    setCurrentLevel(level);
+    setSessionTime(0);
+    setAmmo({ ...getLevelConfig(level).ammo });
+    setActiveThreats([]);
+    setSelectedThreatId(null);
+    setResultLog([]);
+    setFeedbackMessage(null);
+    setEscapeRoomTime(escapeRoomStartTime);
+    setTzevaAdomActive(false);
+    setSirenCount(0);
+    setWrongInterceptAttempts(0);
+    setStreak(0);
+    setBestStreak(0);
+    setFinalSalvoWarning(false);
+    setImpactFlashes([]);
+    setActiveTrails([]);
+    setScreenShake(false);
+    setPaused(false);
+    spawnedIdsRef.current = new Set();
+    allSpawnedRef.current = false;
+    lastTickRef.current = null;
+    // All levels go through Briefing first
+    setGameState(GAME_STATES.BRIEFING);
+  }, [stopSiren, escapeRoomStartTime]);
 
   const resetGame = useCallback(() => {
     stopSiren();
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
+
     if (autoEndTimerRef.current) {
       clearTimeout(autoEndTimerRef.current);
       autoEndTimerRef.current = null;
@@ -768,7 +780,8 @@ export default function useGameEngine() {
     setSelectedThreatId(null);
     setResultLog([]);
     setFeedbackMessage(null);
-    setTotalPenaltyTime(0);
+    setEscapeRoomTime(escapeRoomStartTime);
+    setTzevaAdomActive(false);
     setSirenCount(0);
     setWrongInterceptAttempts(0);
     setStreak(0);
@@ -779,13 +792,40 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
-    tzevaAdomQueueRef.current = [];
     allSpawnedRef.current = false;
     lastTickRef.current = null;
-  }, [stopSiren]);
+  }, [stopSiren, escapeRoomStartTime]);
 
   const togglePause = useCallback(() => {
     setPaused((p) => !p);
+  }, []);
+
+  // Escape room timer — ticks during ALL states except PRE_GAME and SUMMARY
+  useEffect(() => {
+    const shouldTick =
+      gameState !== GAME_STATES.PRE_GAME &&
+      gameState !== GAME_STATES.SUMMARY &&
+      !paused;
+    if (!shouldTick) return;
+
+    let lastTime = performance.now();
+    const interval = setInterval(() => {
+      const now = performance.now();
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+      setEscapeRoomTime((prev) => prev - delta);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [gameState, paused]);
+
+  // Add quiz points to campaign total
+  const addQuizPoints = useCallback((points) => {
+    campaignStatsRef.current.totalScore += points;
+    if (!campaignStatsRef.current.quizPoints) {
+      campaignStatsRef.current.quizPoints = 0;
+    }
+    campaignStatsRef.current.quizPoints += points;
   }, []);
 
   return {
@@ -795,12 +835,13 @@ export default function useGameEngine() {
     ammo,
     activeThreats,
     selectedThreatId,
-    tzevaAdomTimeLeft,
+    tzevaAdomActive,
     paused,
     volume,
     resultLog,
     feedbackMessage,
-    totalPenaltyTime,
+    escapeRoomTime,
+    escapeRoomStartTime,
     sirenCount,
     streak,
     bestStreak,
@@ -815,11 +856,15 @@ export default function useGameEngine() {
     resetGame,
     togglePause,
     skipBriefing,
+    jumpToLevel,
     handleAction,
     setSelectedThreatId,
     setVolume,
+    setEscapeRoomStartTime,
     getLevelStats,
+    getRunningScore,
     getCampaignStats,
+    addQuizPoints,
     GAME_STATES,
   };
 }

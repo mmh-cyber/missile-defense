@@ -10,7 +10,6 @@ export default function Summary({ stats, levelStats, onReset }) {
     totalSirens,
     totalWrongIntercepts,
     totalWastedIntercepts,
-    totalPenaltyTime,
     overallBestStreak,
     rating,
     levelsCompleted,
@@ -138,11 +137,6 @@ export default function Summary({ stats, levelStats, onReset }) {
             label="TOTAL SIRENS"
             value={totalSirens}
             bad={totalSirens > 0}
-          />
-          <StatRow
-            label="PENALTY TIME"
-            value={`${totalPenaltyTime}s`}
-            bad={totalPenaltyTime > 0}
           />
           {overallBestStreak > 0 && (
             <StatRow

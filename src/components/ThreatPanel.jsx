@@ -1,15 +1,13 @@
+import { THREAT_COLORS } from '../config/threats.js';
+
 function formatTime(seconds) {
   const s = Math.max(0, Math.ceil(seconds));
   return `${s}s`;
 }
 
-const THREAT_COLOR = '#94a3b8';   // Neutral slate — clean and consistent
-const DECOY_COLOR = '#6b7280';    // Gray for unknown contacts
-
 function ThreatCard({ threat, isSelected, onSelect }) {
-  const color = threat.is_decoy ? DECOY_COLOR : THREAT_COLOR;
+  const color = THREAT_COLORS[threat.type] || '#94a3b8';
   const urgency = threat.timeLeft < 5 ? 'animate-pulse' : '';
-  const isDecoy = threat.is_decoy;
   const intel = threat.intel || 'full';
 
   return (
@@ -47,7 +45,7 @@ function ThreatCard({ threat, isSelected, onSelect }) {
             className="text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider"
             style={{ backgroundColor: `${color}30`, color }}
           >
-            {isDecoy ? 'UNKNOWN' : threat.type === 'hypersonic' ? 'HYPERSONIC' : threat.type.toUpperCase()}
+            {threat.type === 'hypersonic' ? 'HYPERSONIC' : threat.type.toUpperCase()}
           </span>
           {threat.priority && (
             <span className="text-xs font-bold px-2 py-0.5 rounded bg-red-900/50 text-red-400 border border-red-700 tracking-wider animate-pulse">
@@ -63,11 +61,11 @@ function ThreatCard({ threat, isSelected, onSelect }) {
 
       {/* Threat name */}
       <div className="text-sm font-bold font-mono text-green-400 mb-2 tracking-wide">
-        {isDecoy ? 'UNIDENTIFIED CONTACT' : intel === 'minimal' ? 'UNKNOWN DESIGNATION' : threat.name.toUpperCase()}
+        {intel === 'minimal' ? 'UNKNOWN DESIGNATION' : threat.name.toUpperCase()}
       </div>
 
       {/* Stats — variable based on intel level */}
-      {!isDecoy && (
+      {(
         <div className="text-xs font-mono space-y-1">
           <div className="flex justify-between">
             <span className="text-gray-500">SPEED</span>
@@ -90,18 +88,10 @@ function ThreatCard({ threat, isSelected, onSelect }) {
         </div>
       )}
 
-      {isDecoy && (
-        <div className="text-xs font-mono text-gray-600 italic">
-          ANALYZING RADAR SIGNATURE...
-        </div>
-      )}
-
       {/* Impact zone — progressive reveal */}
       <div className="mt-2 flex items-center gap-2">
         <span className="text-xs text-gray-500 font-mono">IMPACT:</span>
-        {isDecoy ? (
-          <span className="text-sm font-mono text-gray-600">UNKNOWN</span>
-        ) : threat.impactRevealed ? (
+        {threat.impactRevealed ? (
           <span
             className={`text-sm font-bold font-mono ${
               threat.is_populated ? 'text-red-500' : 'text-gray-500'
@@ -171,10 +161,11 @@ export default function ThreatPanel({
   return (
     <div className="h-full flex flex-col">
       <div className="text-xs text-green-500/50 font-mono tracking-widest mb-3 uppercase">
-        Threat Analysis — {activeThreats.length} Active
+        Threat Analysis — {activeThreats.filter((t) => !t.intercepted).length} Active
       </div>
       <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
         {[...activeThreats]
+          .filter((t) => !t.intercepted)
           .sort((a, b) => a.timeLeft - b.timeLeft)
           .map((threat) => (
             <ThreatCard

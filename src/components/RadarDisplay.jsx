@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
-import { POPULATED_ZONES, IMPACT_POSITIONS, COMMAND_CENTER } from '../config/threats.js';
-
-const BLIP_COLOR = '#ffffff';     // Bright white — high contrast against green map
-const DECOY_BLIP_COLOR = '#6b7280'; // Gray for unknown contacts
+import { POPULATED_ZONES, IMPACT_POSITIONS, COMMAND_CENTER, THREAT_COLORS } from '../config/threats.js';
 
 const ISRAEL_PATH = `
   M 0.35,0.10
@@ -31,19 +28,30 @@ function easeProgress(linearProgress, type) {
   return linearProgress; // drones + cruise: constant speed
 }
 
+// Entry direction vectors for threat origins
+const ENTRY_DIRS = {
+  south:     { x: 0.0, y: 0.48 },    // Yemen — from bottom
+  southwest: { x: -0.34, y: 0.34 },  // Gaza — from bottom-left
+  southeast: { x: 0.34, y: 0.34 },   // Yemen/Iran — from bottom-right
+  east:      { x: 0.48, y: 0.0 },    // Iran/Iraq — from right
+  north:     { x: 0.0, y: -0.48 },   // Hezbollah/Lebanon — from top
+  northeast: { x: 0.34, y: -0.34 },  // Syria — from upper-right
+};
+
 function getBlipPosition(threat) {
   const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
-  const linearProgress = 1 - threat.timeLeft / threat.countdown;
+  // Use frozen position for intercepted threats so they don't keep moving
+  const timeLeft = threat.intercepted ? threat.frozenTimeLeft : threat.timeLeft;
+  const linearProgress = 1 - timeLeft / threat.countdown;
   const progress = easeProgress(linearProgress, threat.type);
 
   const cx = 0.5, cy = 0.5;
-  const dx = target.x - cx;
-  const dy = target.y - cy;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const norm = dist > 0 ? 1 / dist : 1;
 
-  const startX = cx + (dx * norm * 0.48);
-  const startY = cy + (dy * norm * 0.48);
+  // Determine entry point — use threat's origin direction, default to southeast (Yemen)
+  let startX, startY;
+  const dir = ENTRY_DIRS[threat.origin] || ENTRY_DIRS.southeast;
+  startX = cx + dir.x;
+  startY = cy + dir.y;
 
   return {
     x: startX + (target.x - startX) * progress,
@@ -163,6 +171,40 @@ function GroundImpactEffect({ flash }) {
           }}
         />
       ))}
+    </g>
+  );
+}
+
+function HoldClearEffect({ flash }) {
+  const { cx, cy } = flash;
+  return (
+    <g>
+      {/* Green celebration flash */}
+      <circle cx={cx} cy={cy} r="3"
+        fill="rgba(34, 197, 94, 0.4)"
+        className="hold-clear-flash" />
+
+      {/* Expanding green ring */}
+      <circle cx={cx} cy={cy} r="2.5"
+        fill="none" stroke="#22c55e" strokeWidth="0.6"
+        className="hold-clear-ring" />
+
+      {/* Checkmark — drawn as two lines forming a ✓ */}
+      <g className="hold-clear-check">
+        <line x1={cx - 1.5} y1={cy + 0.3} x2={cx - 0.3} y2={cy + 1.5}
+          stroke="#22c55e" strokeWidth="0.6" strokeLinecap="round" />
+        <line x1={cx - 0.3} y1={cy + 1.5} x2={cx + 2} y2={cy - 1.5}
+          stroke="#22c55e" strokeWidth="0.6" strokeLinecap="round" />
+      </g>
+
+      {/* "CLEAR" label */}
+      <text x={cx} y={cy - 3.5}
+        fill="#22c55e" fontSize="2" fontFamily="monospace"
+        textAnchor="middle" fontWeight="bold"
+        className="hold-clear-label"
+      >
+        CLEAR
+      </text>
     </g>
   );
 }
@@ -313,6 +355,9 @@ export default function RadarDisplay({
             if (flash.type === 'ground_impact') {
               return <GroundImpactEffect key={flash.id} flash={flash} />;
             }
+            if (flash.type === 'hold_clear') {
+              return <HoldClearEffect key={flash.id} flash={flash} />;
+            }
             return null;
           })}
 
@@ -325,7 +370,7 @@ export default function RadarDisplay({
           <defs>
             {activeThreats.map((threat) => {
               const pos = getBlipPosition(threat);
-              const color = threat.is_decoy ? DECOY_BLIP_COLOR : BLIP_COLOR;
+              const color = THREAT_COLORS[threat.type] || '#ffffff';
               return (
                 <linearGradient
                   key={`trail-grad-${threat.id}`}
@@ -344,48 +389,64 @@ export default function RadarDisplay({
           {/* Threat blips with trajectory trails */}
           {activeThreats.map((threat) => {
             const pos = getBlipPosition(threat);
-            const isDecoy = threat.is_decoy;
-            const color = isDecoy ? DECOY_BLIP_COLOR : BLIP_COLOR;
+            const color = THREAT_COLORS[threat.type] || '#ffffff';
             const isSelected = threat.id === selectedThreatId;
 
             return (
               <g
                 key={threat.id}
-                onClick={() => onSelectThreat(threat.id)}
-                style={{ cursor: 'pointer' }}
+                onClick={() => !threat.intercepted && onSelectThreat(threat.id)}
+                style={{ cursor: threat.intercepted ? 'default' : 'pointer' }}
+                className={`${threat.intercepted ? 'intercepted-blip-fade' : 'blip-hover'}`}
               >
+                {/* Invisible hit target — larger radius for easier clicking */}
+                {!threat.intercepted && (
+                  <circle
+                    cx={pos.x * size} cy={pos.y * size}
+                    r="4.5" fill="transparent" stroke="none"
+                  />
+                )}
                 {/* Trajectory trail — fading line from entry point to current position */}
                 <line
                   x1={pos.originX * size} y1={pos.originY * size}
                   x2={pos.x * size} y2={pos.y * size}
                   stroke={`url(#trail-grad-${threat.id})`}
-                  strokeWidth={isDecoy ? '0.3' : '0.5'}
-                  strokeDasharray={isDecoy ? '0.8 0.6' : 'none'}
+                  strokeWidth="0.5"
+                  strokeDasharray="none"
                 />
+                {/* Selection ring — visible when selected */}
+                {isSelected && !threat.intercepted && (
+                  <circle
+                    cx={pos.x * size} cy={pos.y * size} r="4"
+                    fill="none" stroke="#ffffff" strokeWidth="0.3" opacity="0.6"
+                    strokeDasharray="1.5 1"
+                    className="selection-ring-spin"
+                  />
+                )}
                 {/* Pulse ring */}
                 <circle
                   cx={pos.x * size} cy={pos.y * size} r="2.5"
                   fill="none" stroke={color} strokeWidth="0.3" opacity="0.4"
-                  className={isDecoy ? 'decoy-pulse' : 'radar-pulse'}
+                  className="radar-pulse"
                 />
                 {/* Blip */}
                 <circle
                   cx={pos.x * size} cy={pos.y * size}
-                  r={isDecoy ? '1' : '1.5'}
+                  r="1.8"
                   fill={color}
                   stroke={isSelected ? '#ffffff' : color}
                   strokeWidth={isSelected ? '0.6' : '0.3'}
-                  opacity={isDecoy ? 0.5 : 1}
-                  style={{ filter: `drop-shadow(0 0 3px ${color})` }}
+                  opacity={1}
+                  style={{ filter: `drop-shadow(0 0 ${isSelected ? '5' : '3'}px ${color})` }}
                 />
                 {/* Label */}
                 <text
-                  x={pos.x * size} y={pos.y * size - 3}
-                  fill={color} fontSize="1.8" fontFamily="monospace"
+                  x={pos.x * size} y={pos.y * size - 3.5}
+                  fill={color} fontSize="2" fontFamily="monospace"
                   textAnchor="middle" fontWeight="bold"
-                  opacity={isDecoy ? 0.5 : 1}
+                  opacity={0.9}
                 >
-                  {isDecoy ? '?' : `T${threat.id}`}
+                  {`T${threat.id}`}
                 </text>
               </g>
             );
