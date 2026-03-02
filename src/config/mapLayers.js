@@ -40,8 +40,8 @@ export const CITIES = {
   'Ashdod':         { x: 0.24, y: 0.41, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'w' },
   'Jerusalem':      { x: 0.44, y: 0.42, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
   'Netanya':        { x: 0.31, y: 0.30, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
-  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
+  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
+  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
   'Holon':          { x: 0.27, y: 0.37, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
 
   // === L4: Negev === (pushed south for spacing from Otef Aza / Jerusalem)
