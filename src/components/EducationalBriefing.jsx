@@ -8,16 +8,17 @@ const BRIEFING_CONTENT = {
   1: {
     phases: ['threat', 'defense', 'quiz', 'exercise'],
     threat: {
-      title: 'DRONES',
-      subtitle: 'Shahed-136 Kamikaze Drone',
-      color: '#eab308',
+      title: 'SHORT-RANGE ROCKETS',
+      subtitle: 'Qassam & Grad Rockets',
+      color: '#f97316',
       bullets: [
-        { icon: '🇮🇷', text: 'Iran manufactures the Shahed-136 kamikaze drone' },
-        { icon: '💥', text: 'Kamikaze drones ARE the weapon — they crash directly into their target' },
-        { icon: '📡', text: 'They fly at low altitude and slow speed, making them hard to detect on radar' },
-        { icon: '🎯', text: 'Cheap to produce (~$20,000 each) — enemies launch them in swarms' },
+        { icon: '🚀', text: 'Qassam rockets are built in Gaza using basic materials like sugar and fertilizer' },
+        { icon: '📏', text: 'Range: 5-45 km — designed to strike nearby Israeli cities like Sderot and Ashkelon' },
+        { icon: '⚡', text: 'Grad rockets are Soviet-designed, smuggled into Gaza — faster and longer range' },
+        { icon: '🎯', text: 'Unguided — they cannot steer after launch, but can still devastate populated areas' },
+        { icon: '💰', text: 'A Qassam costs ~$800 to build. The Tamir that destroys it costs $50,000 — this cost imbalance is a strategic weapon' },
       ],
-      animation: 'drone',
+      animation: 'rocket',
     },
     defense: {
       title: 'IRON DOME',
@@ -33,32 +34,6 @@ const BRIEFING_CONTENT = {
       animation: 'iron_dome',
     },
     exerciseConfig: {
-      threatType: 'drone',
-      systemKey: 'iron_dome',
-      systemName: 'IRON DOME',
-      shortcut: '1',
-      threatLabel: 'DRONE',
-      threatColor: '#eab308',
-    },
-  },
-
-  2: {
-    phases: ['threat', 'quiz', 'exercise'],
-    threat: {
-      title: 'SHORT-RANGE ROCKETS',
-      subtitle: 'Qassam & Grad Rockets',
-      color: '#f97316',
-      bullets: [
-        { icon: '🚀', text: 'Qassam rockets are built in Gaza using basic materials like sugar and fertilizer' },
-        { icon: '📏', text: 'Range: 5-45 km — designed to strike nearby Israeli cities like Sderot' },
-        { icon: '⚡', text: 'Grad rockets are Soviet-designed, smuggled into Gaza — faster and longer range' },
-        { icon: '🎯', text: 'Unguided — they cannot steer after launch, but can still devastate populated areas' },
-        { icon: '💰', text: 'A Qassam costs ~$800 to build. The Tamir that destroys it costs $50,000 — this cost imbalance is a strategic weapon' },
-      ],
-      animation: 'rocket',
-    },
-    defense: null,
-    exerciseConfig: {
       threatType: 'rocket',
       systemKey: 'iron_dome',
       systemName: 'IRON DOME',
@@ -68,8 +43,32 @@ const BRIEFING_CONTENT = {
     },
   },
 
+  2: {
+    phases: ['threat', 'quiz'],
+    threat: {
+      title: 'ATTACK DRONES',
+      subtitle: 'Shahed-136 & Samad-3 Drones',
+      color: '#eab308',
+      bullets: [
+        { icon: '🇮🇷', text: 'Iran manufactures the Shahed-136 kamikaze drone — supplied to Hezbollah in Lebanon' },
+        { icon: '💥', text: 'Kamikaze drones ARE the weapon — they crash directly into their target' },
+        { icon: '📡', text: 'They fly at low altitude and slow speed, making them hard to detect on radar' },
+        { icon: '🎯', text: 'Cheap to produce (~$20,000 each) — enemies launch them in swarms' },
+        { icon: '🛡️', text: 'Iron Dome intercepts drones too — same system, different threat' },
+      ],
+      animation: 'drone',
+    },
+    defense: null,
+    exerciseConfig: {
+      exerciseThreats: [
+        { systemName: 'IRON DOME', shortcut: '1', threatLabel: 'DRONE', threatColor: '#eab308', startX: 30, startY: 55 },
+        { systemName: 'IRON DOME', shortcut: '1', threatLabel: 'ROCKET', threatColor: '#f97316', startX: 260, startY: 15 },
+      ],
+    },
+  },
+
   3: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'CRUISE MISSILES',
       subtitle: 'Paveh & Quds Cruise Missiles',
@@ -96,17 +95,16 @@ const BRIEFING_CONTENT = {
       animation: 'davids_sling',
     },
     exerciseConfig: {
-      threatType: 'cruise',
-      systemKey: 'davids_sling',
-      shortcut: '2',
-      threatLabel: 'CRUISE',
-      threatColor: '#3b82f6',
+      exerciseThreats: [
+        { systemName: "DAVID'S SLING", shortcut: '2', threatLabel: 'CRUISE', threatColor: '#3b82f6', startX: 30, startY: 55 },
+        { systemName: 'IRON DOME', shortcut: '1', threatLabel: 'ROCKET', threatColor: '#f97316', startX: 260, startY: 15 },
+      ],
     },
   },
 
 
   4: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'BALLISTIC MISSILES',
       subtitle: 'Shahab-3 & Fateh-110',
@@ -133,16 +131,15 @@ const BRIEFING_CONTENT = {
       animation: 'arrow_2',
     },
     exerciseConfig: {
-      threatType: 'ballistic',
-      systemName: 'ARROW 2',
-      shortcut: '3',
-      threatLabel: 'BALLISTIC',
-      threatColor: '#ef4444',
+      exerciseThreats: [
+        { systemName: 'ARROW 2', shortcut: '3', threatLabel: 'BALLISTIC', threatColor: '#ef4444', startX: 30, startY: 55 },
+        { systemName: "DAVID'S SLING", shortcut: '2', threatLabel: 'CRUISE', threatColor: '#3b82f6', startX: 260, startY: 15 },
+      ],
     },
   },
 
   5: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'HYPERSONIC GLIDE VEHICLES',
       subtitle: 'DF-ZF Class',
@@ -169,39 +166,40 @@ const BRIEFING_CONTENT = {
       animation: 'arrow_3',
     },
     exerciseConfig: {
-      threatType: 'hypersonic',
-      systemKey: 'arrow_3',
-      systemName: 'ARROW 3',
-      shortcut: '4',
-      threatLabel: 'HYPERSONIC',
-      threatColor: '#a855f7',
+      exerciseThreats: [
+        { systemName: 'ARROW 3', shortcut: '4', threatLabel: 'HYPERSONIC', threatColor: '#a855f7', startX: 30, startY: 55 },
+        { systemName: 'ARROW 2', shortcut: '3', threatLabel: 'BALLISTIC', threatColor: '#ef4444', startX: 260, startY: 15 },
+      ],
     },
   },
 
   6: {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'MULTI-LAYERED DEFENSE',
-      subtitle: "Israel's Integrated Air Defense",
+      title: 'APRIL 13, 2024 ATTACK',
+      subtitle: 'Iran Launches 300+ Projectiles at Israel',
       color: '#22c55e',
       bullets: [
-        { icon: '🛡️', text: 'Israel operates a 4-tier missile defense shield — the most advanced in the world' },
-        { icon: '1️⃣', text: 'Iron Dome (Layer 1): Short-range — drones, rockets, mortars (4-70 km)' },
-        { icon: '2️⃣', text: "David's Sling (Layer 2): Medium-range — cruise missiles, large rockets (40-300 km)" },
-        { icon: '3️⃣', text: 'Arrow 2 (Layer 3): Upper-atmosphere — ballistic missiles during descent' },
-        { icon: '4️⃣', text: 'Arrow 3 (Layer 4): Exo-atmospheric — intercepts in space before reentry' },
+        { icon: '🇮🇷', text: 'On April 13, 2024, Iran launched its first-ever direct attack on Israel — over 300 projectiles' },
+        { icon: '📊', text: 'The salvo included 170 Shahed drones, 30+ cruise missiles, and 120+ ballistic missiles' },
+        { icon: '⏱️', text: 'Iran launched drones hours before the missiles — drones travel ~185 km/h (4-hour flight), while ballistic missiles arrive in under 12 minutes' },
+        { icon: '🌊', text: 'This staggered timing was designed to overwhelm defenses — all 300+ projectiles arriving in the same window' },
+        { icon: '🎯', text: 'Iran targeted Nevatim and Ramon airbases in the Negev desert, plus military sites near the Dead Sea' },
+        { icon: '💥', text: 'One ballistic missile struck Nevatim airbase causing minor damage — the only projectile to hit its intended target' },
       ],
       animation: 'layered',
     },
     defense: {
-      title: 'WAVE TACTICS',
-      subtitle: 'Defending Against Coordinated Assault',
+      title: 'MULTINATIONAL INTERCEPT',
+      subtitle: 'Coalition Defense — 99% Intercept Rate',
       color: '#22c55e',
       bullets: [
-        { icon: '🌊', text: 'Enemies launch mixed waves — different threat types arriving simultaneously' },
-        { icon: '⚡', text: 'You must quickly identify each threat type and match it to the correct interceptor' },
-        { icon: '🎯', text: 'Prioritize threats to populated areas — open ground targets can be held' },
-        { icon: '💡', text: 'Watch your ammo — spreading fire evenly across systems is key to surviving waves' },
+        { icon: '🛡️', text: '99% of all 300+ projectiles were intercepted — the most complex aerial defense operation in history' },
+        { icon: '🇺🇸', text: 'The US deployed Navy destroyers and fighter jets, intercepting dozens of drones and ballistic missiles' },
+        { icon: '🇬🇧', text: 'British RAF Typhoon jets shot down drones over Jordan and Syria before they reached Israeli airspace' },
+        { icon: '🇯🇴', text: "Jordan intercepted drones and missiles crossing its airspace — a historic first for the kingdom" },
+        { icon: '💰', text: 'The total intercept operation cost over $1 billion — Iran\'s attack cost an estimated $80-100 million to launch' },
+        { icon: '🧠', text: 'All 4 tiers activated simultaneously: Iron Dome, David\'s Sling, Arrow 2, and Arrow 3 all fired in a single night' },
       ],
       animation: 'wave_tactics',
     },
@@ -211,26 +209,30 @@ const BRIEFING_CONTENT = {
   7: {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'FINAL STAND',
-      subtitle: 'Massive Salvos, Limited Resources',
+      title: 'THE COST PROBLEM',
+      subtitle: 'When Defense Costs More Than Attack',
       color: '#ef4444',
       bullets: [
-        { icon: '🚨', text: 'This is the ultimate test — massive simultaneous salvos from all directions' },
-        { icon: '📉', text: 'Ammunition is severely limited — every interceptor must count' },
-        { icon: '🎯', text: 'Hold fire on open ground targets — saving ammo for populated areas is critical' },
-        { icon: '🧠', text: 'This is about strategy, not speed — think before you fire' },
+        { icon: '💰', text: 'A Qassam rocket costs $800 to build — the Tamir that destroys it costs $50,000 (a 62:1 cost ratio favoring the attacker)' },
+        { icon: '📉', text: 'A $20,000 Shahed drone forces a $50,000 Tamir response — even "cheap" drones drain budgets in swarms' },
+        { icon: '🚀', text: 'An Arrow 3 interceptor costs ~$3.5 million — adversaries can force a launch with a $300,000 decoy missile' },
+        { icon: '🌊', text: 'During Oct 2023, Hamas launched ~3,000 rockets in 24 hours — at $50K per intercept, that would cost $150 million in one day' },
+        { icon: '🧮', text: 'IDF commanders sometimes deliberately let rockets hit open ground — intercepting every threat is economically impossible' },
+        { icon: '⚠️', text: 'This is called the "cost-exchange ratio" — the central unsolved problem of missile defense worldwide' },
       ],
       animation: 'final_stand',
     },
     defense: {
-      title: 'RESOURCE MANAGEMENT',
-      subtitle: 'Making Every Interceptor Count',
+      title: 'IRON BEAM & THE FUTURE',
+      subtitle: 'Solving the Cost Problem with Directed Energy',
       color: '#f97316',
       bullets: [
-        { icon: '💰', text: 'Each interceptor costs $50K-$3M — Israel cannot afford to waste them' },
-        { icon: '📊', text: 'A real operator must calculate: is this threat worth an interceptor?' },
-        { icon: '🏘️', text: 'Populated areas MUST be defended — but open ground threats should be held' },
-        { icon: '⏱️', text: 'Stay calm under pressure — hasty decisions waste limited resources' },
+        { icon: '🔦', text: 'Iron Beam is a laser defense system under development by Rafael — it fires a focused energy beam to destroy threats' },
+        { icon: '💵', text: 'Each Iron Beam shot costs roughly $3.50 in electricity — compared to $50,000 for a Tamir missile' },
+        { icon: '📏', text: 'Iron Beam works at short range (up to ~7 km) against drones, rockets, and mortars — it supplements, not replaces, Iron Dome' },
+        { icon: '⚡', text: 'It has no ammunition limit — as long as there is power, it can keep firing, eliminating the supply exhaustion problem' },
+        { icon: '🎯', text: 'The limitation: lasers cannot work through clouds or heavy rain, and cannot reach the altitudes needed for ballistic missiles' },
+        { icon: '🛡️', text: 'The future vision is a 5-tier system: Iron Beam (close range) + Iron Dome + David\'s Sling + Arrow 2 + Arrow 3' },
       ],
       animation: 'resource_mgmt',
     },
@@ -1081,6 +1083,12 @@ function IntelCheckPhase({ level, onComplete }) {
               <div className="text-xs text-gray-400">{q.explanation}</div>
             </>
           )}
+          {!timedOut && !isCorrect && (
+            <>
+              <div className="font-bold tracking-wider mb-1">✗ INCORRECT</div>
+              <div className="text-xs text-gray-400">{q.explanation}</div>
+            </>
+          )}
         </div>
       )}
 
@@ -1099,33 +1107,55 @@ function IntelCheckPhase({ level, onComplete }) {
 // Mimics actual game controls to orient the player
 // ============================================================
 function FieldExercisePhase({ config, onComplete }) {
-  // State machine: waiting → selected → fired → intercepted → complete
+  // Build threats array — backwards compat with single-threat configs
+  const threats = config.exerciseThreats || [{
+    systemName: config.systemName || 'IRON DOME',
+    shortcut: config.shortcut || '1',
+    threatLabel: config.threatLabel || 'DRONE',
+    threatColor: config.threatColor || '#eab308',
+    startX: 30,
+    startY: 55,
+  }];
+  const isMultiThreat = threats.length > 1;
+
+  // State machine: waiting → selected → fired → intercepted → (next or complete)
+  const [threatIndex, setThreatIndex] = useState(0);
   const [step, setStep] = useState('waiting');
   const [threatProgress, setThreatProgress] = useState(0);
   const [trailProgress, setTrailProgress] = useState(0);
   const [showStepFlash, setShowStepFlash] = useState(false);
   const animRef = useRef(null);
   const stepRef = useRef('waiting');
+  const threatIndexRef = useRef(0);
 
+  // Current threat config
+  const current = threats[threatIndex];
   const {
     systemName = 'IRON DOME',
     shortcut = '1',
     threatLabel = 'DRONE',
     threatColor = '#eab308',
-  } = config;
+    startX = 30,
+    startY = 55,
+  } = current;
 
-  // Keep ref in sync
+  // City target for trajectory
+  const cityX = 250;
+  const cityY = 55;
+
+  // Keep refs in sync
   useEffect(() => { stepRef.current = step; }, [step]);
+  useEffect(() => { threatIndexRef.current = threatIndex; }, [threatIndex]);
 
-  // Threat flies from left toward city — stops when fired
+  // Threat flies toward city — stops when fired
   const threatStopped = step === 'fired' || step === 'intercepted' || step === 'complete';
   useEffect(() => {
     if (threatStopped) return;
-    const start = performance.now();
+    const startTime = performance.now();
     const duration = 25000;
 
     const animate = () => {
-      const elapsed = performance.now() - start;
+      const elapsed = performance.now() - startTime;
       const p = Math.min(1, elapsed / duration);
       setThreatProgress(p);
 
@@ -1137,25 +1167,35 @@ function FieldExercisePhase({ config, onComplete }) {
     };
     animRef.current = requestAnimationFrame(animate);
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [threatStopped]);
+  }, [threatStopped, threatIndex]);
 
   // Trail animation after firing
   const isFired = step === 'fired';
   useEffect(() => {
     if (!isFired) return;
-    const start = performance.now();
+    const startTime = performance.now();
     const duration = 600;
 
     const animate = () => {
-      const elapsed = performance.now() - start;
+      const elapsed = performance.now() - startTime;
       const p = Math.min(1, elapsed / duration);
       setTrailProgress(p);
 
       if (p >= 1) {
         setStep('intercepted');
         setTimeout(() => {
-          setStep('complete');
-          setTimeout(() => onComplete(), 2500);
+          const idx = threatIndexRef.current;
+          if (idx < threats.length - 1) {
+            // More threats — advance to next
+            setThreatIndex(idx + 1);
+            setStep('waiting');
+            setThreatProgress(0);
+            setTrailProgress(0);
+          } else {
+            // All done
+            setStep('complete');
+            setTimeout(() => onComplete(), 2500);
+          }
         }, 800);
         return;
       }
@@ -1167,14 +1207,15 @@ function FieldExercisePhase({ config, onComplete }) {
   // Listen for keyboard shortcut to fire (only when threat is selected)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === shortcut && stepRef.current === 'selected') {
+      const cur = threats[threatIndexRef.current];
+      if (cur && e.key === cur.shortcut && stepRef.current === 'selected') {
         e.preventDefault();
         setStep('fired');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [shortcut]);
+  }, []);
 
   // Click on threat to select it
   const handleSelectThreat = useCallback(() => {
@@ -1190,9 +1231,9 @@ function FieldExercisePhase({ config, onComplete }) {
     setStep('fired');
   }, [step]);
 
-  // Threat position
-  const threatX = 30 + threatProgress * 200;
-  const threatY = 55;
+  // Threat position — interpolate from start toward city
+  const threatX = startX + threatProgress * (cityX - startX);
+  const threatY = startY + threatProgress * (cityY - startY);
 
   // Battery position
   const batteryX = 130;
@@ -1208,6 +1249,8 @@ function FieldExercisePhase({ config, onComplete }) {
   const interceptorColor = threatColor === '#eab308' ? '#22c55e' : threatColor;
   const batteryColor = interceptorColor;
 
+  const threatId = `T${threatIndex + 1}`;
+
   return (
     <div>
       <div className="text-center mb-3">
@@ -1215,6 +1258,15 @@ function FieldExercisePhase({ config, onComplete }) {
         <h2 className="text-xl font-bold font-mono text-green-400 tracking-wider">WEAPONS TRAINING</h2>
         <div className="text-xs text-gray-600 font-mono mt-1">Practice the two-step intercept procedure</div>
       </div>
+
+      {/* Threat counter for multi-threat exercises */}
+      {isMultiThreat && (
+        <div className="text-center mb-2">
+          <span className="text-xs font-mono text-gray-500 tracking-widest">
+            THREAT {threatIndex + 1} OF {threats.length}
+          </span>
+        </div>
+      )}
 
       {/* Step indicator */}
       <div className="flex gap-2 mb-4 max-w-sm mx-auto">
@@ -1277,7 +1329,10 @@ function FieldExercisePhase({ config, onComplete }) {
               ✓ TARGET DESTROYED
             </div>
             <div className="text-xs text-gray-500 mt-1 tracking-widest">
-              {systemName} INTERCEPTION SUCCESSFUL
+              {threatIndex < threats.length - 1
+                ? 'NEXT THREAT INCOMING...'
+                : `${systemName} INTERCEPTION SUCCESSFUL`
+              }
             </div>
           </>
         )}
@@ -1339,14 +1394,14 @@ function FieldExercisePhase({ config, onComplete }) {
 
               {/* Threat label with threat ID (like real game) */}
               <text x={threatX} y={threatY - 14} fill={threatColor} fontSize="7" fontFamily="monospace" opacity="0.8" textAnchor="middle" fontWeight="bold">
-                T1
+                {threatId}
               </text>
               <text x={threatX} y={threatY - 22} fill={threatColor} fontSize="5" fontFamily="monospace" opacity="0.5" textAnchor="middle">
                 {threatLabel}
               </text>
 
               {/* Trajectory line */}
-              <line x1={threatX} y1={threatY} x2="260" y2="50" stroke={threatColor} strokeWidth="0.3" opacity="0.3" strokeDasharray="3,3" />
+              <line x1={threatX} y1={threatY} x2={cityX} y2={cityY} stroke={threatColor} strokeWidth="0.3" opacity="0.3" strokeDasharray="3,3" />
 
               {/* Click prompt arrow (only in waiting step) */}
               {step === 'waiting' && threatProgress > 0.05 && (
@@ -1359,17 +1414,46 @@ function FieldExercisePhase({ config, onComplete }) {
             </g>
           )}
 
-          {/* Interceptor trail */}
+          {/* Interceptor trail — rocket projectile with warhead */}
           {step === 'fired' && (
-            <line
-              x1={batteryX}
-              y1={batteryY - 15}
-              x2={trailEndX}
-              y2={trailEndY}
-              stroke={batteryColor}
-              strokeWidth="2"
-              opacity="0.8"
-            />
+            <g>
+              {/* Fading trail line from battery to warhead */}
+              <line
+                x1={batteryX}
+                y1={batteryY - 15}
+                x2={trailEndX}
+                y2={trailEndY}
+                stroke={batteryColor}
+                strokeWidth="1"
+                opacity="0.4"
+              />
+              {/* Bright warhead dot — the projectile */}
+              <circle
+                cx={trailEndX}
+                cy={trailEndY}
+                r="3"
+                fill="white"
+                opacity="0.95"
+              />
+              {/* Warhead glow */}
+              <circle
+                cx={trailEndX}
+                cy={trailEndY}
+                r="5"
+                fill={batteryColor}
+                opacity="0.4"
+              />
+              {/* Launch flash at battery (only at start) */}
+              {trailProgress < 0.3 && (
+                <circle
+                  cx={batteryX}
+                  cy={batteryY - 15}
+                  r={4 + (1 - trailProgress / 0.3) * 6}
+                  fill={batteryColor}
+                  opacity={(1 - trailProgress / 0.3) * 0.6}
+                />
+              )}
+            </g>
           )}
 
           {/* Intercept flash */}
@@ -1443,7 +1527,7 @@ function FieldExercisePhase({ config, onComplete }) {
         CLICK TARGET &#x2022; PRESS {shortcut} TO FIRE
       </div>
 
-      <CountdownBar duration={35} onComplete={onComplete} paused={step === 'complete'} />
+      <CountdownBar duration={isMultiThreat ? 50 : 35} onComplete={onComplete} paused={step === 'complete'} />
     </div>
   );
 }

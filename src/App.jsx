@@ -5,7 +5,6 @@ import ThreatPanel from './components/ThreatPanel.jsx';
 import ControlPanel from './components/ControlPanel.jsx';
 import TzevaAdom from './components/TzevaAdom.jsx';
 import Summary, { LeaderboardTable } from './components/Summary.jsx';
-import Briefing from './components/Briefing.jsx';
 import EducationalBriefing from './components/EducationalBriefing.jsx';
 import EscapeRoomTimer from './components/EscapeRoomTimer.jsx';
 import LevelIntro from './components/LevelIntro.jsx';
@@ -127,7 +126,7 @@ export default function App() {
         e.preventDefault();
         if (activeThreats.length === 0) return;
 
-        const sortedThreats = [...activeThreats].filter((t) => !t.intercepted).sort((a, b) => a.timeLeft - b.timeLeft);
+        const sortedThreats = [...activeThreats].filter((t) => !t.intercepted && !t.held).sort((a, b) => a.timeLeft - b.timeLeft);
         const currentIndex = sortedThreats.findIndex((t) => t.id === selectedThreatId);
 
         let nextIndex;
@@ -369,13 +368,13 @@ export default function App() {
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800/50 bg-[#080c16]">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 whitespace-nowrap">
           <span className="text-green-500 font-mono text-xs tracking-widest">
-            MISSILE DEFENSE
+            LEVEL {currentLevel}
           </span>
           <span className="text-gray-700 font-mono text-xs">|</span>
           <span className="font-mono text-xs tracking-wider text-green-500">
-            LEVEL {currentLevel}
+            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CRUISE THREAT', 4: 'BALLISTIC ARC', 5: 'HYPERSONIC STRIKE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
           </span>
         </div>
 
@@ -407,6 +406,7 @@ export default function App() {
             sessionTime={sessionTime}
             impactFlashes={impactFlashes}
             activeTrails={activeTrails}
+            currentLevel={currentLevel}
           />
         </div>
 

@@ -9,13 +9,18 @@ function ThreatCard({ threat, isSelected, onSelect }) {
   const color = THREAT_COLORS[threat.type] || '#94a3b8';
   const urgency = threat.timeLeft < 5 ? 'animate-pulse' : '';
   const intel = threat.intel || 'full';
+  const isHeld = threat.held;
 
   return (
     <div
-      onClick={() => onSelect(threat.id)}
+      onClick={() => !isHeld && onSelect(threat.id)}
       className={`
-        relative cursor-pointer rounded p-3 mb-2 transition-all flex gap-3
-        ${isSelected
+        relative rounded p-3 mb-2 transition-all flex gap-3
+        ${isHeld
+          ? 'opacity-50 cursor-default'
+          : 'cursor-pointer'
+        }
+        ${isSelected && !isHeld
           ? 'bg-white/10 shadow-lg shadow-white/10'
           : 'bg-gray-900/50 hover:border-gray-500'
         }
@@ -55,6 +60,11 @@ function ThreatCard({ threat, isSelected, onSelect }) {
           {threat.is_final_salvo && (
             <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-orange-900/50 text-orange-400 border border-orange-700 tracking-wider">
               SALVO
+            </span>
+          )}
+          {isHeld && (
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-gray-700/50 text-gray-400 border border-gray-600 tracking-wider">
+              HOLD
             </span>
           )}
       </div>

@@ -7,6 +7,8 @@ import {
   COMMAND_CENTER,
   INTERCEPTOR_COLORS,
 } from '../config/threats.js';
+import { getBatteryForLevel } from '../config/mapLayers.js';
+import { getSpawnOrigin } from '../config/spawnOrigins.js';
 import {
   playInterceptSound,
   playCityHitSound,
@@ -50,12 +52,14 @@ export default function useGameEngine() {
   const gameStateRef = useRef(gameState);
   const selectedThreatIdRef = useRef(selectedThreatId);
   const activeThreatsRef = useRef(activeThreats);
+  const ammoRef = useRef(ammo);
   const volumeRef = useRef(volume);
   const currentLevelRef = useRef(currentLevel);
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { selectedThreatIdRef.current = selectedThreatId; }, [selectedThreatId]);
   useEffect(() => { activeThreatsRef.current = activeThreats; }, [activeThreats]);
+  useEffect(() => { ammoRef.current = ammo; }, [ammo]);
   useEffect(() => { volumeRef.current = volume; }, [volume]);
   useEffect(() => { currentLevelRef.current = currentLevel; }, [currentLevel]);
 
@@ -65,6 +69,7 @@ export default function useGameEngine() {
   const feedbackTimerRef = useRef(null);
   const tzevaAdomTimerRef = useRef(null);
   const allSpawnedRef = useRef(false);
+  const interceptedIdsRef = useRef(new Set());  // Synchronous guard against race conditions
 
   // Campaign stats — accumulated across all levels
   const campaignStatsRef = useRef({
@@ -123,11 +128,12 @@ export default function useGameEngine() {
 
   // Add impact flash effect with pre-computed particles
   // overridePos: optional { x, y } in 0-1 coords to place the flash at a custom position (e.g. blip location for intercepts)
+  // Stores mapX/mapY in 0-1 normalized space (RadarDisplay transforms to SVG via mapToSVG)
   const addImpactFlash = useCallback((zone, type, threatType = 'ballistic', overridePos = null) => {
     const flashId = Date.now() + Math.random();
     const pos = overridePos || IMPACT_POSITIONS[zone] || { x: 0.5, y: 0.5 };
-    const cx = pos.x * 100;
-    const cy = pos.y * 100;
+    const cx = pos.x;
+    const cy = pos.y;
 
     let particles = [];
     if (type === 'intercept') {
@@ -170,27 +176,20 @@ export default function useGameEngine() {
   }, []);
 
   // Compute where a threat blip currently IS on the radar
-  const ENTRY_DIRS = {
-    south: { x: 0.0, y: 0.48 }, southwest: { x: -0.34, y: 0.34 },
-    southeast: { x: 0.34, y: 0.34 }, east: { x: 0.48, y: 0.0 },
-    north: { x: 0.0, y: -0.48 }, northeast: { x: 0.34, y: -0.34 },
-  };
+  // Uses shared spawn origin system from config/spawnOrigins.js
   const getBlipPosition = useCallback((threat) => {
     const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
     const linearProgress = 1 - threat.timeLeft / threat.countdown;
     let progress = linearProgress;
     if (threat.type === 'ballistic') progress = linearProgress ** 3;
     else if (threat.type === 'hypersonic') progress = linearProgress ** 4;
-    const cx = 0.5, cy = 0.5;
-    const dir = ENTRY_DIRS[threat.origin] || ENTRY_DIRS.southeast;
-    const startX = cx + dir.x;
-    const startY = cy + dir.y;
-    return { x: startX + (target.x - startX) * progress, y: startY + (target.y - startY) * progress };
+    const start = getSpawnOrigin(threat.type, threat.origin);
+    return { x: start.x + (target.x - start.x) * progress, y: start.y + (target.y - start.y) * progress };
   }, []);
 
   // Launch interceptor trail with delayed impact flash
   const addTrail = useCallback((action, threat, impactType) => {
-    const battery = COMMAND_CENTER;
+    const battery = getBatteryForLevel(currentLevelRef.current) || COMMAND_CENTER;
     if (!battery) return;
 
     const { x: blipX, y: blipY } = getBlipPosition(threat);
@@ -203,10 +202,10 @@ export default function useGameEngine() {
 
     setActiveTrails((prev) => [...prev, {
       id: trailId,
-      startX: battery.x * 100,
-      startY: battery.y * 100,
-      endX: blipX * 100,
-      endY: blipY * 100,
+      startX: battery.x,
+      startY: battery.y,
+      endX: blipX,
+      endY: blipY,
       color: INTERCEPTOR_COLORS[action],
       duration,
     }]);
@@ -218,7 +217,7 @@ export default function useGameEngine() {
     if (impactType) {
       setTimeout(() => {
         addImpactFlash(threat.impact_zone, impactType, threat.type, { x: blipX, y: blipY });
-        if (impactType === 'intercept') playInterceptSound(volumeRef.current);
+        if (impactType === 'intercept') playInterceptSound(volumeRef.current, threat.type);
       }, duration);
     }
   }, [addImpactFlash, getBlipPosition]);
@@ -246,24 +245,42 @@ export default function useGameEngine() {
     }, 3000);
   }, [stopSiren]);
 
-  // Handle threat timeout (countdown reached 0)
+  // Handle threat timeout (countdown reached 0) — covers both unactioned timeouts and held threats
   const handleThreatTimeout = useCallback((threat) => {
+    // Guard: if threat was intercepted between timeout scheduling and execution, skip entirely.
+    // This prevents the race condition where the countdown interval schedules a timeout
+    // in the same frame that the player successfully intercepts.
+    if (interceptedIdsRef.current.has(threat.id)) return;
+
     setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
 
     if (selectedThreatIdRef.current === threat.id) {
       setSelectedThreatId(null);
     }
 
-    const effectivePopulated = threat.is_populated;
-
-    if (effectivePopulated) {
-      setResultLog((prev) => [...prev, { ...threat, result: 'timeout', siren: true }]);
+    if (threat.is_populated) {
+      // City hit — either player held fire (wrong) or didn't act in time
+      const result = threat.held ? 'hold_populated' : 'timeout';
+      setResultLog((prev) => [...prev, { ...threat, result, siren: true }]);
       playSound(failRef);
       addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
       playCityHitSound(volumeRef.current);
       setStreak(0);
       triggerTzevaAdom();
+    } else if (threat.held) {
+      // Correct hold — player let it through, lands harmlessly
+      setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
+      playSound(successRef);
+      addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
+      playGroundImpactSound(volumeRef.current);
+      setStreak((s) => {
+        const next = s + 1;
+        setBestStreak((b) => Math.max(b, next));
+        return next;
+      });
+      showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammunition conserved.`, 'success');
     } else {
+      // Unactioned timeout — player didn't respond in time
       setResultLog((prev) => [...prev, { ...threat, result: 'timeout_open', siren: false }]);
       addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
       playGroundImpactSound(volumeRef.current);
@@ -281,39 +298,27 @@ export default function useGameEngine() {
     if (!threat) return;
 
     if (action === 'hold_fire') {
-      // Compute blip position BEFORE removing the threat
-      const blipPos = getBlipPosition(threat);
-      setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
+      // Mark threat as "held" — it continues on its trajectory to the city.
+      // Effects (tzeva adom / success feedback) trigger when it actually impacts.
+      setActiveThreats((prev) => prev.map((t) =>
+        t.id === threat.id ? { ...t, held: true } : t
+      ));
       setSelectedThreatId(null);
-
-      if (threat.is_populated) {
-        setResultLog((prev) => [...prev, { ...threat, result: 'hold_populated', siren: true }]);
-        playSound(failRef);
-        addImpactFlash(threat.impact_zone, 'city_hit', threat.type);
-        playCityHitSound(volumeRef.current);
-        setStreak(0);
-        triggerTzevaAdom();
-      } else {
-        setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
-        playSound(successRef);
-        addImpactFlash(threat.impact_zone, 'hold_clear', threat.type, blipPos);
-        playGroundImpactSound(volumeRef.current);
-        setStreak((s) => {
-          const next = s + 1;
-          setBestStreak((b) => Math.max(b, next));
-          return next;
-        });
-        showFeedback(`Threat landed in ${threat.impact_zone} — no damage. Ammunition conserved.`, 'success');
-      }
       return;
     }
 
-    // Interceptor action — consume ammo
+    // Interceptor action — validate ammo before firing
+    if (ammoRef.current[action] <= 0) return;
     setAmmo((prev) => ({ ...prev, [action]: prev[action] - 1 }));
 
     const isCorrect = action === threat.correct_action;
 
     if (isCorrect) {
+      // Synchronously mark as intercepted BEFORE any async state updates
+      // This guards against the race condition where the countdown interval
+      // reaches timeLeft=0 and schedules handleThreatTimeout in the same frame
+      interceptedIdsRef.current.add(threat.id);
+
       // Mark threat as intercepted (stays visible while trail animates) instead of removing immediately
       setActiveThreats((prev) => prev.map((t) =>
         t.id === threat.id ? { ...t, intercepted: true, frozenTimeLeft: t.timeLeft } : t
@@ -346,7 +351,9 @@ export default function useGameEngine() {
       playSound(failRef);
       setStreak(0);
       addTrail(action, threat, null);
-      showFeedback('INTERCEPTION FAILED — wrong system!', 'error');
+      const SYSTEM_NAMES = { iron_dome: 'Iron Dome', davids_sling: "David's Sling", arrow_2: 'Arrow 2', arrow_3: 'Arrow 3' };
+      const correctName = SYSTEM_NAMES[threat.correct_action] || threat.correct_action;
+      showFeedback(`INTERCEPTION FAILED — use ${correctName}!`, 'error');
     }
   }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash, addTrail, getBlipPosition]);
 
@@ -391,8 +398,9 @@ export default function useGameEngine() {
             _corrected: false,
           };
           const newThreats = [...prev, newThreat];
-          if (newThreats.length === 1) {
-            setSelectedThreatId(newThreats[0].id);
+          const selectable = newThreats.filter((t) => !t.intercepted && !t.held);
+          if (selectable.length === 1) {
+            setSelectedThreatId(selectable[0].id);
           }
           return newThreats;
         });
@@ -490,6 +498,7 @@ export default function useGameEngine() {
 
         const timedOut = updated.filter(
           (t) => t.timeLeft <= 0 && !t.intercepted && !processedTimeouts.has(t.id)
+            && !interceptedIdsRef.current.has(t.id)
         );
 
         if (timedOut.length > 0) {
@@ -543,8 +552,9 @@ export default function useGameEngine() {
       (correctIntercepts * 100)
       + (correctHolds * 75)
       + (bestStreak * 25)
-      - (sirenCount * 150)
-      - (wrongInterceptAttempts * 75)
+      + (totalThreats * 10)          // base engagement bonus
+      - (sirenCount * 100)
+      - (wrongInterceptAttempts * 50)
       - (wastedIntercepts * 25)
     );
 
@@ -578,13 +588,15 @@ export default function useGameEngine() {
     const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
     const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
     const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
+    const totalProcessed = resultLog.length;
 
     return Math.max(0,
       (correctIntercepts * 100)
       + (correctHolds * 75)
       + (bestStreak * 25)
-      - (sirenCount * 150)
-      - (wrongInterceptAttempts * 75)
+      + (totalProcessed * 10)
+      - (sirenCount * 100)
+      - (wrongInterceptAttempts * 50)
       - (wastedIntercepts * 25)
     );
   }, [resultLog, sirenCount, wrongInterceptAttempts, bestStreak]);
@@ -652,6 +664,7 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
+    interceptedIdsRef.current.clear();
     allSpawnedRef.current = false;
     lastTickRef.current = null;
     if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
@@ -684,6 +697,7 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
+    interceptedIdsRef.current.clear();
     allSpawnedRef.current = false;
     lastTickRef.current = null;
     if (tzevaAdomTimerRef.current) clearTimeout(tzevaAdomTimerRef.current);
@@ -757,6 +771,7 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
+    interceptedIdsRef.current.clear();
     allSpawnedRef.current = false;
     lastTickRef.current = null;
     // All levels go through Briefing first
@@ -792,6 +807,7 @@ export default function useGameEngine() {
     setScreenShake(false);
     setPaused(false);
     spawnedIdsRef.current = new Set();
+    interceptedIdsRef.current.clear();
     allSpawnedRef.current = false;
     lastTickRef.current = null;
   }, [stopSiren, escapeRoomStartTime]);
