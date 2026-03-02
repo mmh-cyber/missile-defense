@@ -44,7 +44,7 @@ const BRIEFING_CONTENT = {
   },
 
   2: {
-    phases: ['threat', 'quiz', 'exercise'],
+    phases: ['threat', 'quiz'],
     threat: {
       title: 'ATTACK DRONES',
       subtitle: 'Shahed-136 & Samad-3 Drones',
@@ -68,7 +68,7 @@ const BRIEFING_CONTENT = {
   },
 
   3: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'CRUISE MISSILES',
       subtitle: 'Paveh & Quds Cruise Missiles',
@@ -104,7 +104,7 @@ const BRIEFING_CONTENT = {
 
 
   4: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'BALLISTIC MISSILES',
       subtitle: 'Shahab-3 & Fateh-110',
@@ -139,7 +139,7 @@ const BRIEFING_CONTENT = {
   },
 
   5: {
-    phases: ['threat', 'defense', 'quiz', 'exercise'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'HYPERSONIC GLIDE VEHICLES',
       subtitle: 'DF-ZF Class',
