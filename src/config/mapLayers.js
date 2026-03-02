@@ -59,11 +59,11 @@ export const LEVEL_VIEWPORTS = [
   null, // index 0 unused (levels are 1-indexed)
   { centerX: 0.27, centerY: 0.48, scale: 2.5 },   // L1: tight on Otef Aza, cities near Gaza arc on left
   { centerX: 0.48, centerY: 0.15, scale: 1.8 },   // L2: Galil/Golan + battery (slightly wider)
-  { centerX: 0.28, centerY: 0.35, scale: 1.0 },   // L3: zoom out — shifted up-right toward Gaza/Lebanon/Syria
-  { centerX: 0.28, centerY: 0.44, scale: 0.80 },  // L4: includes Negev + Eilat visible
-  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L5: full country, Eilat clearly visible
-  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L6: same
-  { centerX: 0.28, centerY: 0.46, scale: 0.78 },  // L7: same
+  { centerX: 0.35, centerY: 0.35, scale: 1.0 },   // L3: zoom out — Gush Dan/Otef Aza closer to Gaza arc
+  { centerX: 0.33, centerY: 0.44, scale: 0.80 },  // L4: includes Negev + Eilat visible
+  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L5: full country, Eilat clearly visible
+  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L6: same
+  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L7: same
 ];
 
 // --- Per-Level Battery Positions (Regional HQs) ---
