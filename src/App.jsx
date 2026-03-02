@@ -5,7 +5,6 @@ import ThreatPanel from './components/ThreatPanel.jsx';
 import ControlPanel from './components/ControlPanel.jsx';
 import TzevaAdom from './components/TzevaAdom.jsx';
 import Summary, { LeaderboardTable } from './components/Summary.jsx';
-import Briefing from './components/Briefing.jsx';
 import EducationalBriefing from './components/EducationalBriefing.jsx';
 import EscapeRoomTimer from './components/EscapeRoomTimer.jsx';
 import LevelIntro from './components/LevelIntro.jsx';

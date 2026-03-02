@@ -40,8 +40,8 @@ export const CITIES = {
   'Ashdod':         { x: 0.24, y: 0.41, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'w' },
   'Jerusalem':      { x: 0.44, y: 0.42, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
   'Netanya':        { x: 0.31, y: 0.30, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
+  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'se' },
+  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'ne' },
   'Holon':          { x: 0.27, y: 0.37, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
 
   // === L4: Negev === (pushed south for spacing from Otef Aza / Jerusalem)
@@ -114,7 +114,7 @@ export const REGIONS = [
       [0.56, 0.06], [0.65, 0.07], [0.65, 0.19],
       [0.57, 0.22], [0.55, 0.18], [0.55, 0.10],
     ],
-    labelPos: { x: 0.62, y: 0.14 },
+    labelPos: { x: 0.58, y: 0.16 },
   },
   {
     name: 'Gush Dan',
@@ -124,7 +124,7 @@ export const REGIONS = [
       [0.25, 0.28], [0.35, 0.28], [0.46, 0.38],
       [0.46, 0.44], [0.24, 0.44], [0.24, 0.34],
     ],
-    labelPos: { x: 0.35, y: 0.46 },
+    labelPos: { x: 0.32, y: 0.46 },
   },
   {
     name: 'Negev',
@@ -160,31 +160,6 @@ export const REGIONS = [
   },
 ];
 
-// --- Kinneret (Sea of Galilee) ---
-export const KINNERET = {
-  cx: 0.55,
-  cy: 0.17,
-  rx: 0.02,
-  ry: 0.03,
-  revealLevel: 2,
-};
-
-// --- Gaza Strip Zone ---
-// Unique among threat sources — close enough to Otef Aza to render ON the map.
-// Shown only in levels where Gaza threats are active (not L2).
-
-export const GAZA_STRIP = {
-  activeLevels: [3, 4, 5, 6, 7],
-  polygon: [
-    [0.178, 0.453],  // NE corner (Beit Hanoun area)
-    [0.155, 0.453],  // NW corner (coast)
-    [0.110, 0.520],  // SW corner (Rafah coast)
-    [0.125, 0.525],  // SE corner (Rafah crossing)
-  ],
-  labelPos: { x: 0.140, y: 0.488 },
-  color: 'rgba(255, 80, 40, 0.15)',
-  borderColor: 'rgba(255, 80, 40, 0.6)',
-};
 
 // --- Threat Origin Indicators ---
 // Labeled arc segments at the radar perimeter showing where threats come from.
@@ -199,46 +174,6 @@ export const THREAT_ORIGINS = [
   { name: 'Yemen',   angle: 155, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // SSE (~142° to 168°)
 ];
 
-// --- Israel outline vertices (GPS-verified) ---
-// All points computed via x = 0.28 + (lon-34.78)*0.3636, y = 0.90 - (lat-29.56)*0.22
-// Includes West Bank + Golan Heights, EXCLUDES Gaza.
-// Recognizable shape: Golan finger NE, eastern Jordan River/Dead Sea border,
-// Negev triangle to Eilat, Gaza indentation on SW coast.
-
-export const ISRAEL_OUTLINE = [
-  // -- Northern border, west to east --
-  [0.396, 0.123],  // Rosh Hanikra (NW coast, Lebanon border) — 33.09°N, 35.10°E
-  [0.571, 0.082],  // Metula (northern tip) — 33.28°N, 35.58°E
-  // -- Golan Heights finger --
-  [0.669, 0.088],  // Northern Golan border — 33.25°N, 35.85°E
-  [0.705, 0.110],  // NE Golan (Quneitra area) — 33.15°N, 35.95°E
-  [0.687, 0.194],  // Eastern Golan (ceasefire line) — 32.77°N, 35.90°E
-  [0.589, 0.209],  // Southern Golan (Kinneret outflow) — 32.70°N, 35.63°E
-  // -- Eastern border (Jordan River / West Bank) --
-  [0.549, 0.253],  // Beit She'an / Jordan Valley — 32.50°N, 35.52°E
-  [0.560, 0.341],  // West Bank eastern edge — 32.10°N, 35.55°E
-  [0.542, 0.407],  // Dead Sea north — 31.80°N, 35.50°E
-  [0.505, 0.539],  // Dead Sea south — 31.20°N, 35.40°E
-  // -- Negev / Arava to Eilat --
-  [0.415, 0.671],  // Southern Negev / Arava — 30.60°N, 35.15°E
-  [0.353, 0.900],  // Eilat east — 29.56°N, 34.98°E
-  [0.320, 0.915],  // Eilat west (Taba border) — 29.49°N, 34.89°E
-  // -- Egypt-Israel border heading NW toward Gaza --
-  [0.135, 0.610],  // Nitzana area — 30.88°N, 34.38°E
-  [0.095, 0.535],  // Kerem Shalom (SE corner of Gaza) — 31.22°N, 34.27°E
-  // -- Gaza cutout: Israel's border traces AROUND Gaza --
-  [0.124, 0.502],  // Eastern fence mid-point (Kissufim) — 31.37°N, 34.35°E
-  [0.200, 0.462],  // NE corner of Gaza fence (Erez crossing) — 31.55°N, 34.56°E
-  [0.167, 0.462],  // NW corner — Gaza coast (Beit Lahia) — 31.55°N, 34.47°E
-  // -- Mediterranean coast north of Gaza --
-  [0.189, 0.434],  // Ashkelon coast — 31.68°N, 34.53°E
-  [0.225, 0.407],  // Ashdod coast — 31.80°N, 34.63°E
-  [0.269, 0.350],  // Tel Aviv coast — 32.06°N, 34.75°E
-  [0.309, 0.291],  // Netanya coast — 32.33°N, 34.86°E
-  [0.324, 0.264],  // Hadera coast — 32.45°N, 34.90°E
-  [0.353, 0.187],  // Haifa coast — 32.80°N, 34.98°E
-  [0.396, 0.123],  // Close loop at Rosh Hanikra
-];
 
 // --- Helper Functions ---
 
@@ -275,12 +210,3 @@ export function getVisibleThreatOrigins(level) {
   return THREAT_ORIGINS.filter((o) => o.activeLevels.includes(level));
 }
 
-/** Check if Gaza Strip zone should be visible */
-export function isGazaVisible(level) {
-  return GAZA_STRIP.activeLevels.includes(level);
-}
-
-/** Check if Kinneret should be visible */
-export function isKinneretVisible(level) {
-  return level >= KINNERET.revealLevel;
-}

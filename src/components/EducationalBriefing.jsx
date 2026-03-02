@@ -1083,6 +1083,12 @@ function IntelCheckPhase({ level, onComplete }) {
               <div className="text-xs text-gray-400">{q.explanation}</div>
             </>
           )}
+          {!timedOut && !isCorrect && (
+            <>
+              <div className="font-bold tracking-wider mb-1">✗ INCORRECT</div>
+              <div className="text-xs text-gray-400">{q.explanation}</div>
+            </>
+          )}
         </div>
       )}
 

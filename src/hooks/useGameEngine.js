@@ -8,6 +8,7 @@ import {
   INTERCEPTOR_COLORS,
 } from '../config/threats.js';
 import { getBatteryForLevel } from '../config/mapLayers.js';
+import { getSpawnOrigin } from '../config/spawnOrigins.js';
 import {
   playInterceptSound,
   playCityHitSound,
@@ -175,27 +176,7 @@ export default function useGameEngine() {
   }, []);
 
   // Compute where a threat blip currently IS on the radar
-  // Spawn origin system — must match RadarDisplay.jsx
-  // Short-range threats (rockets, nearby drones) spawn from the border
-  // Long-range threats (missiles, distant drones) spawn from off-map
-  const SPAWN_NEAR = {
-    gaza: { x: 0.10, y: 0.48 }, north: { x: 0.42, y: 0.02 },
-    northeast: { x: 0.70, y: 0.02 }, east: { x: 0.75, y: 0.35 },
-    southeast: { x: 0.55, y: 0.80 },
-  };
-  const SPAWN_FAR = {
-    gaza: { x: 0.02, y: 0.48 }, north: { x: 0.42, y: -0.15 },
-    northeast: { x: 0.85, y: -0.10 }, east: { x: 1.08, y: 0.58 },
-    southeast: { x: 0.75, y: 1.05 }, south: { x: 0.50, y: 1.10 },
-    southwest: { x: 0.10, y: 0.95 },
-  };
-  const getSpawnOrigin = useCallback((type, origin) => {
-    if (type === 'rocket') return SPAWN_NEAR[origin] || SPAWN_NEAR.gaza;
-    if (type === 'drone' && ['gaza', 'north', 'northeast'].includes(origin)) {
-      return SPAWN_NEAR[origin] || SPAWN_NEAR.north;
-    }
-    return SPAWN_FAR[origin] || SPAWN_FAR.east;
-  }, []);
+  // Uses shared spawn origin system from config/spawnOrigins.js
   const getBlipPosition = useCallback((threat) => {
     const target = IMPACT_POSITIONS[threat.impact_zone] || { x: 0.5, y: 0.5 };
     const linearProgress = 1 - threat.timeLeft / threat.countdown;
@@ -204,7 +185,7 @@ export default function useGameEngine() {
     else if (threat.type === 'hypersonic') progress = linearProgress ** 4;
     const start = getSpawnOrigin(threat.type, threat.origin);
     return { x: start.x + (target.x - start.x) * progress, y: start.y + (target.y - start.y) * progress };
-  }, [getSpawnOrigin]);
+  }, []);
 
   // Launch interceptor trail with delayed impact flash
   const addTrail = useCallback((action, threat, impactType) => {
@@ -370,7 +351,9 @@ export default function useGameEngine() {
       playSound(failRef);
       setStreak(0);
       addTrail(action, threat, null);
-      showFeedback('INTERCEPTION FAILED — wrong system!', 'error');
+      const SYSTEM_NAMES = { iron_dome: 'Iron Dome', davids_sling: "David's Sling", arrow_2: 'Arrow 2', arrow_3: 'Arrow 3' };
+      const correctName = SYSTEM_NAMES[threat.correct_action] || threat.correct_action;
+      showFeedback(`INTERCEPTION FAILED — use ${correctName}!`, 'error');
     }
   }, [triggerTzevaAdom, playSound, showFeedback, addImpactFlash, addTrail, getBlipPosition]);
 
@@ -569,8 +552,9 @@ export default function useGameEngine() {
       (correctIntercepts * 100)
       + (correctHolds * 75)
       + (bestStreak * 25)
-      - (sirenCount * 150)
-      - (wrongInterceptAttempts * 75)
+      + (totalThreats * 10)          // base engagement bonus
+      - (sirenCount * 100)
+      - (wrongInterceptAttempts * 50)
       - (wastedIntercepts * 25)
     );
 
@@ -604,13 +588,15 @@ export default function useGameEngine() {
     const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
     const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
     const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
+    const totalProcessed = resultLog.length;
 
     return Math.max(0,
       (correctIntercepts * 100)
       + (correctHolds * 75)
       + (bestStreak * 25)
-      - (sirenCount * 150)
-      - (wrongInterceptAttempts * 75)
+      + (totalProcessed * 10)
+      - (sirenCount * 100)
+      - (wrongInterceptAttempts * 50)
       - (wastedIntercepts * 25)
     );
   }, [resultLog, sirenCount, wrongInterceptAttempts, bestStreak]);

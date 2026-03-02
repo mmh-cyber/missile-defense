@@ -18,23 +18,6 @@
 // Command center — single launch point for ALL interceptors
 export const COMMAND_CENTER = { x: 0.28, y: 0.38 };
 
-export const POPULATED_ZONES = [
-  { name: 'Tel Aviv', x: 0.28, y: 0.35 },
-  { name: 'Jerusalem', x: 0.44, y: 0.42 },
-  { name: 'Haifa', x: 0.36, y: 0.19 },
-  { name: 'Ashdod', x: 0.24, y: 0.41 },
-  { name: 'Beersheba', x: 0.29, y: 0.57 },
-  { name: 'Eilat', x: 0.35, y: 0.90 },
-  { name: 'Dimona', x: 0.37, y: 0.62 },
-  { name: 'Netanya', x: 0.31, y: 0.30 },
-  { name: 'Ashkelon', x: 0.202, y: 0.436 },
-  { name: 'Teveriah', x: 0.55, y: 0.19 },
-  { name: 'Tzfat', x: 0.54, y: 0.15 },
-  { name: 'Kiryat Shmona', x: 0.56, y: 0.10 },
-  { name: 'Sderot', x: 0.212, y: 0.467 },
-  { name: 'Nahariya', x: 0.39, y: 0.15 },
-];
-
 export const THREAT_COLORS = {
   drone: '#eab308',
   rocket: '#f97316',
@@ -600,10 +583,6 @@ export const LEVELS = [
 export function getThreats(level) {
   const lvl = LEVELS[level - 1];
   return lvl ? lvl.threats : [];
-}
-
-export function getConfig(level) {
-  return LEVELS[level - 1] || LEVELS[0];
 }
 
 export function getLevelConfig(level) {
