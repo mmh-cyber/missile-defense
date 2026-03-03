@@ -90,11 +90,12 @@ export default function useGameEngine() {
   const failRef = useRef(null);
 
   useEffect(() => {
-    sirenRef.current = new Audio('/sounds/siren.mp3');
+    const base = import.meta.env.BASE_URL;
+    sirenRef.current = new Audio(`${base}sounds/siren.mp3`);
     sirenRef.current.loop = true;
-    pingRef.current = new Audio('/sounds/ping.wav');
-    successRef.current = new Audio('/sounds/success.wav');
-    failRef.current = new Audio('/sounds/fail.wav');
+    pingRef.current = new Audio(`${base}sounds/ping.wav`);
+    successRef.current = new Audio(`${base}sounds/success.wav`);
+    failRef.current = new Audio(`${base}sounds/fail.wav`);
   }, []);
 
   useEffect(() => {

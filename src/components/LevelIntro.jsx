@@ -215,7 +215,7 @@ function RocketAnimation() {
 const LEVEL_TITLES = {
   1: 'SOUTHERN FRONT',
   2: 'NORTHERN FRONT',
-  3: 'CRUISE THREAT',
+  3: 'CENTRAL FRONT',
   4: 'BALLISTIC ARC',
   5: 'HYPERSONIC STRIKE',
   6: 'WAVE ASSAULT',

@@ -28,6 +28,8 @@ export default function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [skipBriefings, setSkipBriefings] = useState(false);
   const seenBriefingsRef = useRef(new Set());
+  const briefingMusicRef = useRef(null);
+  const [musicMuted, setMusicMuted] = useState(false);
 
   const {
     gameState,
@@ -67,6 +69,32 @@ export default function App() {
   } = game;
 
   const config = getLevelConfig(currentLevel);
+
+  // Briefing music — create once, play/pause based on game state
+  useEffect(() => {
+    const audio = new Audio(`${import.meta.env.BASE_URL}sounds/briefing-music.mp3`);
+    audio.loop = true;
+    audio.volume = 0;
+    briefingMusicRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; };
+  }, []);
+
+  useEffect(() => {
+    const audio = briefingMusicRef.current;
+    if (!audio) return;
+    const shouldPlay = gameState === GAME_STATES.BRIEFING && !musicMuted;
+    if (shouldPlay) {
+      audio.volume = volume * 0.4;
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+      if (gameState !== GAME_STATES.BRIEFING) audio.currentTime = 0;
+    }
+  }, [gameState, GAME_STATES, musicMuted]);
+
+  useEffect(() => {
+    if (briefingMusicRef.current && !musicMuted) briefingMusicRef.current.volume = volume * 0.4;
+  }, [volume, musicMuted]);
 
   // Auto-skip briefing if facilitator toggle is on, or if this level's briefing was already seen
   useEffect(() => {
@@ -290,7 +318,19 @@ export default function App() {
     // Auto-skip on replay is handled by the useEffect above
     return (
       <div className="relative">
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-3">
+          <button
+            onClick={() => setMusicMuted((m) => !m)}
+            className={`px-3 py-1.5 rounded-full font-mono text-xs tracking-wider border transition-all cursor-pointer flex items-center gap-1.5 ${
+              musicMuted
+                ? 'border-gray-600 bg-gray-800/50 text-gray-400 hover:border-gray-500 hover:text-gray-300'
+                : 'border-green-700 bg-green-900/30 text-green-400 hover:border-green-500 hover:text-green-300'
+            }`}
+            title={musicMuted ? 'Unmute music' : 'Mute music'}
+          >
+            <span className="text-base leading-none">{musicMuted ? '\u266A' : '\u266A'}</span>
+            {musicMuted ? 'OFF' : 'ON'}
+          </button>
           <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />
         </div>
         <EducationalBriefing
@@ -374,7 +414,7 @@ export default function App() {
           </span>
           <span className="text-gray-700 font-mono text-xs">|</span>
           <span className="font-mono text-xs tracking-wider text-green-500">
-            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CRUISE THREAT', 4: 'BALLISTIC ARC', 5: 'HYPERSONIC STRIKE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
+            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'BALLISTIC ARC', 5: 'HYPERSONIC STRIKE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
           </span>
         </div>
 

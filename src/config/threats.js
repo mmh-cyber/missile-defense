@@ -51,6 +51,9 @@ export const IMPACT_POSITIONS = {
   'Rishon LeZion': { x: 0.27, y: 0.39 },
   'Petah Tikva': { x: 0.33, y: 0.34 },
   'Holon': { x: 0.27, y: 0.37 },
+  "Ra'anana": { x: 0.313, y: 0.323 },
+  "Modi'in": { x: 0.364, y: 0.386 },
+  'Gush Etzion': { x: 0.417, y: 0.442 },
   'Akko': { x: 0.37, y: 0.17 },
   'Katzrin': { x: 0.60, y: 0.14 },
   'Majdal Shams': { x: 0.59, y: 0.09 },
@@ -248,48 +251,49 @@ const THREATS_L2 = [
 ];
 
 // ============================================================
-// LEVEL 3: Gush Dan & Jerusalem — Cruise Missiles + all previous
+// LEVEL 3: Central Israel — Cruise Missiles + all previous
 // Duration: 120s | 26 threats | Introduces: David's Sling + cruise missiles
-// Geography: Big zoom-out — center + both fronts visible.
-// Gaza rockets resume (south), Lebanon drones continue (north),
-// NEW: cruise missiles from Iran (east) and Yemen (southeast).
+// Geography: Zoomed into Central Region — Tel Aviv, Jerusalem, Modi'in,
+// Ra'anana, Gush Etzion, and surrounding cities.
+// Gaza rockets hit southern central (Ashdod, Rishon LeZion), Iran cruise
+// missiles target the heartland (Tel Aviv, Jerusalem, Modi'in, Gush Etzion).
 // ============================================================
 const THREATS_L3 = [
-  // Warm-up with known types — remind player of both fronts
-  threat(1,  4,  'rocket', 'Sderot',          true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(2,  9,  'drone',  'Haifa',           true,  11, 'full', 1.0, { origin: 'north' }),        // Lebanon
+  // Warm-up — Gaza rockets on southern central cities
+  threat(1,  4,  'rocket', 'Ashdod',          true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(2,  9,  'rocket', 'Rishon LeZion',   true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
   // First cruise missile! From Iran — the teaching moment
   threat(3,  15, 'cruise', 'Tel Aviv',        true,  11, 'full', 1.0, { origin: 'east' }),         // Iran
-  threat(4,  22, 'rocket', 'Northern Negev',  false, 7,  'full', 1.0, { origin: 'gaza' }),         // hold fire
+  threat(4,  22, 'rocket', 'Judean Hills',    false, 7,  'full', 1.0, { origin: 'gaza' }),         // hold fire
   threat(5,  27, 'cruise', 'Jerusalem',       true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
-  threat(6,  32, 'rocket', 'Ashkelon',        true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  // Mixed pair — both fronts + cruise
-  threat(7,  38, 'cruise', 'Haifa',           true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
-  threat(8,  40, 'drone',  'Coastal Plain',   false, 11, 'full', 1.0, { origin: 'north' }),        // hold fire, Lebanon
-  // Tempo up — tighter gaps, introduce Gush Dan cities
+  threat(6,  32, 'rocket', 'Holon',           true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  // New cities — cruise missiles targeting the corridor
+  threat(7,  38, 'cruise', "Modi'in",         true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
+  threat(8,  40, 'drone',  'Coastal Plain',   false, 11, 'full', 1.0, { origin: 'north' }),        // hold fire
+  // Tempo up — introduce more central cities
   threat(9,  46, 'rocket', 'Ashdod',          true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(10, 51, 'cruise', 'Netanya',         true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(11, 57, 'drone',  'Kiryat Shmona',   true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
-  // Pairs overlap
+  threat(10, 51, 'cruise', "Ra'anana",        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(11, 57, 'drone',  'Petah Tikva',     true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
+  // Pairs overlap — heartland under fire
   threat(12, 63, 'cruise', 'Tel Aviv',        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(13, 64, 'rocket', 'Sderot',          true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  // Bridge
-  threat(14, 72, 'drone',  'Rishon LeZion',   true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
-  // Closing triple
+  threat(13, 64, 'rocket', 'Rishon LeZion',   true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  // Bridge — Gush Etzion targeted
+  threat(14, 72, 'cruise', 'Gush Etzion',     true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
+  // Closing triple — multi-front pressure
   threat(15, 80, 'cruise', 'Jerusalem',       true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(16, 81, 'drone',  'Nahariya',        true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(17, 83, 'rocket', 'Ashkelon',        true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  // Final pairs
+  threat(16, 81, 'drone',  'Netanya',         true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
+  threat(17, 83, 'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  // Final pairs — corridor cities
   threat(18, 90, 'cruise', 'Judean Hills',    false, 9,  'full', 1.0, { origin: 'east' }),         // hold fire, Iran
-  threat(19, 92, 'drone',  'Petah Tikva',     true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
-  // Compressed tail — rapid fire
-  threat(20, 96, 'rocket', 'Sderot',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(21, 98, 'cruise', 'Holon',           true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(22, 101,'drone',  'Haifa',           true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(23, 102,'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(24, 106,'cruise', 'Tel Aviv',        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(25, 108,'drone',  'Western Galilee', false, 9,  'full', 1.0, { origin: 'north' }),        // hold fire, Lebanon
-  threat(26, 110,'rocket', 'Ashkelon',        true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(19, 92, 'drone',  'Holon',           true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
+  // Compressed tail — rapid fire across central region
+  threat(20, 96, 'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(21, 98, 'cruise', "Modi'in",         true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(22, 101,'drone',  "Ra'anana",        true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
+  threat(23, 102,'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(24, 106,'cruise', 'Gush Etzion',     true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(25, 108,'drone',  'Coastal Plain',   false, 9,  'full', 1.0, { origin: 'north' }),        // hold fire
+  threat(26, 110,'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
 ];
 
 // ============================================================
@@ -531,7 +535,7 @@ export const LEVELS = [
     final_salvo_start_time: null,
     threats: THREATS_L2,
   },
-  // Level 3: Gush Dan & Jerusalem — Cruise Missiles + David's Sling
+  // Level 3: Central Israel — Cruise Missiles + David's Sling
   {
     id: 3,
     duration: 120,

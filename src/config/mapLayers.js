@@ -35,14 +35,19 @@ export const CITIES = {
   'Katzrin':        { x: 0.60, y: 0.14, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'e' },
   'Majdal Shams':   { x: 0.59, y: 0.09, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'w' },
 
-  // === L3: Gush Dan + Center ===
-  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'w' },
-  'Ashdod':         { x: 0.24, y: 0.41, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'w' },
-  'Jerusalem':      { x: 0.44, y: 0.42, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Netanya':        { x: 0.31, y: 0.30, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'se' },
-  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'gush_dan', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Holon':          { x: 0.27, y: 0.37, region: 'gush_dan', tier: 2, revealLevel: 3, labelDir: 'e' },
+  // === L3: Central Israel (Tel Aviv metro, Jerusalem corridor, Judean foothills) ===
+  // tier 1: major cities always labeled on zoomed-out maps (L4+)
+  // tier 2: labeled only when zoomed in (L3) or when actively targeted (L4+)
+  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'central', tier: 1, revealLevel: 3, labelDir: 'w' },
+  'Jerusalem':      { x: 0.44, y: 0.42, region: 'central', tier: 1, revealLevel: 3, labelDir: 'e' },
+  'Netanya':        { x: 0.31, y: 0.30, region: 'central', tier: 2, revealLevel: 3, labelDir: 'ne' },
+  "Ra'anana":       { x: 0.313, y: 0.323, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w' },
+  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
+  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'central', tier: 2, revealLevel: 3, labelDir: 'sw' },
+  'Ashdod':         { x: 0.24, y: 0.41, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w' },
+  "Modi'in":        { x: 0.364, y: 0.386, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
+  'Gush Etzion':    { x: 0.417, y: 0.442, region: 'central', tier: 2, revealLevel: 3, labelDir: 'se' },
+  'Holon':          { x: 0.27, y: 0.37, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
 
   // === L4: Negev === (pushed south for spacing from Otef Aza / Jerusalem)
   'Beersheba':      { x: 0.29, y: 0.57, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
@@ -59,8 +64,8 @@ export const LEVEL_VIEWPORTS = [
   null, // index 0 unused (levels are 1-indexed)
   { centerX: 0.27, centerY: 0.48, scale: 2.5 },   // L1: tight on Otef Aza, cities near Gaza arc on left
   { centerX: 0.48, centerY: 0.15, scale: 1.8 },   // L2: Galil/Golan + battery (slightly wider)
-  { centerX: 0.35, centerY: 0.35, scale: 1.0 },   // L3: zoom out — Gush Dan/Otef Aza closer to Gaza arc
-  { centerX: 0.33, centerY: 0.44, scale: 0.80 },  // L4: includes Negev + Eilat visible
+  { centerX: 0.34, centerY: 0.37, scale: 2.2 },   // L3: Central Israel zoom — Tel Aviv, Jerusalem, Modi'in, Gush Etzion
+  { centerX: 0.33, centerY: 0.44, scale: 0.80 },  // L4: full map — first level showing all regions + Negev
   { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L5: full country, Eilat clearly visible
   { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L6: same
   { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L7: same
@@ -117,14 +122,14 @@ export const REGIONS = [
     labelPos: { x: 0.58, y: 0.16 },
   },
   {
-    name: 'Gush Dan',
+    name: 'Central Israel',
     revealLevel: 3,
     color: 'rgba(0, 255, 200, 0.15)',
     polygon: [
-      [0.25, 0.28], [0.35, 0.28], [0.46, 0.38],
-      [0.46, 0.44], [0.24, 0.44], [0.24, 0.34],
+      [0.22, 0.28], [0.36, 0.28], [0.46, 0.38],
+      [0.46, 0.46], [0.22, 0.46], [0.22, 0.34],
     ],
-    labelPos: { x: 0.32, y: 0.46 },
+    labelPos: { x: 0.32, y: 0.47 },
   },
   {
     name: 'Negev',
@@ -160,20 +165,26 @@ export const REGIONS = [
 export const THREAT_ORIGINS = [
   { name: 'Gaza',    angle: 270, arcSpan: 20, activeLevels: [1, 3, 4, 5, 6, 7] },    // W (verified: ~270°)
   { name: 'Lebanon', angle: 0,   arcSpan: 35, activeLevels: [2, 3, 4, 5, 6, 7] },    // N — spans northern border (~342.5° to 17.5°)
-  { name: 'Syria',   angle: 48,  arcSpan: 35, activeLevels: [2, 3, 4, 5, 6, 7] },    // NE — Golan/eastern border (~30° to 66°)
+  { name: 'Syria',   angle: 48,  arcSpan: 35, activeLevels: [2, 4, 5, 6, 7] },       // NE — Golan/eastern border (~30° to 66°)
   { name: 'Iran',    angle: 100, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // E-ESE — between Syria and Yemen (~87° to 113°)
-  { name: 'Yemen',   angle: 155, arcSpan: 25, activeLevels: [3, 4, 5, 6, 7] },        // SSE (~142° to 168°)
+  { name: 'Yemen',   angle: 155, arcSpan: 25, activeLevels: [4, 5, 6, 7] },           // SSE (~142° to 168°)
 ];
 
 
 // --- Helper Functions ---
 
-/** Get all cities visible at a given level (accumulates) */
+/** Get cities visible at a given level.
+ *  L1-L3: region-specific (only that level's cities) — focused zoom per front.
+ *  L4+: cumulative (all cities revealed so far) — full map. */
 export function getVisibleCities(level) {
   const result = {};
   for (const [name, city] of Object.entries(CITIES)) {
-    if (city.revealLevel <= level) {
-      result[name] = city;
+    if (level <= 3) {
+      // Region-specific: only show this level's cities
+      if (city.revealLevel === level) result[name] = city;
+    } else {
+      // Cumulative: show all cities revealed up to this level
+      if (city.revealLevel <= level) result[name] = city;
     }
   }
   return result;
@@ -191,8 +202,10 @@ export function getBatteryForLevel(level) {
   return LEVEL_BATTERIES[idx] || LEVEL_BATTERIES[3];
 }
 
-/** Get all region outlines visible at a given level */
+/** Get region labels visible at a given level.
+ *  L1-L3: only that level's region. L4+: cumulative. */
 export function getVisibleRegions(level) {
+  if (level <= 3) return REGIONS.filter((r) => r.revealLevel === level);
   return REGIONS.filter((r) => r.revealLevel <= level);
 }
 
