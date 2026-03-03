@@ -160,7 +160,60 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
-   Impact Flash Ring (on city hit/save/ground)
+   Blip Hover & Selection
+   ============================================ */
+.blip-hover:hover circle:nth-child(4) {
+  filter: drop-shadow(0 0 6px currentColor) !important;
+}
+
+.selection-ring-spin {
+  animation: selectionSpin 3s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes selectionSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Intercepted Blip Fade (600ms to match trail)
+   ============================================ */
+.intercepted-blip-fade {
+  animation: interceptedFade 600ms linear forwards;
+}
+
+@keyframes interceptedFade {
+  0%   { opacity: 0.7; }
+  65%  { opacity: 0.55; }
+  85%  { opacity: 0.2; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
+   Held Blip — dimmed, still moving toward target
+   ============================================ */
+.held-blip-fade {
+  opacity: 0.35;
+}
+
+/* ============================================
+   Tzeva Adom Flash (non-blocking, 3s)
+   ============================================ */
+.tzeva-adom-flash {
+  animation: tzevaFlash 3s ease-out forwards;
+}
+
+@keyframes tzevaFlash {
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
+   Impact Flash Ring (on city hit/save)
    ============================================ */
 .impact-flash-ring {
   animation: impactFlash 2s ease-out forwards;
@@ -215,37 +268,527 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
-   Salvo Warning — Level 2 (Red, more intense)
-   ============================================ */
-.salvo-warning-level2 {
-  animation: salvoWarningRed 0.6s ease-in-out infinite alternate;
+   Interception Effects (Success - Green)
+   ============================================
+   Using transform: scale() instead of r animation
+   for cross-browser SVG compatibility.
+   transform-box: fill-box ensures scale from center. */
+
+.intercept-flash-center {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: interceptCenterFlash 0.5s ease-out forwards;
 }
 
-@keyframes salvoWarningRed {
-  from {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
-    transform: scale(1);
+@keyframes interceptCenterFlash {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(3); opacity: 0.9; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+.intercept-shockwave {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: interceptShockwave 1.5s ease-out forwards;
+}
+
+@keyframes interceptShockwave {
+  0% { transform: scale(0.5); opacity: 1; stroke-width: 1; }
+  100% { transform: scale(5); opacity: 0; stroke-width: 0.1; }
+}
+
+.intercept-shockwave-secondary {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: interceptShockwave 1.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.intercept-particle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: particleScatter 0.8s ease-out forwards;
+}
+
+@keyframes particleScatter {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
   }
-  to {
-    box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
-    transform: scale(1.03);
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--end-x), var(--end-y)) scale(0.3);
   }
 }
 
 /* ============================================
-   Ammo Low Flash
-   ============================================ */
-.ammo-low-flash {
-  animation: ammoLowFlash 1.2s ease-in-out infinite;
+   Hypersonic Intercept Effects (Cyan/Purple)
+   ============================================
+   Unique sci-fi energy discharge animation for
+   Arrow 3 intercepting hypersonic missiles. */
+
+.hyper-flash-core {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperCoreFlash 0.6s ease-out forwards;
 }
 
-@keyframes ammoLowFlash {
-  0%, 100% {
+@keyframes hyperCoreFlash {
+  0% { transform: scale(1); opacity: 1; fill: white; }
+  15% { transform: scale(4); opacity: 1; fill: #06b6d4; }
+  40% { transform: scale(2); opacity: 0.8; fill: #a855f7; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+.hyper-plasma-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperPlasmaGlow 1s ease-out forwards;
+}
+
+@keyframes hyperPlasmaGlow {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  20% { transform: scale(2.5); opacity: 0.6; }
+  50% { transform: scale(3.5); opacity: 0.3; }
+  100% { transform: scale(5); opacity: 0; }
+}
+
+.hyper-shockwave-1 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperShockwave 1.2s ease-out forwards;
+}
+
+.hyper-shockwave-2 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperShockwave 1.5s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.hyper-shockwave-3 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperShockwave 1.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+@keyframes hyperShockwave {
+  0% { transform: scale(0.5); opacity: 1; stroke-width: 1.2; }
+  50% { opacity: 0.6; }
+  100% { transform: scale(7); opacity: 0; stroke-width: 0.1; }
+}
+
+.hyper-arc {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperArcFlash 0.4s ease-out forwards;
+}
+
+@keyframes hyperArcFlash {
+  0% { opacity: 1; stroke-width: 0.8; }
+  30% { opacity: 1; stroke-width: 0.6; }
+  100% { opacity: 0; stroke-width: 0.1; }
+}
+
+.hyper-particle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperParticleScatter 1s ease-out forwards;
+}
+
+@keyframes hyperParticleScatter {
+  0% { opacity: 1; transform: translate(0, 0) scale(1.2); }
+  50% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--end-x), var(--end-y)) scale(0.2); }
+}
+
+.hyper-dissipation {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hyperDissipation 2s ease-out forwards;
+}
+
+@keyframes hyperDissipation {
+  0% { transform: scale(1); opacity: 0.5; stroke-width: 0.5; }
+  100% { transform: scale(10); opacity: 0; stroke-width: 0.05; }
+}
+
+/* ============================================
+   City Hit Effects (Failure - Red/Orange)
+   ============================================ */
+.city-hit-flash {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cityHitFlash 0.6s ease-out forwards;
+}
+
+@keyframes cityHitFlash {
+  0% { transform: scale(0.3); opacity: 1; }
+  20% { transform: scale(2.5); opacity: 0.95; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+.city-hit-shockwave {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cityHitShockwave 2s ease-out forwards;
+}
+
+@keyframes cityHitShockwave {
+  0% { transform: scale(0.5); opacity: 1; stroke-width: 1.2; }
+  100% { transform: scale(7); opacity: 0; stroke-width: 0.05; }
+}
+
+.city-hit-shockwave-secondary {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cityHitShockwave 2.5s ease-out 0.15s forwards;
+  opacity: 0;
+}
+
+.city-hit-damage-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: damagePulse 3s ease-in-out forwards;
+}
+
+@keyframes damagePulse {
+  0% { opacity: 0; transform: scale(0.3); }
+  10% { opacity: 0.6; transform: scale(1); }
+  30% { opacity: 0.4; transform: scale(1.1); }
+  50% { opacity: 0.5; transform: scale(1); }
+  70% { opacity: 0.3; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+.city-hit-crater {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: craterFade 3s ease-out forwards;
+}
+
+@keyframes craterFade {
+  0% { opacity: 0; transform: scale(0); }
+  15% { opacity: 0.8; transform: scale(1); }
+  80% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+.city-hit-particle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cityParticleScatter 1.2s ease-out forwards;
+}
+
+@keyframes cityParticleScatter {
+  0% {
     opacity: 1;
+    transform: translate(0, 0) scale(1);
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.8;
   }
+  100% {
+    opacity: 0;
+    transform: translate(var(--end-x), var(--end-y)) scale(0.2);
+  }
+}
+
+/* ============================================
+   Ground Impact Effects (Neutral - Amber)
+   ============================================ */
+.ground-puff {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: groundPuff 1.5s ease-out forwards;
+}
+
+@keyframes groundPuff {
+  0% { transform: scale(0.3); opacity: 0.7; }
+  40% { transform: scale(1.5); opacity: 0.4; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.ground-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: groundRing 1s ease-out forwards;
+}
+
+@keyframes groundRing {
+  0% { transform: scale(0.5); opacity: 0.6; stroke-width: 0.5; }
+  100% { transform: scale(4); opacity: 0; stroke-width: 0.05; }
+}
+
+.ground-particle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: particleScatter 0.6s ease-out forwards;
+}
+
+/* ============================================
+   Hold Clear Effect (Correct Hold Fire)
+   ============================================ */
+.hold-clear-flash {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holdClearFlash 2s ease-out forwards;
+}
+
+@keyframes holdClearFlash {
+  0% { opacity: 0; r: 1; }
+  15% { opacity: 0.6; r: 4; }
+  100% { opacity: 0; r: 6; }
+}
+
+.hold-clear-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holdClearRing 1.5s ease-out forwards;
+}
+
+@keyframes holdClearRing {
+  0% { r: 1; opacity: 0.8; stroke-width: 0.8; }
+  100% { r: 6; opacity: 0; stroke-width: 0.2; }
+}
+
+.hold-clear-check {
+  animation: holdClearCheckPop 2s ease-out forwards;
+}
+
+@keyframes holdClearCheckPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1.3); }
+  40% { transform: scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.hold-clear-label {
+  animation: holdClearLabel 2s ease-out forwards;
+}
+
+@keyframes holdClearLabel {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
+   Screen Shake (City Hit)
+   ============================================ */
+.screen-shake {
+  animation: screenShake 0.5s ease-out;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3px, -2px); }
+  20% { transform: translate(4px, 1px); }
+  30% { transform: translate(-2px, 3px); }
+  40% { transform: translate(3px, -1px); }
+  50% { transform: translate(-1px, 2px); }
+  60% { transform: translate(2px, -2px); }
+  70% { transform: translate(-3px, 1px); }
+  80% { transform: translate(1px, -1px); }
+  90% { transform: translate(-1px, 2px); }
+}
+
+/* Border flash for city hit */
+.border-flash-red {
+  animation: borderFlashRed 0.5s ease-out;
+}
+
+@keyframes borderFlashRed {
+  0% { box-shadow: inset 0 0 0 0 transparent; }
+  20% { box-shadow: inset 0 0 30px 10px rgba(239, 68, 68, 0.4); }
+  100% { box-shadow: inset 0 0 0 0 transparent; }
+}
+
+/* ============================================
+   Interceptor Launch Trail
+   ============================================ */
+.trail-warhead {
+  animation: trailMove var(--trail-duration, 600ms) ease-in forwards;
+}
+
+@keyframes trailMove {
+  0%   { transform: translate(0, 0); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+.trail-line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: trailDraw var(--trail-duration, 600ms) ease-in forwards,
+             trailFade 0.5s ease-out var(--trail-duration, 600ms) forwards;
+}
+
+@keyframes trailDraw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes trailFade {
+  from { opacity: 0.6; }
+  to   { opacity: 0; }
+}
+
+.trail-launch-flash {
+  animation: launchFlash 0.3s ease-out forwards;
+}
+
+@keyframes launchFlash {
+  0%   { r: 0.5; opacity: 0.8; }
+  100% { r: 2.5; opacity: 0; }
+}
+
+/* ============================================
+   Level Intro — Drone Animation (Level 1)
+   ============================================ */
+.drone-fly {
+  animation: droneFly 5s linear infinite;
+}
+
+@keyframes droneFly {
+  0%   { transform: translate(-30px, 38px); }
+  15%  { transform: translate(50px, 34px); }
+  30%  { transform: translate(100px, 40px); }
+  50%  { transform: translate(170px, 35px); }
+  70%  { transform: translate(230px, 42px); }
+  85%  { transform: translate(270px, 37px); }
+  100% { transform: translate(320px, 39px); }
+}
+
+.drone-rotor-spin {
+  animation: rotorSpin 0.1s linear infinite;
+}
+
+@keyframes rotorSpin {
+  0%   { opacity: 0.08; }
+  50%  { opacity: 0.25; }
+  100% { opacity: 0.08; }
+}
+
+.drone-exhaust-glow {
+  animation: droneExhaust 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes droneExhaust {
+  from { opacity: 0.15; r: 1.5; }
+  to   { opacity: 0.4; r: 2.5; }
+}
+
+/* ============================================
+   Level Intro — Cruise Missile Animation
+   ============================================ */
+.cruise-missile-fly {
+  animation: cruiseFly 3s linear infinite;
+}
+
+@keyframes cruiseFly {
+  0%   { transform: translate(-20px, 48px); }
+  100% { transform: translate(300px, 48px); }
+}
+
+.cruise-exhaust-pulse {
+  animation: exhaustPulse 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes exhaustPulse {
+  from { opacity: 0.2; r: 2; }
+  to   { opacity: 0.5; r: 4; }
+}
+
+.cruise-trail {
+  animation: trailShimmer 1s linear infinite;
+}
+
+@keyframes trailShimmer {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -18; }
+}
+
+/* ============================================
+   Level Intro — Ballistic Missile Animation
+   ============================================ */
+.ballistic-missile-arc {
+  offset-path: path("M35,116 Q75,10 150,6 Q225,4 270,116");
+  offset-rotate: auto;
+  animation: ballisticArc 4s ease-in infinite;
+}
+
+@keyframes ballisticArc {
+  0%   { offset-distance: 0%; opacity: 0; }
+  3%   { opacity: 1; }
+  /* Slow rise phase — takes 60% of time to reach apogee (50% of path) */
+  60%  { offset-distance: 50%; opacity: 1; }
+  /* Fast descent — remaining 40% of time for second half of path */
+  90%  { offset-distance: 95%; opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.ballistic-glow {
+  animation: ballisticGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes ballisticGlow {
+  from { opacity: 0.15; r: 4; }
+  to   { opacity: 0.3; r: 6; }
+}
+
+.ballistic-impact-pulse {
+  animation: impactPulseIntro 1.5s ease-in-out infinite;
+}
+
+@keyframes impactPulseIntro {
+  0%, 100% { r: 2; opacity: 0.2; }
+  50%      { r: 5; opacity: 0.5; }
+}
+
+/* ============================================
+   Level Intro — Hypersonic Missile Animation
+   ============================================ */
+.hypersonic-missile-dive {
+  offset-path: path("M280,8 Q200,10 150,40 Q120,65 90,116");
+  offset-rotate: auto;
+  animation: hypersonicDive 1.5s ease-in infinite;
+}
+
+@keyframes hypersonicDive {
+  0%   { offset-distance: 0%; opacity: 0; }
+  5%   { opacity: 1; }
+  /* Glide phase — first 40% of path covered quickly */
+  30%  { offset-distance: 40%; opacity: 1; }
+  /* Terminal dive — accelerating into the ground */
+  70%  { offset-distance: 85%; opacity: 1; }
+  90%  { offset-distance: 98%; opacity: 0.8; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.hypersonic-plasma {
+  animation: plasmaFlicker 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes plasmaFlicker {
+  from { opacity: 0.1; }
+  to   { opacity: 0.3; }
+}
+
+.hypersonic-speed-line {
+  animation: speedLineFlash 2s ease-in-out infinite;
+}
+
+@keyframes speedLineFlash {
+  0%, 100% { opacity: 0; }
+  30%      { opacity: 0.2; }
+  50%      { opacity: 0; }
 }
 
 /* ============================================
@@ -261,4 +804,119 @@ button:focus-visible {
    ============================================ */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   Educational Briefing — Phase Indicator
+   ============================================ */
+.phase-active-pulse {
+  animation: phaseActivePulse 2s ease-in-out infinite;
+}
+
+@keyframes phaseActivePulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 136, 0.1); }
+  50%      { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+}
+
+/* ============================================
+   Educational Briefing — Quiz Feedback
+   ============================================ */
+.quiz-correct-flash {
+  animation: quizCorrect 0.6s ease-out forwards;
+}
+
+@keyframes quizCorrect {
+  0%   { transform: scale(1); box-shadow: none; }
+  30%  { transform: scale(1.04); box-shadow: 0 0 25px rgba(34, 197, 94, 0.5); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+}
+
+.quiz-wrong-flash {
+  animation: quizWrong 0.5s ease-out forwards;
+}
+
+@keyframes quizWrong {
+  0%   { transform: translateX(0); box-shadow: none; }
+  20%  { transform: translateX(-5px); }
+  40%  { transform: translateX(5px); }
+  60%  { transform: translateX(-3px); }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+}
+
+/* ============================================
+   Educational Briefing — Defense Animation
+   ============================================ */
+.brief-drone-approach {
+  animation: briefDroneApproach 8s linear infinite;
+}
+
+@keyframes briefDroneApproach {
+  0%   { transform: translate(30px, 50px); }
+  100% { transform: translate(260px, 50px); }
+}
+
+.tamir-launch-line {
+  animation: tamirLaunch 8s linear infinite;
+}
+
+@keyframes tamirLaunch {
+  0%, 50%  { opacity: 0; }
+  55%      { opacity: 0.8; }
+  70%      { opacity: 0.3; }
+  100%     { opacity: 0; }
+}
+
+.tamir-intercept-flash {
+  animation: tamirIntercept 8s linear infinite;
+}
+
+@keyframes tamirIntercept {
+  0%, 54%  { r: 0; opacity: 0; }
+  56%      { r: 10; opacity: 0.8; }
+  65%      { r: 15; opacity: 0.3; }
+  80%      { r: 20; opacity: 0; }
+  100%     { r: 0; opacity: 0; }
+}
+
+/* ============================================
+   Educational Briefing — Mini Radar Blip
+   ============================================ */
+.mini-radar-blip {
+  animation: miniRadarBlip 1.5s ease-out infinite;
+}
+
+@keyframes miniRadarBlip {
+  0%   { r: 4; opacity: 0.6; }
+  100% { r: 12; opacity: 0; }
+}
+
+/* ============================================
+   Educational Briefing — Exercise Intercept
+   ============================================ */
+.exercise-intercept-flash {
+  animation: exerciseFlash 1s ease-out forwards;
+}
+
+@keyframes exerciseFlash {
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+.exercise-debris {
+  animation: exerciseDebris 1s ease-out forwards;
+}
+
+@keyframes exerciseDebris {
+  0%   { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--dx, 5px), var(--dy, 5px)); }
+}
+
+.exercise-click-prompt {
+  animation: exerciseClickPrompt 1.2s ease-in-out infinite;
+}
+
+@keyframes exerciseClickPrompt {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
 }

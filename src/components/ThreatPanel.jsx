@@ -16,26 +16,46 @@ function formatTimeUntil(seconds) {
 }
 
 function ThreatCard({ threat, isSelected, onSelect }) {
-  const color = THREAT_COLORS[threat.type] || '#ef4444';
+  const color = THREAT_COLORS[threat.type] || '#94a3b8';
   const urgency = threat.timeLeft < 5 ? 'animate-pulse' : '';
   const intel = threat.intel || 'full';
+  const isHeld = threat.held;
 
   return (
     <div
-      onClick={() => onSelect(threat.id)}
+      onClick={() => !isHeld && onSelect(threat.id)}
       className={`
-        relative cursor-pointer border rounded p-3 mb-2 transition-all
-        ${isSelected
-          ? 'border-white bg-white/10 shadow-lg shadow-white/10'
-          : 'border-gray-700 bg-gray-900/50 hover:border-gray-500'
+        relative rounded p-3 mb-2 transition-all flex gap-3
+        ${isHeld
+          ? 'opacity-50 cursor-default'
+          : 'cursor-pointer'
+        }
+        ${isSelected && !isHeld
+          ? 'bg-white/10 shadow-lg shadow-white/10'
+          : 'bg-gray-900/50 hover:border-gray-500'
         }
         ${urgency}
       `}
-      style={isSelected ? { borderColor: color, boxShadow: `0 0 15px ${color}40` } : {}}
+      style={{
+        borderTop: `2px solid ${isSelected ? color : '#374151'}`,
+        borderRight: `2px solid ${isSelected ? color : '#374151'}`,
+        borderBottom: `2px solid ${isSelected ? color : '#374151'}`,
+        borderLeft: `4px solid ${color}`,
+        boxShadow: isSelected ? `0 0 15px ${color}40` : 'none',
+      }}
     >
+      {/* Prominent Threat ID */}
+      <div
+        className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded font-mono font-bold text-lg"
+        style={{ backgroundColor: `${color}20`, color, border: `1px solid ${color}50` }}
+      >
+        T{threat.id}
+      </div>
+
+      {/* Card content */}
+      <div className="flex-1 min-w-0">
       {/* Type badge + Priority */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span
             className="text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider"
             style={{ backgroundColor: `${color}30`, color }}
@@ -52,8 +72,11 @@ function ThreatCard({ threat, isSelected, onSelect }) {
               SALVO
             </span>
           )}
-        </div>
-        <span className="text-xs text-gray-500 font-mono">T{threat.id}</span>
+          {isHeld && (
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-gray-700/50 text-gray-400 border border-gray-600 tracking-wider">
+              HOLD
+            </span>
+          )}
       </div>
 
       {/* Threat name */}
@@ -62,26 +85,28 @@ function ThreatCard({ threat, isSelected, onSelect }) {
       </div>
 
       {/* Stats — variable based on intel level */}
-      <div className="text-xs font-mono space-y-1">
-        <div className="flex justify-between">
-          <span className="text-gray-500">SPEED</span>
-          <span className="text-gray-300">
-            {intel === 'minimal' ? '---' : `Mach ${threat.speed_mach}`}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">ALTITUDE</span>
-          <span className="text-gray-300">
-            {intel === 'minimal' || intel === 'partial' ? '---' : `${threat.altitude_km} km`}
-          </span>
-        </div>
-        {intel === 'full' && (
-          <div>
-            <span className="text-gray-500">TRAJECTORY: </span>
-            <span className="text-gray-300">{threat.trajectory}</span>
+      {(
+        <div className="text-xs font-mono space-y-1">
+          <div className="flex justify-between">
+            <span className="text-gray-500">SPEED</span>
+            <span className="text-gray-300">
+              {intel === 'minimal' ? '---' : `Mach ${threat.speed_mach}`}
+            </span>
           </div>
-        )}
-      </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">ALTITUDE</span>
+            <span className="text-gray-300">
+              {intel === 'minimal' || intel === 'partial' ? '---' : `${threat.altitude_km} km`}
+            </span>
+          </div>
+          {intel === 'full' && (
+            <div>
+              <span className="text-gray-500">TRAJECTORY: </span>
+              <span className="text-gray-300">{threat.trajectory}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Impact zone — progressive reveal */}
       <div className="mt-2 flex items-center gap-2">
@@ -123,6 +148,7 @@ function ThreatCard({ threat, isSelected, onSelect }) {
           }}
         />
       </div>
+      </div>{/* end card content */}
     </div>
   );
 }
@@ -153,10 +179,11 @@ export default function ThreatPanel({
   return (
     <div className="h-full flex flex-col">
       <div className="text-xs text-green-500/50 font-mono tracking-widest mb-3 uppercase">
-        Threat Analysis — {activeThreats.length} Active
+        Threat Analysis — {activeThreats.filter((t) => !t.intercepted).length} Active
       </div>
       <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
         {[...activeThreats]
+          .filter((t) => !t.intercepted)
           .sort((a, b) => a.timeLeft - b.timeLeft)
           .map((threat) => (
             <ThreatCard
