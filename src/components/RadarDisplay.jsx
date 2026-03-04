@@ -811,7 +811,17 @@ export default function RadarDisplay({
                     fill="none" stroke="#22c55e" strokeWidth="0.4" opacity="0.7"
                     transform={`rotate(45, ${hq.x}, ${hq.y})`}
                   />
-                  {/* Label removed — diamond icon is sufficient, reduces map clutter */}
+                  {/* HQ label — shown for levels 1-3, hidden for 4+ to reduce clutter */}
+                  {currentLevel <= 3 && (
+                    <text
+                      x={hq.x} y={hq.y + 3.5}
+                      fill="#22c55e" fontSize="2.2" fontFamily="monospace"
+                      textAnchor="middle" dominantBaseline="hanging"
+                      opacity="0.7" fontWeight="bold"
+                    >
+                      HQ
+                    </text>
+                  )}
                 </g>
               );
             })()}

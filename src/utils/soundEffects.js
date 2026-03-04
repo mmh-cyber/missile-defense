@@ -418,62 +418,75 @@ export function playCityHitSound(volume = 0.7) {
 }
 
 // -------------------------------------------------------
-// Ground Impact: Audible thud + dust puff
-// Duration: ~0.25s
+// Ground Impact: Distant muffled explosion in open terrain
+// Duration: ~0.5s — sounds like a rocket cratering into sand/dirt
 // -------------------------------------------------------
 export function playGroundImpactSound(volume = 0.7) {
   try {
     const ctx = getContext();
     const now = ctx.currentTime;
 
-    // Main thud (120Hz → 40Hz, extended)
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+    // Distant boom — low muffled explosion (60Hz → 25Hz)
+    const boom = ctx.createOscillator();
+    boom.type = 'sine';
+    boom.frequency.setValueAtTime(60, now);
+    boom.frequency.exponentialRampToValueAtTime(25, now + 0.35);
 
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(volume * 0.5, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    const boomGain = ctx.createGain();
+    boomGain.gain.setValueAtTime(volume * 0.35, now);
+    boomGain.gain.linearRampToValueAtTime(volume * 0.25, now + 0.04);
+    boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.25);
+    boom.connect(boomGain);
+    boomGain.connect(ctx.destination);
+    boom.start(now);
+    boom.stop(now + 0.35);
 
-    // Low bass thump (80Hz → 30Hz)
-    const bass = ctx.createOscillator();
-    bass.type = 'sine';
-    bass.frequency.setValueAtTime(80, now);
-    bass.frequency.exponentialRampToValueAtTime(30, now + 0.2);
-
-    const bassGain = ctx.createGain();
-    bassGain.gain.setValueAtTime(volume * 0.4, now);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-
-    bass.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    bass.start(now);
-    bass.stop(now + 0.2);
-
-    // Noise puff (louder, longer)
-    const bufferSize = Math.floor(ctx.sampleRate * 0.08);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.5;
+    // Dirt scatter — filtered noise (bandpass to sound like debris)
+    const scatterLen = Math.floor(ctx.sampleRate * 0.4);
+    const scatterBuf = ctx.createBuffer(1, scatterLen, ctx.sampleRate);
+    const scatterData = scatterBuf.getChannelData(0);
+    for (let i = 0; i < scatterLen; i++) {
+      const t = i / scatterLen;
+      // Starts after a tiny delay, fades out with random grain
+      const env = Math.pow(1 - t, 2) * (t > 0.02 ? 1 : t / 0.02);
+      scatterData[i] = (Math.random() * 2 - 1) * env * 0.4;
     }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    const scatter = ctx.createBufferSource();
+    scatter.buffer = scatterBuf;
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(volume * 0.3, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    // Bandpass filter — makes noise sound like dirt/sand
+    const bpf = ctx.createBiquadFilter();
+    bpf.type = 'bandpass';
+    bpf.frequency.setValueAtTime(800, now);
+    bpf.frequency.exponentialRampToValueAtTime(300, now + 0.3);
+    bpf.Q.value = 1.5;
 
-    noise.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noise.start(now);
-    noise.stop(now + 0.12);
+    const scatterGain = ctx.createGain();
+    scatterGain.gain.setValueAtTime(volume * 0.2, now);
+    scatterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    scatter.connect(bpf);
+    bpf.connect(scatterGain);
+    scatterGain.connect(ctx.destination);
+    scatter.start(now);
+    scatter.stop(now + 0.4);
+
+    // Low rumble tail — makes it feel distant
+    const rumble = ctx.createOscillator();
+    rumble.type = 'triangle';
+    rumble.frequency.setValueAtTime(35, now + 0.05);
+    rumble.frequency.exponentialRampToValueAtTime(18, now + 0.5);
+
+    const rumbleGain = ctx.createGain();
+    rumbleGain.gain.setValueAtTime(0.001, now);
+    rumbleGain.gain.linearRampToValueAtTime(volume * 0.15, now + 0.06);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    rumble.connect(rumbleGain);
+    rumbleGain.connect(ctx.destination);
+    rumble.start(now);
+    rumble.stop(now + 0.5);
   } catch (e) {
     // Silently fail
   }

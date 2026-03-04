@@ -97,7 +97,9 @@ export default function App() {
   useEffect(() => {
     const audio = briefingMusicRef.current;
     if (!audio) return;
-    const shouldPlay = gameState === GAME_STATES.BRIEFING && !musicMuted;
+    const inBriefing = gameState === GAME_STATES.BRIEFING && !musicMuted;
+    const sashaMusicActive = sashaActive && gameState === GAME_STATES.ACTIVE;
+    const shouldPlay = inBriefing || sashaMusicActive;
     if (shouldPlay) {
       audio.volume = volume * 0.4;
       audio.play().catch(() => {});
@@ -105,7 +107,7 @@ export default function App() {
       audio.pause();
       if (gameState !== GAME_STATES.BRIEFING) audio.currentTime = 0;
     }
-  }, [gameState, GAME_STATES, musicMuted]);
+  }, [gameState, GAME_STATES, musicMuted, sashaActive]);
 
   useEffect(() => {
     if (briefingMusicRef.current && !musicMuted) briefingMusicRef.current.volume = volume * 0.4;
@@ -126,8 +128,8 @@ export default function App() {
         { keys: ['t', 'z', 'u', 'r'], trigger: triggerTzurMode, blocked: tzurActive },
         { keys: ['s', 'a', 's', 'h', 'a'], trigger: triggerSashaMode, blocked: sashaActive },
         { keys: ['d', 'v', 'i', 'r'], trigger: triggerDvirMode, blocked: dvirActive },
-        { keys: ['h', 'h'], trigger: triggerHHMode, blocked: false },
-        { keys: ['r', 'l'], trigger: triggerRLMode, blocked: false },
+        { keys: ['b', 'h'], trigger: triggerHHMode, blocked: false },
+        { keys: ['b', 's', 'd'], trigger: triggerRLMode, blocked: false },
       ];
       if (gameState === GAME_STATES.ACTIVE && !tzurActive && !sashaActive && !dvirActive) {
         const buf = cheatBufferRef.current;

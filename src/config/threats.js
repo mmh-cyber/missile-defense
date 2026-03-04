@@ -159,7 +159,7 @@ function threat(id, time, type, zone, populated, cdn, intel, reveal, extra = {})
 
 // ============================================================
 // LEVEL 1: Otef Aza — Short-range ROCKETS only, Iron Dome
-// Duration: 120s | 29 threats | Teaches: intercept + hold fire
+// Duration: 120s | 32 threats | Teaches: intercept + hold fire
 // Geography: Gaza border communities. Viewport zoomed tight on south.
 // All threats from Gaza. Only Otef Aza cities targeted.
 // ============================================================
@@ -189,17 +189,21 @@ const THREATS_L1 = [
   threat(17, 69, 'rocket', 'Kfar Aza',        true,  6, 'full', 1.0, { origin: 'gaza' }),
   threat(18, 71, 'rocket', 'Northern Negev',  false, 6, 'full', 1.0, { origin: 'gaza' }),    // hold fire
   threat(19, 75, 'rocket', 'Netivot',         true,  6, 'full', 1.0, { origin: 'gaza' }),
-  // === FLURRY — last 30s, rapid fire, 3s gaps ===
+  // === FLURRY — last 40s, rapid fire, building to simultaneous salvos ===
   threat(20, 80, 'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),
   threat(21, 83, 'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),
   threat(22, 86, 'rocket', "Re'im",           true,  5, 'full', 1.0, { origin: 'gaza' }),
   threat(23, 89, 'rocket', 'Kfar Aza',        true,  5, 'full', 1.0, { origin: 'gaza' }),
   threat(24, 92, 'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),
-  threat(25, 95, 'rocket', 'Netivot',         true,  5, 'full', 1.0, { origin: 'gaza' }),
-  threat(26, 98, 'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),
-  threat(27, 101,'rocket', "Be'eri",          true,  5, 'full', 1.0, { origin: 'gaza' }),
-  threat(28, 104,'rocket', 'Northern Negev',  false, 5, 'full', 1.0, { origin: 'gaza' }),    // hold fire
-  threat(29, 107,'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  // === FINAL SURGE — simultaneous salvos, max pressure ===
+  threat(25, 95, 'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(26, 95, 'rocket', 'Netivot',         true,  5, 'full', 1.0, { origin: 'gaza' }),     // simultaneous pair
+  threat(27, 99, 'rocket', 'Kfar Aza',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(28, 102,'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(29, 102,'rocket', "Be'eri",          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(30, 102,'rocket', 'Northern Negev',  false, 5, 'full', 1.0, { origin: 'gaza' }),     // hold fire in the chaos!
+  threat(31, 107,'rocket', "Re'im",           true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(32, 107,'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),     // closing pair
 ];
 
 // ============================================================
@@ -515,7 +519,7 @@ export const LEVELS = [
   {
     id: 1,
     duration: 120,
-    ammo: { iron_dome: 22 },
+    ammo: { iron_dome: 26 },
     available_systems: ['iron_dome'],
     auto_end_delay: 3000,
     new_system: null,
