@@ -246,7 +246,15 @@ function TrailEffect({ trail, viewport }) {
 // ============================================
 // Threat Origin Arc Renderer
 // ============================================
-function ThreatOriginArc({ origin }) {
+const ORIGIN_HEBREW = {
+  Gaza: 'עַזָּה',
+  Lebanon: 'לְבָנוֹן',
+  Syria: 'סוּרְיָה',
+  Iran: 'אִירָאן',
+  Yemen: 'תֵּימָן',
+};
+
+function ThreatOriginArc({ origin, currentLevel }) {
   // Draw a gradient wedge zone at the radar perimeter
   const cx = 50, cy = 50;
   const outerR = 49;
@@ -293,7 +301,7 @@ function ThreatOriginArc({ origin }) {
       />
       {/* Label */}
       <text
-        x={lx} y={ly}
+        x={lx} y={currentLevel >= 4 && ORIGIN_HEBREW[origin.name] ? ly - 1.2 : ly}
         fill="rgba(255, 180, 80, 0.7)"
         fontSize="2.2" fontFamily="monospace"
         textAnchor="middle" dominantBaseline="middle"
@@ -301,6 +309,17 @@ function ThreatOriginArc({ origin }) {
       >
         {origin.name}
       </text>
+      {currentLevel >= 4 && ORIGIN_HEBREW[origin.name] && (
+        <text
+          x={lx} y={ly + 2}
+          fill="rgba(255, 180, 80, 0.7)"
+          fontSize="2.2" fontFamily="Arial, sans-serif"
+          textAnchor="middle" dominantBaseline="middle"
+          fontWeight="bold"
+        >
+          {ORIGIN_HEBREW[origin.name]}
+        </text>
+      )}
     </g>
   );
 }
@@ -767,10 +786,11 @@ export default function RadarDisplay({
                       <text
                         x={p.x + offset.dx} y={p.y + offset.dy}
                         fill={labelColor}
-                        fontSize={labelSize} fontFamily="monospace"
+                        fontSize={labelSize}
+                        fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
                         textAnchor={offset.anchor}
                       >
-                        {name}
+                        {currentLevel === 7 && city.he ? city.he : name}
                       </text>
                     )}
                   </g>
@@ -986,7 +1006,7 @@ export default function RadarDisplay({
 
           {/* Threat origin arcs — rendered ON TOP of clip, at the radar perimeter */}
           {visibleOrigins.map((origin) => (
-            <ThreatOriginArc key={origin.name} origin={origin} viewport={viewport} />
+            <ThreatOriginArc key={origin.name} origin={origin} viewport={viewport} currentLevel={currentLevel} />
           ))}
 
           {/* Sweep line */}

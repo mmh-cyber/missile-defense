@@ -3,33 +3,41 @@ import { THREAT_COLORS, INTERCEPTOR_COLORS } from '../config/threats.js';
 const ALL_MATCHINGS = [
   {
     system: 'IRON DOME',
+    systemHebrew: 'כִּפַּת בַּרְזֶל',
     systemColor: INTERCEPTOR_COLORS.iron_dome,
     shortcut: '1',
     threat: 'DRONES',
+    threatHebrew: 'כטב"מ',
     threatColor: THREAT_COLORS.drone,
     description: 'Low altitude, slow moving',
   },
   {
     system: "DAVID'S SLING",
+    systemHebrew: 'קֶלַע דָּוִד',
     systemColor: INTERCEPTOR_COLORS.davids_sling,
     shortcut: '2',
     threat: 'CRUISE MISSILES',
+    threatHebrew: 'טִילֵי שִׁיּוּט',
     threatColor: THREAT_COLORS.cruise,
     description: 'Low altitude, terrain-following',
   },
   {
     system: 'ARROW 2',
+    systemHebrew: 'חֵץ 2',
     systemColor: INTERCEPTOR_COLORS.arrow_2,
     shortcut: '3',
     threat: 'BALLISTIC MISSILES',
+    threatHebrew: 'טִילִים בָּלִיסְטִיִּם',
     threatColor: THREAT_COLORS.ballistic,
     description: 'High arc, fast reentry',
   },
   {
     system: 'ARROW 3',
+    systemHebrew: 'חֵץ 3',
     systemColor: INTERCEPTOR_COLORS.arrow_3,
     shortcut: '4',
     threat: 'HYPERSONIC MISSILES',
+    threatHebrew: 'טִילִים הִיפֶּרְסוֹנִיִּם',
     threatColor: THREAT_COLORS.hypersonic,
     description: 'Exo-atmospheric, extreme speed',
   },
@@ -122,7 +130,7 @@ export default function Briefing({ onReady, level = 1 }) {
           </div>
 
           <div className="space-y-3">
-            {matchings.map(({ system, systemColor, shortcut, threat, threatColor, description }) => (
+            {matchings.map(({ system, systemHebrew, systemColor, shortcut, threat, threatHebrew, threatColor, description }) => (
               <div
                 key={system}
                 className="flex items-center gap-4 p-3 rounded-lg bg-gray-900/50 border border-gray-800"
@@ -137,10 +145,16 @@ export default function Briefing({ onReady, level = 1 }) {
                   <div className="font-mono font-bold text-sm tracking-wider" style={{ color: systemColor }}>
                     {system}
                   </div>
+                  <div className="text-xs font-bold mt-0.5" style={{ color: systemColor, opacity: 0.75, fontFamily: 'Arial, sans-serif' }}>
+                    {systemHebrew}
+                  </div>
                 </div>
                 <div className="flex-shrink-0 text-green-600 font-mono text-xl px-2">&#x2192;</div>
                 <div className="flex-1">
                   <div className="font-mono font-bold text-sm tracking-wider" style={{ color: threatColor }}>{threat}</div>
+                  <div className="text-xs font-bold mt-0.5" style={{ color: threatColor, opacity: 0.75, fontFamily: 'Arial, sans-serif' }}>
+                    {threatHebrew}
+                  </div>
                   <div className="text-[10px] text-gray-500 font-mono mt-0.5">{description}</div>
                 </div>
               </div>

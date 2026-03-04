@@ -9,6 +9,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz', 'exercise'],
     threat: {
       title: 'SHORT-RANGE ROCKETS',
+      hebrewTitle: 'רַקֵּטוֹת',
       subtitle: 'Qassam & Grad Rockets',
       color: '#f97316',
       bullets: [
@@ -22,6 +23,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: 'IRON DOME',
+      hebrewTitle: 'כִּפַּת בַּרְזֶל',
       subtitle: 'Short-Range Air Defense System',
       color: '#22c55e',
       bullets: [
@@ -47,6 +49,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'quiz'],
     threat: {
       title: 'ATTACK DRONES',
+      hebrewTitle: 'כטב"מ',
       subtitle: 'Shahed-136 & Samad-3 Drones',
       color: '#eab308',
       bullets: [
@@ -71,6 +74,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'CRUISE MISSILES',
+      hebrewTitle: 'טִילֵי שִׁיּוּט',
       subtitle: 'Paveh & Quds Cruise Missiles',
       color: '#3b82f6',
       bullets: [
@@ -83,6 +87,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: "DAVID'S SLING",
+      hebrewTitle: 'קֶלַע דָּוִד',
       subtitle: 'Medium-Range Air Defense System',
       color: '#3b82f6',
       bullets: [
@@ -107,6 +112,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'BALLISTIC MISSILES',
+      hebrewTitle: 'טִילִים בָּלִיסְטִיִּם',
       subtitle: 'Shahab-3 & Fateh-110',
       color: '#ef4444',
       bullets: [
@@ -119,6 +125,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: 'ARROW 2',
+      hebrewTitle: 'חֵץ 2',
       subtitle: 'Upper-Atmosphere Interceptor',
       color: '#ef4444',
       bullets: [
@@ -142,6 +149,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'HYPERSONIC GLIDE VEHICLES',
+      hebrewTitle: 'טִילִים הִיפֶּרְסוֹנִיִּם',
       subtitle: 'DF-ZF Class',
       color: '#a855f7',
       bullets: [
@@ -154,6 +162,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: 'ARROW 3',
+      hebrewTitle: 'חֵץ 3',
       subtitle: 'Exo-Atmospheric Interceptor',
       color: '#a855f7',
       bullets: [
@@ -177,6 +186,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'APRIL 13, 2024 ATTACK',
+      hebrewTitle: 'מתקפת 13 באפריל',
       subtitle: 'Iran Launches 300+ Projectiles at Israel',
       color: '#22c55e',
       bullets: [
@@ -191,6 +201,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: 'MULTINATIONAL INTERCEPT',
+      hebrewTitle: 'יִירוּט רַב-לְאוּמִּי',
       subtitle: 'Coalition Defense — 99% Intercept Rate',
       color: '#22c55e',
       bullets: [
@@ -210,6 +221,7 @@ const BRIEFING_CONTENT = {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
       title: 'THE COST PROBLEM',
+      hebrewTitle: 'בְּעָיַת הָעֲלוּת',
       subtitle: 'When Defense Costs More Than Attack',
       color: '#ef4444',
       bullets: [
@@ -224,6 +236,7 @@ const BRIEFING_CONTENT = {
     },
     defense: {
       title: 'IRON BEAM & THE FUTURE',
+      hebrewTitle: 'קֶרֶן בַּרְזֶל',
       subtitle: 'Solving the Cost Problem with Directed Energy',
       color: '#f97316',
       bullets: [
@@ -807,6 +820,9 @@ function ThreatBriefingPhase({ data, onComplete }) {
       <div className="text-center mb-4">
         <div className="text-xs text-gray-500 font-mono tracking-[0.4em] mb-1">THREAT BRIEFING</div>
         <h2 className="text-2xl font-bold font-mono tracking-wider" style={{ color: data.color }}>{data.title}</h2>
+        {data.hebrewTitle && (
+          <div className="text-xl font-bold mt-0.5" style={{ color: data.color, opacity: 0.75, fontFamily: 'Arial, sans-serif' }}>{data.hebrewTitle}</div>
+        )}
         <div className="text-xs text-gray-600 font-mono mt-1">{data.subtitle}</div>
       </div>
 
@@ -869,6 +885,9 @@ function DefenseBriefingPhase({ data, onComplete }) {
       <div className="text-center mb-4">
         <div className="text-xs text-gray-500 font-mono tracking-[0.4em] mb-1">DEFENSE BRIEFING</div>
         <h2 className="text-2xl font-bold font-mono tracking-wider" style={{ color: data.color }}>{data.title}</h2>
+        {data.hebrewTitle && (
+          <div className="text-xl font-bold mt-0.5" style={{ color: data.color, opacity: 0.75, fontFamily: 'Arial, sans-serif' }}>{data.hebrewTitle}</div>
+        )}
         <div className="text-xs text-gray-600 font-mono mt-1">{data.subtitle}</div>
       </div>
 
@@ -1537,13 +1556,13 @@ function FieldExercisePhase({ config, onComplete }) {
 // ============================================================
 // Level names + geographic context for briefing headers
 const LEVEL_NAMES = {
-  1: { name: 'SOUTHERN FRONT', subtitle: 'Otef Aza — Gaza Border Communities' },
-  2: { name: 'NORTHERN FRONT', subtitle: 'Galil & Golan Heights' },
-  3: { name: 'CENTRAL FRONT', subtitle: 'Tel Aviv — Jerusalem Corridor' },
-  4: { name: 'BALLISTIC ARC', subtitle: 'Full Country Defense' },
-  5: { name: 'HYPERSONIC STRIKE', subtitle: 'Full Country Defense' },
-  6: { name: 'WAVE ASSAULT', subtitle: 'Coordinated Multi-Front Attack' },
-  7: { name: 'FINAL STAND', subtitle: 'Total Saturation Attack' },
+  1: { name: 'SOUTHERN FRONT', hebrewName: 'חֲזִית הַדָּרוֹם', subtitle: 'Otef Aza — Gaza Border Communities' },
+  2: { name: 'NORTHERN FRONT', hebrewName: 'חֲזִית הַצָּפוֹן', subtitle: 'Galil & Golan Heights' },
+  3: { name: 'CENTRAL FRONT', hebrewName: 'חֲזִית הַמֶּרְכָּז', subtitle: 'Tel Aviv — Jerusalem Corridor' },
+  4: { name: 'BALLISTIC ARC', hebrewName: 'קֶשֶׁת בָּלִיסְטִית', subtitle: 'Full Country Defense' },
+  5: { name: 'HYPERSONIC STRIKE', hebrewName: 'מַכַּת עַל-קוֹלִית', subtitle: 'Full Country Defense' },
+  6: { name: 'WAVE ASSAULT', hebrewName: 'מִתְקֶפֶת גַּלִּים', subtitle: 'Coordinated Multi-Front Attack' },
+  7: { name: 'FINAL STAND', hebrewName: 'הַמַּעֲמָד הָאַחֲרוֹן', subtitle: 'Total Saturation Attack' },
 };
 
 export default function EducationalBriefing({ level, onComplete }) {
@@ -1598,6 +1617,11 @@ export default function EducationalBriefing({ level, onComplete }) {
           <h1 className="text-2xl font-bold font-mono text-green-400 tracking-wider mb-0.5">
             {levelInfo.name}
           </h1>
+          {levelInfo.hebrewName && (
+            <div className="text-lg font-bold text-green-400/75 mb-0.5" style={{ fontFamily: 'Arial, sans-serif' }}>
+              {levelInfo.hebrewName}
+            </div>
+          )}
           <div className="text-xs font-mono text-green-600/70 tracking-widest">
             {levelInfo.subtitle}
           </div>

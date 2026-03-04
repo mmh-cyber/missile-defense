@@ -59,6 +59,8 @@ export default function App() {
     dvirActive,
     triggerDvirMode,
     bouncingThreats,
+    triggerHHMode,
+    triggerRLMode,
     startCampaign,
     startLevel,
     advanceLevel,
@@ -121,6 +123,8 @@ export default function App() {
         { keys: ['t', 'z', 'u', 'r'], trigger: triggerTzurMode, blocked: tzurActive },
         { keys: ['s', 'a', 's', 'h', 'a'], trigger: triggerSashaMode, blocked: sashaActive },
         { keys: ['d', 'v', 'i', 'r'], trigger: triggerDvirMode, blocked: dvirActive },
+        { keys: ['h', 'h'], trigger: triggerHHMode, blocked: false },
+        { keys: ['r', 'l'], trigger: triggerRLMode, blocked: false },
       ];
       if (gameState === GAME_STATES.ACTIVE && !tzurActive && !sashaActive && !dvirActive) {
         const buf = cheatBufferRef.current;
@@ -227,7 +231,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, paused, togglePause, handleAction, activeThreats, selectedThreatId, setSelectedThreatId, GAME_STATES, config, currentLevel, tzurActive, triggerTzurMode, sashaActive, triggerSashaMode, dvirActive, triggerDvirMode]);
+  }, [gameState, paused, togglePause, handleAction, activeThreats, selectedThreatId, setSelectedThreatId, GAME_STATES, config, currentLevel, tzurActive, triggerTzurMode, sashaActive, triggerSashaMode, dvirActive, triggerDvirMode, triggerHHMode, triggerRLMode]);
 
   const handleCloseFacilitator = useCallback(() => {
     setShowFacilitator(false);
@@ -316,8 +320,11 @@ export default function App() {
           <h1 className="text-5xl md:text-6xl font-bold font-mono text-green-400 tracking-wider mb-2 drop-shadow-[0_0_20px_rgba(0,255,136,0.3)]">
             MISSILE DEFENSE
           </h1>
-          <div className="text-lg font-mono text-green-600 tracking-[0.3em] mb-10">
+          <div className="text-lg font-mono text-green-600 tracking-[0.3em] mb-1">
             AIR DEFENSE COMMAND
+          </div>
+          <div className="text-2xl font-bold text-green-400/80 tracking-wider mb-10 drop-shadow-[0_0_10px_rgba(0,255,136,0.2)]" style={{ fontFamily: 'Arial, sans-serif' }}>
+            מָגֵן יִשְׂרָאֵל
           </div>
 
           <button
@@ -481,6 +488,9 @@ export default function App() {
           <span className="text-gray-700 font-mono text-xs">|</span>
           <span className="font-mono text-xs tracking-wider text-green-500">
             {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'BALLISTIC ARC', 5: 'HYPERSONIC STRIKE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
+          </span>
+          <span className="text-green-500/80 text-xs font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
+            {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'קֶשֶׁת בָּלִיסְטִית', 5: 'מַכַּת עַל-קוֹלִית', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'הַמַּעֲמָד הָאַחֲרוֹן' })[currentLevel] || ''}
           </span>
         </div>
 

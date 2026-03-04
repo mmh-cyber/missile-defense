@@ -87,6 +87,10 @@ export default function useGameEngine() {
   const dvirActiveRef = useRef(false);
   const [bouncingThreats, setBouncingThreats] = useState([]);
 
+  // Instant-effect cheat code refs (once per level)
+  const hhUsedRef = useRef(false);  // "hh" — clear all threats
+  const rlUsedRef = useRef(false);  // "rl" — resupply ammo
+
   // Refs for stale closure avoidance
   const gameStateRef = useRef(gameState);
   const selectedThreatIdRef = useRef(selectedThreatId);
@@ -249,8 +253,8 @@ export default function useGameEngine() {
 
     const { x: blipX, y: blipY } = getBlipPosition(threat);
 
-    // Immediate launch sound feedback
-    playLaunchSound(volumeRef.current);
+    // Immediate launch sound feedback — distinct per interceptor type
+    playLaunchSound(volumeRef.current, action);
 
     const trailId = Date.now() + Math.random();
     const duration = 600;
@@ -448,6 +452,61 @@ export default function useGameEngine() {
 
     // Turtle fades out after 12.5s
     setTimeout(() => setDvirActive(false), 12500);
+  }, []);
+
+  // "hh" cheat — instantly intercept all active threats (once per level)
+  const triggerHHMode = useCallback(() => {
+    if (hhUsedRef.current) return;
+    if (gameStateRef.current !== GAME_STATES.ACTIVE) return;
+    hhUsedRef.current = true;
+
+    const threats = activeThreatsRef.current.filter((t) => !t.intercepted);
+    if (threats.length === 0) return;
+
+    // Intercept every active threat with staggered flashes
+    threats.forEach((threat, i) => {
+      setTimeout(() => {
+        interceptedIdsRef.current.add(threat.id);
+        setActiveThreats((prev) => prev.map((t) =>
+          t.id === threat.id ? { ...t, intercepted: true, frozenTimeLeft: t.timeLeft } : t
+        ));
+        // Impact flash at threat position
+        if (threat.is_populated) {
+          const pos = IMPACT_POSITIONS[threat.impact_zone];
+          if (pos) {
+            addImpactFlash(threat.impact_zone, 'intercept', pos.x, pos.y, threat.type);
+          }
+          setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
+          setStreak((s) => {
+            const next = s + 1;
+            setBestStreak((b) => Math.max(b, next));
+            return next;
+          });
+        }
+        playInterceptSound(volumeRef.current, threat.type);
+
+        // Remove threat after flash
+        setTimeout(() => {
+          setActiveThreats((prev) => prev.filter((t) => t.id !== threat.id));
+        }, 600);
+      }, i * 80); // stagger 80ms apart for a satisfying cascade
+    });
+  }, [addImpactFlash]);
+
+  // "rl" cheat — resupply +1 of each available interceptor type (once per level)
+  const triggerRLMode = useCallback(() => {
+    if (rlUsedRef.current) return;
+    if (gameStateRef.current !== GAME_STATES.ACTIVE) return;
+    rlUsedRef.current = true;
+
+    const config = getLevelConfig(currentLevelRef.current);
+    setAmmo((prev) => {
+      const updated = { ...prev };
+      for (const key of Object.keys(config.ammo)) {
+        updated[key] = (updated[key] || 0) + 1;
+      }
+      return updated;
+    });
   }, []);
 
   // Trigger tzeva adom — non-blocking, brief flash (no timer penalty — points-based only)
@@ -986,6 +1045,8 @@ export default function useGameEngine() {
     tzurUsedRef.current = false;
     sashaUsedRef.current = false;
     dvirUsedRef.current = false;
+    hhUsedRef.current = false;
+    rlUsedRef.current = false;
     if (tzurIntervalRef.current) { clearInterval(tzurIntervalRef.current); tzurIntervalRef.current = null; }
     if (sashaIntervalRef.current) { clearInterval(sashaIntervalRef.current); sashaIntervalRef.current = null; }
     allSpawnedRef.current = false;
@@ -1029,6 +1090,8 @@ export default function useGameEngine() {
     tzurUsedRef.current = false;
     sashaUsedRef.current = false;
     dvirUsedRef.current = false;
+    hhUsedRef.current = false;
+    rlUsedRef.current = false;
     if (tzurIntervalRef.current) { clearInterval(tzurIntervalRef.current); tzurIntervalRef.current = null; }
     if (sashaIntervalRef.current) { clearInterval(sashaIntervalRef.current); sashaIntervalRef.current = null; }
     allSpawnedRef.current = false;
@@ -1156,6 +1219,8 @@ export default function useGameEngine() {
     tzurUsedRef.current = false;
     sashaUsedRef.current = false;
     dvirUsedRef.current = false;
+    hhUsedRef.current = false;
+    rlUsedRef.current = false;
     if (tzurIntervalRef.current) { clearInterval(tzurIntervalRef.current); tzurIntervalRef.current = null; }
     if (sashaIntervalRef.current) { clearInterval(sashaIntervalRef.current); sashaIntervalRef.current = null; }
     allSpawnedRef.current = false;
@@ -1222,6 +1287,8 @@ export default function useGameEngine() {
     dvirActive,
     triggerDvirMode,
     bouncingThreats,
+    triggerHHMode,
+    triggerRLMode,
     startCampaign,
     startLevel,
     advanceLevel,

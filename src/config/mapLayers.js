@@ -18,46 +18,46 @@
 
 export const CITIES = {
   // === L1: Otef Aza === (GPS-verified positions)
-  'Sderot':         { x: 0.212, y: 0.467, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'e' },
-  'Ashkelon':       { x: 0.202, y: 0.436, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'ne' },
-  "Be'eri":         { x: 0.175, y: 0.490, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'se' },
-  'Kfar Aza':       { x: 0.191, y: 0.477, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'n' },
-  "Re'im":          { x: 0.162, y: 0.498, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 's' },
-  'Netivot':        { x: 0.211, y: 0.490, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'e' },
+  'Sderot':         { x: 0.212, y: 0.467, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'e', he: 'שְׂדֵרוֹת' },
+  'Ashkelon':       { x: 0.202, y: 0.436, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'ne', he: 'אַשְׁקְלוֹן' },
+  "Be'eri":         { x: 0.175, y: 0.490, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'se', he: 'בְּאֵרִי' },
+  'Kfar Aza':       { x: 0.191, y: 0.477, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'n', he: 'כְּפַר עַזָּה' },
+  "Re'im":          { x: 0.162, y: 0.498, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 's', he: 'רְעִים' },
+  'Netivot':        { x: 0.211, y: 0.490, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'e', he: 'נְתִיבוֹת' },
 
   // === L2: Galil + Golan Heights ===
-  'Haifa':          { x: 0.36, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w' },
-  'Nahariya':       { x: 0.39, y: 0.15, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w' },
-  'Kiryat Shmona':  { x: 0.56, y: 0.10, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'sw' },
-  'Teveriah':       { x: 0.55, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'e' },
-  'Akko':           { x: 0.37, y: 0.17, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'e' },
-  'Tzfat':          { x: 0.54, y: 0.15, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'w' },
-  'Katzrin':        { x: 0.60, y: 0.14, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'e' },
-  'Majdal Shams':   { x: 0.59, y: 0.09, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'w' },
+  'Haifa':          { x: 0.36, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w', he: 'חֵיפָה' },
+  'Nahariya':       { x: 0.39, y: 0.15, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w', he: 'נַהֲרִיָּה' },
+  'Kiryat Shmona':  { x: 0.56, y: 0.10, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'sw', he: 'קִרְיַת שְׁמוֹנָה' },
+  'Teveriah':       { x: 0.55, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'e', he: 'טְבֶרְיָה' },
+  'Akko':           { x: 0.37, y: 0.17, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'e', he: 'עַכּוֹ' },
+  'Tzfat':          { x: 0.54, y: 0.15, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'w', he: 'צְפַת' },
+  'Katzrin':        { x: 0.60, y: 0.14, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'e', he: 'קַצְרִין' },
+  'Majdal Shams':   { x: 0.59, y: 0.09, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'w', he: 'מַגְ׳דַל שַׁמְס' },
 
   // === L3: Central Israel (Tel Aviv metro, Jerusalem corridor, Judean foothills) ===
   // tier 1: major cities always labeled on zoomed-out maps (L4+)
   // tier 2: labeled only when zoomed in (L3) or when actively targeted (L4+)
-  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'central', tier: 1, revealLevel: 3, labelDir: 'w' },
-  'Jerusalem':      { x: 0.44, y: 0.42, region: 'central', tier: 1, revealLevel: 3, labelDir: 'e' },
-  'Netanya':        { x: 0.31, y: 0.30, region: 'central', tier: 2, revealLevel: 3, labelDir: 'ne' },
-  "Ra'anana":       { x: 0.313, y: 0.323, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w' },
-  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
-  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'central', tier: 2, revealLevel: 3, labelDir: 'sw' },
-  'Ashdod':         { x: 0.24, y: 0.41, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w' },
-  "Modi'in":        { x: 0.364, y: 0.386, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
-  'Gush Etzion':    { x: 0.417, y: 0.442, region: 'central', tier: 2, revealLevel: 3, labelDir: 'se' },
-  'Holon':          { x: 0.27, y: 0.37, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e' },
+  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'central', tier: 1, revealLevel: 3, labelDir: 'w', he: 'תֵּל אָבִיב' },
+  'Jerusalem':      { x: 0.44, y: 0.42, region: 'central', tier: 1, revealLevel: 3, labelDir: 'e', he: 'יְרוּשָׁלַיִם' },
+  'Netanya':        { x: 0.31, y: 0.30, region: 'central', tier: 2, revealLevel: 3, labelDir: 'ne', he: 'נְתַנְיָה' },
+  "Ra'anana":       { x: 0.313, y: 0.323, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w', he: 'רַעֲנַנָּה' },
+  'Petah Tikva':    { x: 0.33, y: 0.34, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e', he: 'פֶּתַח תִּקְוָה' },
+  'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'central', tier: 2, revealLevel: 3, labelDir: 'sw', he: 'רִאשׁוֹן לְצִיּוֹן' },
+  'Ashdod':         { x: 0.24, y: 0.41, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w', he: 'אַשְׁדּוֹד' },
+  "Modi'in":        { x: 0.364, y: 0.386, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e', he: 'מוֹדִיעִין' },
+  'Gush Etzion':    { x: 0.417, y: 0.442, region: 'central', tier: 2, revealLevel: 3, labelDir: 'se', he: 'גּוּשׁ עֶצְיוֹן' },
+  'Holon':          { x: 0.27, y: 0.37, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e', he: 'חוֹלוֹן' },
 
   // === L4: Coastal bridge + Negev ===
   // Coastal cities between Galil and Central — fill the visual gap on full map
-  'Caesarea':       { x: 0.320, y: 0.253, region: 'coast', tier: 2, revealLevel: 4, labelDir: 'w' },
-  'Hadera':         { x: 0.331, y: 0.269, region: 'coast', tier: 2, revealLevel: 4, labelDir: 'e' },
+  'Caesarea':       { x: 0.320, y: 0.253, region: 'coast', tier: 2, revealLevel: 4, labelDir: 'w', he: 'קֵיסָרְיָה' },
+  'Hadera':         { x: 0.331, y: 0.269, region: 'coast', tier: 2, revealLevel: 4, labelDir: 'e', he: 'חֲדֵרָה' },
   // Negev (pushed south for spacing from Otef Aza / Jerusalem)
-  'Beersheba':      { x: 0.29, y: 0.57, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
-  'Dimona':         { x: 0.37, y: 0.62, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
-  'Eilat':          { x: 0.35, y: 0.90, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e' },
-  'Arad':           { x: 0.42, y: 0.58, region: 'negev', tier: 2, revealLevel: 4, labelDir: 'ne' },
+  'Beersheba':      { x: 0.29, y: 0.57, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e', he: 'בְּאֵר שֶׁבַע' },
+  'Dimona':         { x: 0.37, y: 0.62, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e', he: 'דִּימוֹנָה' },
+  'Eilat':          { x: 0.35, y: 0.90, region: 'negev', tier: 1, revealLevel: 4, labelDir: 'e', he: 'אֵילַת' },
+  'Arad':           { x: 0.42, y: 0.58, region: 'negev', tier: 2, revealLevel: 4, labelDir: 'ne', he: 'עֲרָד' },
 };
 
 // --- Level Viewport Configuration ---

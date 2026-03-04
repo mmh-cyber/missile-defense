@@ -222,6 +222,16 @@ const LEVEL_TITLES = {
   7: 'FINAL STAND',
 };
 
+const LEVEL_TITLES_HE = {
+  1: 'חֲזִית הַדָּרוֹם',
+  2: 'חֲזִית הַצָּפוֹן',
+  3: 'חֲזִית הַמֶּרְכָּז',
+  4: 'קֶשֶׁת בָּלִיסְטִית',
+  5: 'מַכַּת עַל-קוֹלִית',
+  6: 'מִתְקֶפֶת גַּלִּים',
+  7: 'הַמַּעֲמָד הָאַחֲרוֹן',
+};
+
 export default function LevelIntro({ level, onReady }) {
   const config = getLevelConfig(level);
   if (!config) return null;
@@ -248,6 +258,11 @@ export default function LevelIntro({ level, onReady }) {
           {LEVEL_TITLES[level] && (
             <div className="text-lg font-mono text-green-600 tracking-[0.3em] mt-1">
               {LEVEL_TITLES[level]}
+            </div>
+          )}
+          {LEVEL_TITLES_HE[level] && (
+            <div className="text-lg font-bold text-green-500/80 mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>
+              {LEVEL_TITLES_HE[level]}
             </div>
           )}
           <div className="h-px bg-green-900 w-48 mx-auto mt-4" />
