@@ -207,6 +207,54 @@ const THREATS_L1 = [
 ];
 
 // ============================================================
+// LEVEL 1 — VARIANT B: Same skeleton, different target assignments
+// Same timing, countdowns, hold-fire positions, and ammo budget.
+// Different city targets per slot so repeat players can't memorize.
+// ============================================================
+const THREATS_L1_B = [
+  // Opening: gentle intro — 5s gaps, learn the basics
+  threat(1,  3,  'rocket', 'Ashkelon',        true,  8, 'full', 1.0, { origin: 'gaza' }),
+  threat(2,  8,  'rocket', 'Northern Negev',  false, 8, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  threat(3,  13, 'rocket', 'Kfar Aza',        true,  8, 'full', 1.0, { origin: 'gaza' }),
+  threat(4,  18, 'rocket', 'Northern Negev',  false, 8, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  // Pairs begin — first overlap
+  threat(5,  24, 'rocket', 'Netivot',         true,  7, 'full', 1.0, { origin: 'gaza' }),
+  threat(6,  26, 'rocket', 'Northern Negev',  false, 7, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  // Tempo up — 4s gaps
+  threat(7,  32, 'rocket', "Re'im",           true,  7, 'full', 1.0, { origin: 'gaza' }),
+  threat(8,  36, 'rocket', 'Sderot',          true,  7, 'full', 1.0, { origin: 'gaza' }),
+  threat(9,  40, 'rocket', "Be'eri",          true,  7, 'full', 1.0, { origin: 'gaza' }),
+  threat(10, 42, 'rocket', 'Northern Negev',  false, 7, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  // Simultaneous pair
+  threat(11, 48, 'rocket', 'Kfar Aza',        true,  7, 'full', 1.0, { origin: 'gaza' }),
+  threat(12, 48, 'rocket', 'Ashkelon',        true,  7, 'full', 1.0, { origin: 'gaza' }),
+  // Building pressure — 3-4s gaps
+  threat(13, 54, 'rocket', 'Sderot',          true,  6, 'full', 1.0, { origin: 'gaza' }),
+  threat(14, 56, 'rocket', 'Northern Negev',  false, 6, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  threat(15, 60, 'rocket', 'Netivot',         true,  6, 'full', 1.0, { origin: 'gaza' }),
+  threat(16, 64, 'rocket', 'Kfar Aza',        true,  6, 'full', 1.0, { origin: 'gaza' }),
+  // Mid-section pairs
+  threat(17, 69, 'rocket', "Be'eri",          true,  6, 'full', 1.0, { origin: 'gaza' }),
+  threat(18, 71, 'rocket', 'Northern Negev',  false, 6, 'full', 1.0, { origin: 'gaza' }),    // hold fire
+  threat(19, 75, 'rocket', "Re'im",           true,  6, 'full', 1.0, { origin: 'gaza' }),
+  // === FLURRY — last 40s, rapid fire, building to simultaneous salvos ===
+  threat(20, 80, 'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(21, 83, 'rocket', 'Netivot',         true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(22, 86, 'rocket', 'Kfar Aza',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(23, 89, 'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(24, 92, 'rocket', "Be'eri",          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  // === FINAL SURGE — simultaneous salvos, max pressure ===
+  threat(25, 95, 'rocket', "Re'im",           true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(26, 95, 'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),     // simultaneous pair
+  threat(27, 99, 'rocket', 'Netivot',         true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(28, 102,'rocket', 'Sderot',          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(29, 102,'rocket', 'Kfar Aza',        true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(30, 102,'rocket', 'Northern Negev',  false, 5, 'full', 1.0, { origin: 'gaza' }),     // hold fire in the chaos!
+  threat(31, 107,'rocket', "Be'eri",          true,  5, 'full', 1.0, { origin: 'gaza' }),
+  threat(32, 107,'rocket', 'Ashkelon',        true,  5, 'full', 1.0, { origin: 'gaza' }),     // closing pair
+];
+
+// ============================================================
 // LEVEL 2: Galil, Haifa & Golan — Drones + Rockets, Iron Dome
 // Duration: 120s | 34 threats | Introduces: drones
 // Geography: Northern Israel. Viewport zoomed tight on north.
@@ -515,7 +563,7 @@ const THREATS_L7 = [
 // LEVEL CONFIGURATION
 // ============================================================
 export const LEVELS = [
-  // Level 1: Otef Aza — Rockets + Iron Dome
+  // Level 1: Otef Aza — Rockets + Iron Dome (randomized variants)
   {
     id: 1,
     duration: 120,
@@ -527,6 +575,7 @@ export const LEVELS = [
     final_salvo_warning_time: null,
     final_salvo_start_time: null,
     threats: THREATS_L1,
+    threatVariants: [THREATS_L1, THREATS_L1_B],
   },
   // Level 2: Galil & Golan — Drones + Rockets (still Iron Dome only)
   {
@@ -614,6 +663,17 @@ export const LEVELS = [
 export function getThreats(level) {
   const lvl = LEVELS[level - 1];
   return lvl ? lvl.threats : [];
+}
+
+// Pick a random variant for a level (called once per level start).
+// Returns the selected threats array. Falls back to default if no variants.
+export function pickThreatVariant(level) {
+  const lvl = LEVELS[level - 1];
+  if (!lvl) return [];
+  if (lvl.threatVariants && lvl.threatVariants.length > 0) {
+    return lvl.threatVariants[Math.floor(Math.random() * lvl.threatVariants.length)];
+  }
+  return lvl.threats;
 }
 
 export function getLevelConfig(level) {

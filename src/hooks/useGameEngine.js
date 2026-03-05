@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   getThreats,
   getLevelConfig,
+  pickThreatVariant,
   TOTAL_LEVELS,
   IMPACT_POSITIONS,
   COMMAND_CENTER,
@@ -135,6 +136,9 @@ export default function useGameEngine() {
   const pingRef = useRef(null);
   const successRef = useRef(null);
   const failRef = useRef(null);
+
+  // Threat variant — picked once per level start, stable across re-renders
+  const selectedThreatsRef = useRef(null);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -697,7 +701,7 @@ export default function useGameEngine() {
     if (gameState !== GAME_STATES.ACTIVE) return;
 
     const config = getLevelConfig(currentLevel);
-    const threats = getThreats(currentLevel);
+    const threats = selectedThreatsRef.current || getThreats(currentLevel);
 
     let spawned = false;
     let unspawnedCount = 0;
@@ -1105,6 +1109,10 @@ export default function useGameEngine() {
       clearTimeout(autoEndTimerRef.current);
       autoEndTimerRef.current = null;
     }
+
+    // Pick a random threat variant for this level (stable until next level start)
+    selectedThreatsRef.current = pickThreatVariant(level);
+
     setGameState(GAME_STATES.ACTIVE);
   }, []);
 
