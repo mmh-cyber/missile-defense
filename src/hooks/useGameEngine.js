@@ -587,7 +587,6 @@ export default function useGameEngine() {
     } else if (threat.held) {
       // Correct hold — player let it through, lands harmlessly
       setResultLog((prev) => [...prev, { ...threat, result: 'correct_hold', siren: false }]);
-      playSound(successRef);
       addImpactFlash(threat.impact_zone, 'ground_impact', threat.type);
       playGroundImpactSound(volumeRef.current);
       setStreak((s) => {
