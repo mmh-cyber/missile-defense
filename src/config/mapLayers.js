@@ -95,10 +95,10 @@ export const LEVEL_VIEWPORTS = [
 
 export const LEVEL_BATTERIES = [
   null,
-  { x: 0.27, y: 0.46, label: 'Iron Dome' },       // L1: near Otef Aza cluster
-  { x: 0.38, y: 0.20, label: 'Iron Dome' },       // L2: near Haifa (northern front)
-  { x: 0.25, y: 0.39, label: 'Hatzor AFB' },      // L3: David's Sling home base
-  { x: 0.22, y: 0.37, label: 'Palmachim AFB' },   // L4: Arrow 2 primary site
+  { x: 0.24, y: 0.455, label: 'Hatzerim' },       // L1: Iron Dome battery (Hatzerim AFB area, SW of Otef Aza)
+  { x: 0.43, y: 0.22, label: 'Ramat David' },     // L2: northern air defense (Ramat David AFB)
+  { x: 0.25, y: 0.42, label: 'Hatzor' },          // L3: David's Sling home base (Hatzor AFB)
+  { x: 0.22, y: 0.40, label: 'Palmachim' },       // L4: Arrow 2 primary site (offset slightly from base marker)
   // L5-7: array of distributed batteries — getNearestBattery picks the closest
   [
     { x: 0.24, y: 0.38, label: 'Palmachim' },     // Central coast — Arrow 2/3 primary

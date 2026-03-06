@@ -842,27 +842,36 @@ export default function RadarDisplay({
               });
             })()}
 
-            {/* Battery markers — single for L1-4, multiple for L5-7 */}
+            {/* Battery markers — orange diamond inside green outline, AFB label */}
             {(() => {
               const entry = getBatteryForLevel(currentLevel);
               if (!entry) return null;
               const batteries = Array.isArray(entry) ? entry : [entry];
               return batteries.map((battery, i) => {
                 const hq = mapToSVG(battery.x, battery.y, viewport);
+                const r = 1.8;
                 return (
                   <g key={`bat-${i}`}>
+                    {/* Outer green diamond */}
                     <rect
-                      x={hq.x - 1.5} y={hq.y - 1.5}
-                      width="3" height="3"
-                      fill="none" stroke="#22c55e" strokeWidth="0.4" opacity="0.7"
+                      x={hq.x - r} y={hq.y - r}
+                      width={r * 2} height={r * 2}
+                      fill="none" stroke="rgba(0, 255, 136, 0.7)" strokeWidth="0.5"
                       transform={`rotate(45, ${hq.x}, ${hq.y})`}
                     />
-                    {/* Battery label */}
+                    {/* Inner orange diamond */}
+                    <rect
+                      x={hq.x - r * 0.6} y={hq.y - r * 0.6}
+                      width={r * 1.2} height={r * 1.2}
+                      fill="rgba(234, 179, 8, 0.5)" stroke="rgba(234, 179, 8, 0.9)" strokeWidth="0.3"
+                      transform={`rotate(45, ${hq.x}, ${hq.y})`}
+                    />
+                    {/* AFB label */}
                     <text
                       x={hq.x} y={hq.y + 3.5}
-                      fill="#22c55e" fontSize={battery.label.length > 10 ? '1.6' : '2.2'} fontFamily="monospace"
+                      fill="rgba(234, 179, 8, 0.9)" fontSize="2" fontFamily="monospace"
                       textAnchor="middle" dominantBaseline="hanging"
-                      opacity="0.7" fontWeight="bold"
+                      fontWeight="bold"
                     >
                       {battery.label}
                     </text>

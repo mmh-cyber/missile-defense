@@ -526,7 +526,7 @@ export default function App() {
             if (gameState === GAME_STATES.ACTIVE && !paused) togglePause();
             setShowFacilitator(true);
           }}
-          className="text-gray-500 hover:text-gray-200 transition-colors cursor-pointer text-xl px-1"
+          className="text-gray-400 hover:text-gray-100 transition-colors cursor-pointer text-2xl px-1.5 py-0.5"
           title="Settings (ESC)"
         >
           &#9881;
@@ -537,14 +537,14 @@ export default function App() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800/50 bg-[#080c16]">
         <div className="flex items-center gap-3 whitespace-nowrap">
-          <span className="text-green-500 font-mono text-xs tracking-widest">
+          <span className="text-green-400 font-mono text-sm font-bold tracking-widest">
             LEVEL {currentLevel}
           </span>
-          <span className="text-gray-700 font-mono text-xs">|</span>
-          <span className="font-mono text-xs tracking-wider text-green-500">
+          <span className="text-gray-600 font-mono text-sm">|</span>
+          <span className="font-mono text-sm tracking-wider text-green-400 font-bold">
             {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'STRATEGIC TARGETS', 5: 'FULL DEFENSE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
           </span>
-          <span className="text-green-500/80 text-xs font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <span className="text-green-400/80 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
             {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', 5: 'הֲגָנָה מְלֵאָה', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'הַמַּעֲמָד הָאַחֲרוֹן' })[currentLevel] || ''}
           </span>
         </div>
