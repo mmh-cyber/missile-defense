@@ -312,27 +312,10 @@ export default function useGameEngine() {
         interceptedIdsRef.current.add(target.id);
         const { x: blipX, y: blipY } = getBlipPosition(target);
 
-        // Beard strand trail — start from beard tip area (bottom of portrait)
-        // Portrait is centered at (0.5, 0.5) in normalized coords;
-        // beard tips are ~14 SVG units below center = 0.14 in normalized coords
-        const trailId = Date.now() + Math.random();
-        const duration = 350;
-        const beardTipY = 0.5 + 0.14;
-        const beardSpread = (Math.random() - 0.5) * 0.06;
-        setActiveTrails((prev) => [...prev, {
-          id: trailId,
-          startX: 0.5 + beardSpread, startY: beardTipY,
-          endX: blipX, endY: blipY,
-          color: '#8B4513',
-          duration,
-        }]);
-        setTimeout(() => setActiveTrails((prev) => prev.filter((t) => t.id !== trailId)), duration + 500);
-
-        // Intercept flash + sound
-        setTimeout(() => {
-          addImpactFlash(target.impact_zone, 'intercept', target.type, { x: blipX, y: blipY });
-          playInterceptSound(volumeRef.current, target.type);
-        }, duration);
+        // No trail needed — the SVG beard strands already show the visual
+        // connection from beard to threat. Just flash + sound on impact.
+        addImpactFlash(target.impact_zone, 'intercept', target.type, { x: blipX, y: blipY });
+        playInterceptSound(volumeRef.current, target.type);
 
         // Mark intercepted
         setActiveThreats((prev) => prev.map((t) =>
