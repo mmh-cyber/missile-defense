@@ -145,7 +145,7 @@ export const REGIONS = [
       [0.22, 0.28], [0.36, 0.28], [0.46, 0.38],
       [0.46, 0.46], [0.22, 0.46], [0.22, 0.34],
     ],
-    labelPos: { x: 0.32, y: 0.47 },
+    labelPos: { x: 0.32, y: 0.36 },
   },
   {
     name: 'Negev',
@@ -156,7 +156,7 @@ export const REGIONS = [
       [0.42, 0.80], [0.37, 0.92], [0.33, 0.92],
       [0.28, 0.75], [0.22, 0.62],
     ],
-    labelPos: { x: 0.35, y: 0.70 },
+    labelPos: { x: 0.30, y: 0.63 },
   },
   // L5 unpopulated regions — outlines only, no cities
   {
@@ -167,7 +167,7 @@ export const REGIONS = [
       [0.42, 0.58], [0.50, 0.55], [0.48, 0.72],
       [0.44, 0.85], [0.38, 0.92], [0.38, 0.75],
     ],
-    labelPos: { x: 0.45, y: 0.72 },
+    labelPos: { x: 0.46, y: 0.78 },
   },
   // Judean Desert removed — label caused clutter on zoomed-out views
 ];
