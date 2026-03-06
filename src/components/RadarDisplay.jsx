@@ -866,15 +866,23 @@ export default function RadarDisplay({
                       fill="rgba(234, 179, 8, 0.5)" stroke="rgba(234, 179, 8, 0.9)" strokeWidth="0.3"
                       transform={`rotate(45, ${hq.x}, ${hq.y})`}
                     />
-                    {/* AFB label */}
-                    <text
-                      x={hq.x} y={hq.y + 3.5}
-                      fill="rgba(234, 179, 8, 0.9)" fontSize="2" fontFamily="monospace"
-                      textAnchor="middle" dominantBaseline="hanging"
-                      fontWeight="bold"
-                    >
-                      {battery.label}
-                    </text>
+                    {/* AFB label — positioned by labelDir to avoid overlap */}
+                    {(() => {
+                      const dir = battery.labelDir || 's';
+                      const lx = dir.includes('e') ? hq.x + 3.5 : dir.includes('w') ? hq.x - 3.5 : hq.x;
+                      const ly = dir.includes('s') ? hq.y + 3.5 : dir.includes('n') ? hq.y - 3.5 : hq.y + 0.7;
+                      const anchor = dir.includes('e') ? 'start' : dir.includes('w') ? 'end' : 'middle';
+                      return (
+                        <text
+                          x={lx} y={ly}
+                          fill="rgba(234, 179, 8, 0.9)" fontSize="2" fontFamily="monospace"
+                          textAnchor={anchor} dominantBaseline="hanging"
+                          fontWeight="bold"
+                        >
+                          {battery.label}
+                        </text>
+                      );
+                    })()}
                   </g>
                 );
               });
