@@ -107,9 +107,9 @@ const BRIEFING_CONTENT = {
       subtitle: 'Shahab-3 & Fateh-110',
       color: '#ef4444',
       bullets: [
-        { icon: '🇮🇷', text: "Iran's Shahab-3 can reach Israel from Iranian soil — range over 1,300 km" },
-        { icon: '🔥', text: 'Ballistic missiles launch on a high arc into space, then plunge toward the target' },
-        { icon: '⚡', text: 'Reentry speed: Mach 7-10 — faster than any bullet, with enormous kinetic energy' },
+        { icon: '🎯', text: 'Adversaries target military bases — air fields, missile batteries, and intelligence sites — to cripple Israel\'s ability to fight back' },
+        { icon: '🇮🇷', text: "Iran's Shahab-3 can reach any base in Israel from Iranian soil — range over 1,300 km" },
+        { icon: '⚡', text: 'Ballistic missiles arc into space then plunge at Mach 7-10 — enormous kinetic energy on impact' },
       ],
       animation: 'ballistic',
     },
@@ -1532,8 +1532,8 @@ const LEVEL_NAMES = {
   1: { name: 'SOUTHERN FRONT', hebrewName: 'חֲזִית הַדָּרוֹם', subtitle: 'Otef Aza — Gaza Border Communities' },
   2: { name: 'NORTHERN FRONT', hebrewName: 'חֲזִית הַצָּפוֹן', subtitle: 'Galil & Golan Heights' },
   3: { name: 'CENTRAL FRONT', hebrewName: 'חֲזִית הַמֶּרְכָּז', subtitle: 'Tel Aviv — Jerusalem Corridor' },
-  4: { name: 'BALLISTIC ARC', hebrewName: 'קֶשֶׁת בָּלִיסְטִית', subtitle: 'Full Country Defense' },
-  5: { name: 'HYPERSONIC STRIKE', hebrewName: 'מַכַּת עַל-קוֹלִית', subtitle: 'Full Country Defense' },
+  4: { name: 'STRATEGIC TARGETS', hebrewName: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', subtitle: 'Defending Military Bases' },
+  5: { name: 'FULL DEFENSE', hebrewName: 'הֲגָנָה מְלֵאָה', subtitle: 'Full Country — All Systems Active' },
   6: { name: 'WAVE ASSAULT', hebrewName: 'מִתְקֶפֶת גַּלִּים', subtitle: 'Coordinated Multi-Front Attack' },
   7: { name: 'FINAL STAND', hebrewName: 'הַמַּעֲמָד הָאַחֲרוֹן', subtitle: 'Total Saturation Attack' },
 };

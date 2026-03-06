@@ -692,7 +692,6 @@ export default function useGameEngine() {
 
       if (threat.is_populated) {
         setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
-        playSound(successRef);
         addTrail(action, threat, 'intercept');
         setStreak((s) => {
           const next = s + 1;
@@ -709,8 +708,6 @@ export default function useGameEngine() {
       setWrongInterceptAttempts((c) => c + 1);
       setStreak(0);
       addTrail(action, threat, null);
-      // Delay fail sound so the launch sound comes through clean first
-      setTimeout(() => playSound(failRef), 150);
       const SYSTEM_NAMES = { iron_dome: 'Iron Dome', davids_sling: "David's Sling", arrow_2: 'Arrow 2', arrow_3: 'Arrow 3' };
       const correctName = SYSTEM_NAMES[threat.correct_action] || threat.correct_action;
       showFeedback(`INTERCEPTION FAILED — use ${correctName}!`, 'error');
@@ -759,9 +756,12 @@ export default function useGameEngine() {
             _corrected: false,
           };
           const newThreats = [...prev, newThreat];
-          const selectable = newThreats.filter((t) => !t.intercepted && !t.held);
-          if (selectable.length === 1) {
-            setSelectedThreatId(selectable[0].id);
+          // Auto-select when only 1 threat on screen (L3+ only — L1/L2 require manual targeting)
+          if (currentLevel >= 3) {
+            const selectable = newThreats.filter((t) => !t.intercepted && !t.held);
+            if (selectable.length === 1) {
+              setSelectedThreatId(selectable[0].id);
+            }
           }
           return newThreats;
         });

@@ -707,6 +707,8 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
   try {
     const ctx = getContext();
     const now = ctx.currentTime;
+    // Boost launch sounds so they cut through the mix
+    const v = Math.min(volume * 1.4, 1.0);
 
     if (systemKey === 'iron_dome') {
       // ── Iron Dome: POP-zip ──────────────────────────────
@@ -722,7 +724,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       }
       const pop = ctx.createBufferSource(); pop.buffer = popBuf;
       const popG = ctx.createGain();
-      popG.gain.setValueAtTime(volume * 0.9, now);
+      popG.gain.setValueAtTime(v * 0.9, now);
       popG.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
       pop.connect(popG); popG.connect(ctx.destination);
       pop.start(now); pop.stop(now + 0.025);
@@ -733,7 +735,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       zip.frequency.setValueAtTime(800, now);
       zip.frequency.exponentialRampToValueAtTime(3000, now + 0.08);
       const zipG = ctx.createGain();
-      zipG.gain.setValueAtTime(volume * 0.35, now + 0.005);
+      zipG.gain.setValueAtTime(v * 0.35, now + 0.005);
       zipG.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
       zip.connect(zipG); zipG.connect(ctx.destination);
       zip.start(now + 0.005); zip.stop(now + 0.1);
@@ -743,7 +745,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       ping.type = 'triangle';
       ping.frequency.value = 1600;
       const pingG = ctx.createGain();
-      pingG.gain.setValueAtTime(volume * 0.2, now);
+      pingG.gain.setValueAtTime(v * 0.2, now);
       pingG.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       ping.connect(pingG); pingG.connect(ctx.destination);
       ping.start(now); ping.stop(now + 0.06);
@@ -759,7 +761,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       clunk1.frequency.setValueAtTime(400, now);
       clunk1.frequency.exponentialRampToValueAtTime(150, now + 0.04);
       const clunkG1 = ctx.createGain();
-      clunkG1.gain.setValueAtTime(volume * 0.5, now);
+      clunkG1.gain.setValueAtTime(v * 0.5, now);
       clunkG1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       clunk1.connect(clunkG1); clunkG1.connect(ctx.destination);
       clunk1.start(now); clunk1.stop(now + 0.06);
@@ -769,7 +771,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       clunk2.frequency.setValueAtTime(300, now + 0.03);
       clunk2.frequency.exponentialRampToValueAtTime(100, now + 0.07);
       const clunkG2 = ctx.createGain();
-      clunkG2.gain.setValueAtTime(volume * 0.35, now + 0.03);
+      clunkG2.gain.setValueAtTime(v * 0.35, now + 0.03);
       clunkG2.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
       clunk2.connect(clunkG2); clunkG2.connect(ctx.destination);
       clunk2.start(now + 0.03); clunk2.stop(now + 0.09);
@@ -787,8 +789,8 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       hissBP.type = 'bandpass'; hissBP.frequency.value = 3500; hissBP.Q.value = 0.7;
       const hissG = ctx.createGain();
       hissG.gain.setValueAtTime(0.001, now);
-      hissG.gain.linearRampToValueAtTime(volume * 0.3, now + 0.06);
-      hissG.gain.setValueAtTime(volume * 0.25, now + 0.15);
+      hissG.gain.linearRampToValueAtTime(v * 0.3, now + 0.06);
+      hissG.gain.setValueAtTime(v * 0.25, now + 0.15);
       hissG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
       hiss.connect(hissBP); hissBP.connect(hissG); hissG.connect(ctx.destination);
       hiss.start(now + 0.02); hiss.stop(now + 0.35);
@@ -799,7 +801,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       thump.frequency.setValueAtTime(120, now);
       thump.frequency.exponentialRampToValueAtTime(50, now + 0.08);
       const thumpG = ctx.createGain();
-      thumpG.gain.setValueAtTime(volume * 0.4, now);
+      thumpG.gain.setValueAtTime(v * 0.4, now);
       thumpG.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       thump.connect(thumpG); thumpG.connect(ctx.destination);
       thump.start(now); thump.stop(now + 0.12);
@@ -815,7 +817,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       cannon.frequency.setValueAtTime(55, now);
       cannon.frequency.exponentialRampToValueAtTime(28, now + 0.2);
       const cannonG = ctx.createGain();
-      cannonG.gain.setValueAtTime(volume * 0.9, now);
+      cannonG.gain.setValueAtTime(v * 0.9, now);
       cannonG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
       cannon.connect(cannonG); cannonG.connect(ctx.destination);
       cannon.start(now); cannon.stop(now + 0.3);
@@ -832,7 +834,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       const rumbleLP = ctx.createBiquadFilter();
       rumbleLP.type = 'lowpass'; rumbleLP.frequency.value = 400;
       const rumbleG = ctx.createGain();
-      rumbleG.gain.setValueAtTime(volume * 0.45, now + 0.02);
+      rumbleG.gain.setValueAtTime(v * 0.45, now + 0.02);
       rumbleG.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
       rumble.connect(rumbleLP); rumbleLP.connect(rumbleG); rumbleG.connect(ctx.destination);
       rumble.start(now + 0.02); rumble.stop(now + 0.5);
@@ -843,7 +845,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       pulse.frequency.setValueAtTime(40, now + 0.03);
       pulse.frequency.exponentialRampToValueAtTime(20, now + 0.15);
       const pulseG = ctx.createGain();
-      pulseG.gain.setValueAtTime(volume * 0.5, now + 0.03);
+      pulseG.gain.setValueAtTime(v * 0.5, now + 0.03);
       pulseG.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
       pulse.connect(pulseG); pulseG.connect(ctx.destination);
       pulse.start(now + 0.03); pulse.stop(now + 0.2);
@@ -859,7 +861,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       zap.frequency.setValueAtTime(2000, now);
       zap.frequency.exponentialRampToValueAtTime(400, now + 0.04);
       const zapG = ctx.createGain();
-      zapG.gain.setValueAtTime(volume * 0.6, now);
+      zapG.gain.setValueAtTime(v * 0.6, now);
       zapG.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       zap.connect(zapG); zapG.connect(ctx.destination);
       zap.start(now); zap.stop(now + 0.06);
@@ -875,7 +877,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       const crackHP = ctx.createBiquadFilter();
       crackHP.type = 'highpass'; crackHP.frequency.value = 5000;
       const crackG = ctx.createGain();
-      crackG.gain.setValueAtTime(volume * 0.7, now);
+      crackG.gain.setValueAtTime(v * 0.7, now);
       crackG.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
       crack.connect(crackHP); crackHP.connect(crackG); crackG.connect(ctx.destination);
       crack.start(now); crack.stop(now + 0.04);
@@ -888,7 +890,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       whistle.frequency.exponentialRampToValueAtTime(5000, now + 0.45);
       const whistleG = ctx.createGain();
       whistleG.gain.setValueAtTime(0.001, now);
-      whistleG.gain.linearRampToValueAtTime(volume * 0.2, now + 0.08);
+      whistleG.gain.linearRampToValueAtTime(v * 0.2, now + 0.08);
       whistleG.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
       whistle.connect(whistleG); whistleG.connect(ctx.destination);
       whistle.start(now + 0.04); whistle.stop(now + 0.45);
@@ -899,7 +901,7 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
       sub.frequency.setValueAtTime(80, now);
       sub.frequency.exponentialRampToValueAtTime(30, now + 0.1);
       const subG = ctx.createGain();
-      subG.gain.setValueAtTime(volume * 0.3, now);
+      subG.gain.setValueAtTime(v * 0.3, now);
       subG.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       sub.connect(subG); subG.connect(ctx.destination);
       sub.start(now); sub.stop(now + 0.12);

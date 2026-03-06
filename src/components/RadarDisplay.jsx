@@ -286,7 +286,7 @@ function ThreatOriginArc({ origin, currentLevel }) {
   const ly = cy - labelR * Math.cos(midAngle);
 
   return (
-    <g>
+    <g style={{ pointerEvents: 'none' }}>
       {/* Gradient zone — subtle fill indicating hostile territory */}
       <path d={zonePath} fill="rgba(255, 100, 50, 0.06)" stroke="none" />
       {/* Perimeter arc */}
@@ -703,8 +703,9 @@ export default function RadarDisplay({
             {visibleRegions.map((region) => {
               const labelP = mapToSVG(region.labelPos.x, region.labelPos.y, viewport);
               const fillColor = 'rgba(0, 200, 255, 0.35)';
-              // Stack "Otef Aza" vertically to save horizontal space
-              if (region.name === 'Otef Aza') {
+              // Stack multi-word region names vertically to save horizontal space
+              if (region.name === 'Otef Aza' || region.name === 'Golan Heights') {
+                const words = region.name.split(' ');
                 return (
                   <text
                     key={region.name}
@@ -715,8 +716,8 @@ export default function RadarDisplay({
                     fontWeight="bold"
                     letterSpacing="1.5"
                   >
-                    <tspan x={labelP.x} dy="0">Otef</tspan>
-                    <tspan x={labelP.x} dy="3.2">Aza</tspan>
+                    <tspan x={labelP.x} dy="0">{words[0]}</tspan>
+                    <tspan x={labelP.x} dy="3.2">{words[1]}</tspan>
                   </text>
                 );
               }
@@ -735,14 +736,23 @@ export default function RadarDisplay({
               );
             })}
 
-            {/* Cities — progressive reveal with tier-based labels */}
+            {/* Cities & bases — progressive reveal with tier-based labels */}
             {(() => {
               // Scale dots and labels based on viewport zoom
               const dotRadius = viewport.scale >= 2.0 ? 1.2 : viewport.scale >= 1.5 ? 1.0 : 0.7;
               const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.5 : 1.2;
+              // Bases get larger labels/dots when they're the focus (L4)
+              const baseDotRadius = currentLevel === 4 ? 1.0 : dotRadius;
+              const baseLabelSize = currentLevel === 4 ? 1.6 : labelSize;
 
-              // At L3+ (zoomed out), hide tier 2 cities unless actively targeted
+              // Visibility filtering:
+              // - Tier 1 cities: always shown
+              // - Tier 2 cities: shown when zoomed in or actively targeted
+              // - Key bases (keyBase): always shown at L5+ (Ramat David, Palmachim, Nevatim)
+              // - Other bases at L5+: hidden unless actively targeted (prevent clutter)
               const citiesToRender = Object.entries(visibleCities).filter(([name, city]) => {
+                // At L5+, hide non-key bases unless being targeted (clutter control)
+                if (city.isBase && currentLevel >= 5 && !city.keyBase && !activeThreatTargets.has(name)) return false;
                 if (city.tier === 1) return true;
                 if (viewport.scale >= 1.5) return true; // zoomed in (L1/L2)
                 if (activeThreatTargets.has(name)) return true; // being targeted
@@ -753,9 +763,13 @@ export default function RadarDisplay({
                 const p = mapToSVG(city.x, city.y, viewport);
                 const flash = impactFlashes.find((f) => f.zone === name);
 
-                let dotColor = 'rgba(0, 255, 136, 0.3)';
-                let strokeColor = 'rgba(0, 255, 136, 0.7)';
-                let labelColor = 'rgba(0, 255, 136, 0.7)';
+                // Base-specific colors (amber/gold) vs city colors (green)
+                const isBase = city.isBase;
+                const r = isBase ? baseDotRadius : dotRadius;
+                const fontSize = isBase ? baseLabelSize : labelSize;
+                let dotColor = isBase ? 'rgba(234, 179, 8, 0.4)' : 'rgba(0, 255, 136, 0.3)';
+                let strokeColor = isBase ? 'rgba(234, 179, 8, 0.8)' : 'rgba(0, 255, 136, 0.7)';
+                let labelColor = isBase ? 'rgba(234, 179, 8, 0.85)' : 'rgba(0, 255, 136, 0.7)';
 
                 if (flash) {
                   if (flash.type === 'intercept') {
@@ -769,31 +783,44 @@ export default function RadarDisplay({
                   }
                 }
 
-                // Always show labels for visible cities (tier 2 already filtered above)
-                const showLabel = true;
-
                 // Per-city label direction offset
                 const offset = LABEL_OFFSETS[city.labelDir || 'e'];
 
                 return (
                   <g key={name}>
-                    <circle
-                      cx={p.x} cy={p.y} r={dotRadius}
-                      fill={dotColor}
-                      stroke={strokeColor}
-                      strokeWidth="0.3"
-                    />
-                    {showLabel && (
-                      <text
-                        x={p.x + offset.dx} y={p.y + offset.dy}
-                        fill={labelColor}
-                        fontSize={labelSize}
-                        fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
-                        textAnchor={offset.anchor}
-                      >
-                        {currentLevel === 7 && city.he ? city.he : name}
-                      </text>
+                    {isBase ? (
+                      // Diamond marker for military bases
+                      <rect
+                        x={p.x - r} y={p.y - r}
+                        width={r * 2} height={r * 2}
+                        fill={dotColor}
+                        stroke={strokeColor}
+                        strokeWidth="0.4"
+                        transform={`rotate(45, ${p.x}, ${p.y})`}
+                      />
+                    ) : (
+                      // Circle marker for cities
+                      <circle
+                        cx={p.x} cy={p.y} r={r}
+                        fill={dotColor}
+                        stroke={strokeColor}
+                        strokeWidth="0.3"
+                      />
                     )}
+                    <text
+                      x={p.x + offset.dx} y={p.y + offset.dy}
+                      fill={labelColor}
+                      fontSize={fontSize}
+                      fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
+                      textAnchor={offset.anchor}
+                      fontWeight={isBase ? 'bold' : 'normal'}
+                    >
+                      {currentLevel === 7 && city.he ? city.he : (
+                        currentLevel === 4 && isBase
+                          ? (name.includes('AFB') ? name.replace('AFB', 'Base') : name + ' Base')
+                          : name
+                      )}
+                    </text>
                   </g>
                 );
               });
@@ -880,9 +907,9 @@ export default function RadarDisplay({
                   style={{ cursor: (threat.intercepted || threat.held) ? 'default' : 'pointer' }}
                   className={`${threat.intercepted ? 'intercepted-blip-fade' : threat.held ? 'held-blip-fade' : 'blip-hover'}`}
                 >
-                  {/* Invisible hit target */}
+                  {/* Invisible hit target — large for easy clicking */}
                   {!threat.intercepted && !threat.held && (
-                    <circle cx={svgPos.x} cy={svgPos.y} r="4.5" fill="transparent" stroke="none" />
+                    <circle cx={svgPos.x} cy={svgPos.y} r="8" fill="transparent" stroke="none" />
                   )}
                   {/* Trajectory trail */}
                   <line

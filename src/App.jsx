@@ -535,10 +535,10 @@ export default function App() {
           </span>
           <span className="text-gray-700 font-mono text-xs">|</span>
           <span className="font-mono text-xs tracking-wider text-green-500">
-            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'BALLISTIC ARC', 5: 'HYPERSONIC STRIKE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
+            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'STRATEGIC TARGETS', 5: 'FULL DEFENSE', 6: 'WAVE ASSAULT', 7: 'FINAL STAND' })[currentLevel] || ''}
           </span>
           <span className="text-green-500/80 text-xs font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
-            {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'קֶשֶׁת בָּלִיסְטִית', 5: 'מַכַּת עַל-קוֹלִית', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'הַמַּעֲמָד הָאַחֲרוֹן' })[currentLevel] || ''}
+            {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', 5: 'הֲגָנָה מְלֵאָה', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'הַמַּעֲמָד הָאַחֲרוֹן' })[currentLevel] || ''}
           </span>
         </div>
 

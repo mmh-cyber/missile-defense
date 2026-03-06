@@ -240,7 +240,7 @@ export const QUIZ_DATA = {
     ],
   },
 
-  // ─── LEVEL 4: Ballistic Missiles + Arrow 2 ───────────────
+  // ─── LEVEL 4: Strategic Targets — Ballistic Missiles + Arrow 2 ──
   4: {
     questionsPerQuiz: 2,
     timePerQuestion: 15,
@@ -326,6 +326,18 @@ export const QUIZ_DATA = {
         ],
         correctIndex: 2,
         explanation: 'Arrow 2 uses a directed fragmentation warhead to destroy incoming ballistic missiles.',
+      },
+      {
+        id: 'l4q9',
+        question: 'Why do adversaries target military bases with ballistic missiles?',
+        options: [
+          'Bases are easier to hit than cities',
+          'To cripple air fields, missile batteries, and command centers',
+          'International law only permits attacks on military sites',
+          'Bases have no missile defense coverage',
+        ],
+        correctIndex: 1,
+        explanation: 'Adversaries target military bases to destroy air fields, missile batteries, and intelligence sites — crippling the ability to fight back.',
       },
     ],
   },
