@@ -350,6 +350,98 @@ function playInterceptHypersonic(volume) {
 }
 
 // -------------------------------------------------------
+// Beard Zap: Twangy hair-pluck snap + fuzzy buzz
+// Duration: ~0.25s — like a wiry beard hair pulled taut and released
+// Unique comedic-tactical sound unlike any military intercept
+// -------------------------------------------------------
+export function playBeardZapSound(volume = 0.7) {
+  try {
+    const ctx = getContext();
+    const now = ctx.currentTime;
+
+    // Layer 1: Twang — descending "pluck" (triangle 600Hz → 120Hz)
+    // Fast attack, quick decay like a taut hair snapping
+    const twang = ctx.createOscillator();
+    twang.type = 'triangle';
+    twang.frequency.setValueAtTime(600, now);
+    twang.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+
+    const twangGain = ctx.createGain();
+    twangGain.gain.setValueAtTime(volume * 0.55, now);
+    twangGain.gain.exponentialRampToValueAtTime(volume * 0.2, now + 0.04);
+    twangGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+    twang.connect(twangGain);
+    twangGain.connect(ctx.destination);
+    twang.start(now);
+    twang.stop(now + 0.2);
+
+    // Layer 2: Fuzzy buzz — short filtered noise for "hair vibration" texture
+    const buzzLen = Math.floor(ctx.sampleRate * 0.08);
+    const buzzBuf = ctx.createBuffer(1, buzzLen, ctx.sampleRate);
+    const buzzData = buzzBuf.getChannelData(0);
+    for (let i = 0; i < buzzLen; i++) {
+      buzzData[i] = (Math.random() * 2 - 1) * (1 - i / buzzLen) * 0.7;
+    }
+    const buzz = ctx.createBufferSource();
+    buzz.buffer = buzzBuf;
+
+    const buzzFilter = ctx.createBiquadFilter();
+    buzzFilter.type = 'bandpass';
+    buzzFilter.frequency.value = 2200;
+    buzzFilter.Q.value = 3;
+
+    const buzzGain = ctx.createGain();
+    buzzGain.gain.setValueAtTime(volume * 0.35, now);
+    buzzGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+    buzz.connect(buzzFilter);
+    buzzFilter.connect(buzzGain);
+    buzzGain.connect(ctx.destination);
+    buzz.start(now);
+    buzz.stop(now + 0.1);
+
+    // Layer 3: Snap transient — ultra-short click at attack (like hair releasing)
+    const snapLen = Math.floor(ctx.sampleRate * 0.008);
+    const snapBuf = ctx.createBuffer(1, snapLen, ctx.sampleRate);
+    const snapData = snapBuf.getChannelData(0);
+    for (let i = 0; i < snapLen; i++) {
+      snapData[i] = (Math.random() * 2 - 1) * (1 - i / snapLen);
+    }
+    const snap = ctx.createBufferSource();
+    snap.buffer = snapBuf;
+
+    const snapGain = ctx.createGain();
+    snapGain.gain.setValueAtTime(volume * 0.6, now);
+    snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+
+    snap.connect(snapGain);
+    snapGain.connect(ctx.destination);
+    snap.start(now);
+    snap.stop(now + 0.015);
+
+    // Layer 4: Wobble overtone — slight pitch wobble for "wiry" character
+    const wobble = ctx.createOscillator();
+    wobble.type = 'sine';
+    wobble.frequency.setValueAtTime(900, now);
+    wobble.frequency.setValueAtTime(700, now + 0.03);
+    wobble.frequency.setValueAtTime(850, now + 0.06);
+    wobble.frequency.exponentialRampToValueAtTime(200, now + 0.18);
+
+    const wobbleGain = ctx.createGain();
+    wobbleGain.gain.setValueAtTime(volume * 0.2, now);
+    wobbleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+    wobble.connect(wobbleGain);
+    wobbleGain.connect(ctx.destination);
+    wobble.start(now);
+    wobble.stop(now + 0.18);
+  } catch (e) {
+    // Silently fail
+  }
+}
+
+// -------------------------------------------------------
 // City Hit: Heavy explosion with low rumble
 // Duration: ~0.8s
 // -------------------------------------------------------

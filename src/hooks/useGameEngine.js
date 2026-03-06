@@ -16,6 +16,7 @@ import {
   playGroundImpactSound,
   playLaunchSound,
   playShieldBounceSound,
+  playBeardZapSound,
 } from '../utils/soundEffects.js';
 
 export const GAME_STATES = {
@@ -315,7 +316,7 @@ export default function useGameEngine() {
         // No trail needed — the SVG beard strands already show the visual
         // connection from beard to threat. Just flash + sound on impact.
         addImpactFlash(target.impact_zone, 'intercept', target.type, { x: blipX, y: blipY });
-        playInterceptSound(volumeRef.current, target.type);
+        playBeardZapSound(volumeRef.current);
 
         // Mark intercepted
         setActiveThreats((prev) => prev.map((t) =>
