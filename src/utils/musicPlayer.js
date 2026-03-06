@@ -77,6 +77,33 @@ function fadeOut(audio, duration = FADE_DURATION) {
 }
 
 /**
+ * Try to load and play an audio URL. Returns a promise that resolves
+ * when playback actually starts, or rejects on failure.
+ */
+function loadAndPlay(audio, url) {
+  return new Promise((resolve, reject) => {
+    audio.src = url;
+    audio.load();
+
+    const onReady = () => {
+      cleanup();
+      audio.play().then(resolve).catch(reject);
+    };
+    const onError = () => {
+      cleanup();
+      reject(new Error(`Failed to load ${url}`));
+    };
+    const cleanup = () => {
+      audio.removeEventListener('canplaythrough', onReady);
+      audio.removeEventListener('error', onError);
+    };
+
+    audio.addEventListener('canplaythrough', onReady, { once: true });
+    audio.addEventListener('error', onError, { once: true });
+  });
+}
+
+/**
  * Start playing music for a given level.
  * If music is already playing for this level, does nothing.
  * If a different level's music is playing, crossfades.
@@ -102,20 +129,20 @@ export async function startMusic(level, volume = 0.3) {
   const audio = new Audio();
   audio.loop = true;
   audio.volume = 0;
+  audio.preload = 'auto';
 
   const levelUrl = getTrackUrl(level);
   const defaultUrl = getDefaultTrackUrl();
 
   try {
-    audio.src = levelUrl;
-    await audio.play();
-  } catch {
+    await loadAndPlay(audio, levelUrl);
+  } catch (err) {
+    console.warn('[MusicPlayer] Level track failed:', err.message);
     // Level-specific track failed, try default
     try {
-      audio.src = defaultUrl;
-      await audio.play();
+      await loadAndPlay(audio, defaultUrl);
     } catch {
-      // No music available — that's fine
+      console.warn('[MusicPlayer] Default track also unavailable');
       return;
     }
   }

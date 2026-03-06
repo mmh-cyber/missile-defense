@@ -126,16 +126,23 @@ export default function App() {
   }, [volume, musicMuted]);
 
   // Game music — plays during ACTIVE gameplay, pauses/stops on other screens
+  // Also yields to cheat-code music (e.g. Sasha mode plays briefing music)
+  const cheatMusicActive = sashaActive; // add other cheat modes here if they get music
   useEffect(() => {
     if (!gameMusicOn) { stopMusic(); return; }
     if (gameState === GAME_STATES.ACTIVE && !paused) {
-      startMusic(currentLevel, volume * 0.3);
+      if (cheatMusicActive) {
+        // Cheat code has its own music — fade out background music
+        stopMusic();
+      } else {
+        startMusic(currentLevel, volume * 0.3);
+      }
     } else if (gameState === GAME_STATES.ACTIVE && paused) {
       pauseMusic();
     } else {
       stopMusic();
     }
-  }, [gameState, GAME_STATES, currentLevel, paused, gameMusicOn]);
+  }, [gameState, GAME_STATES, currentLevel, paused, gameMusicOn, cheatMusicActive]);
 
   // Sync game music volume with global volume slider
   useEffect(() => {
