@@ -707,9 +707,10 @@ export default function useGameEngine() {
       }
     } else {
       setWrongInterceptAttempts((c) => c + 1);
-      playSound(failRef);
       setStreak(0);
       addTrail(action, threat, null);
+      // Delay fail sound so the launch sound comes through clean first
+      setTimeout(() => playSound(failRef), 150);
       const SYSTEM_NAMES = { iron_dome: 'Iron Dome', davids_sling: "David's Sling", arrow_2: 'Arrow 2', arrow_3: 'Arrow 3' };
       const correctName = SYSTEM_NAMES[threat.correct_action] || threat.correct_action;
       showFeedback(`INTERCEPTION FAILED — use ${correctName}!`, 'error');

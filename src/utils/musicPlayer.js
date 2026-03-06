@@ -19,6 +19,7 @@ let currentLevel = null;
 let targetVolume = 0.3;
 let fadeInterval = null;
 let enabled = true;
+let loadingLevel = null; // Guard against concurrent startMusic calls
 
 function getTrackUrl(level) {
   const base = import.meta.env.BASE_URL || '/';
@@ -107,6 +108,8 @@ function loadAndPlay(audio, url) {
  * Start playing music for a given level.
  * If music is already playing for this level, does nothing.
  * If a different level's music is playing, crossfades.
+ * Uses a loading lock to prevent concurrent race conditions
+ * (React re-renders can call this multiple times rapidly).
  */
 export async function startMusic(level, volume = 0.3) {
   targetVolume = volume;
@@ -118,12 +121,18 @@ export async function startMusic(level, volume = 0.3) {
     return;
   }
 
+  // Already loading this level — don't spawn another load
+  if (loadingLevel === level) return;
+
   // Fade out current track if switching levels
   if (currentAudio && !currentAudio.paused) {
     await fadeOut(currentAudio, 0.8);
     currentAudio.src = '';
     currentAudio = null;
   }
+
+  // Set loading lock
+  loadingLevel = level;
 
   // Try level-specific track, fall back to default
   const audio = new Audio();
@@ -143,10 +152,19 @@ export async function startMusic(level, volume = 0.3) {
       await loadAndPlay(audio, defaultUrl);
     } catch {
       console.warn('[MusicPlayer] Default track also unavailable');
+      loadingLevel = null;
       return;
     }
   }
 
+  // If another startMusic call superseded us while we were loading, bail out
+  if (loadingLevel !== level) {
+    audio.pause();
+    audio.src = '';
+    return;
+  }
+
+  loadingLevel = null;
   currentAudio = audio;
   currentLevel = level;
   fadeIn(audio, targetVolume);
@@ -156,6 +174,7 @@ export async function startMusic(level, volume = 0.3) {
  * Stop music with a fade-out.
  */
 export async function stopMusic() {
+  loadingLevel = null; // Cancel any in-flight load
   if (currentAudio) {
     await fadeOut(currentAudio);
     currentAudio.src = '';

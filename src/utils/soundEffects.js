@@ -696,7 +696,12 @@ export function playShieldBounceSound(volume = 0.7) {
 
 // -------------------------------------------------------
 // Launch: Interceptor-specific launch sounds
-// Each defense system has a distinct audio signature
+// Each defense system has a RADICALLY different audio signature.
+// Design principle: different attack character + different tail.
+//   Iron Dome  = percussive POP → brief zip       (snappy, light)
+//   David's Sling = metallic CLUNK → hissing burn  (chunky, mid-weight)
+//   Arrow 2    = cannon THOOM → rolling rumble      (heavy, powerful)
+//   Arrow 3    = electric ZAP → rising whistle      (sci-fi, ascending)
 // -------------------------------------------------------
 export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
   try {
@@ -704,158 +709,200 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
     const now = ctx.currentTime;
 
     if (systemKey === 'iron_dome') {
-      // Iron Dome — short, sharp whoosh (small Tamir missile)
-      // Quick ascending sine + crisp noise burst
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.12);
-      const oscG = ctx.createGain();
-      oscG.gain.setValueAtTime(volume * 0.3, now);
-      oscG.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      osc.connect(oscG); oscG.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.15);
+      // ── Iron Dome: POP-zip ──────────────────────────────
+      // Percussive click/pop attack → short upward zip tail
+      // Signature: bright, snappy, over fast. Like a bottle-rocket pop.
 
-      // Crisp high-frequency pop
-      const bufLen = Math.floor(ctx.sampleRate * 0.06);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
-      const ns = ctx.createBufferSource(); ns.buffer = buf;
-      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4000;
-      const nG = ctx.createGain();
-      nG.gain.setValueAtTime(volume * 0.2, now);
-      nG.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      ns.connect(hp); hp.connect(nG); nG.connect(ctx.destination);
-      ns.start(now); ns.stop(now + 0.08);
+      // Layer 1: Sharp percussive POP — ultra-short noise click
+      const popLen = Math.floor(ctx.sampleRate * 0.012);
+      const popBuf = ctx.createBuffer(1, popLen, ctx.sampleRate);
+      const popData = popBuf.getChannelData(0);
+      for (let i = 0; i < popLen; i++) {
+        popData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / popLen, 3);
+      }
+      const pop = ctx.createBufferSource(); pop.buffer = popBuf;
+      const popG = ctx.createGain();
+      popG.gain.setValueAtTime(volume * 0.9, now);
+      popG.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+      pop.connect(popG); popG.connect(ctx.destination);
+      pop.start(now); pop.stop(now + 0.025);
+
+      // Layer 2: Quick upward "zip" — sine 800→3000Hz, very fast
+      const zip = ctx.createOscillator();
+      zip.type = 'sine';
+      zip.frequency.setValueAtTime(800, now);
+      zip.frequency.exponentialRampToValueAtTime(3000, now + 0.08);
+      const zipG = ctx.createGain();
+      zipG.gain.setValueAtTime(volume * 0.35, now + 0.005);
+      zipG.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      zip.connect(zipG); zipG.connect(ctx.destination);
+      zip.start(now + 0.005); zip.stop(now + 0.1);
+
+      // Layer 3: Tiny tonal "ping" at 1600Hz for character
+      const ping = ctx.createOscillator();
+      ping.type = 'triangle';
+      ping.frequency.value = 1600;
+      const pingG = ctx.createGain();
+      pingG.gain.setValueAtTime(volume * 0.2, now);
+      pingG.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      ping.connect(pingG); pingG.connect(ctx.destination);
+      ping.start(now); ping.stop(now + 0.06);
 
     } else if (systemKey === 'davids_sling') {
-      // David's Sling — deeper, more powerful launch with sustained burn
-      // Mid-frequency rising tone + rumbling noise
-      const osc = ctx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(150, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.25);
-      const oscG = ctx.createGain();
-      oscG.gain.setValueAtTime(volume * 0.2, now);
-      oscG.gain.linearRampToValueAtTime(volume * 0.25, now + 0.08);
-      oscG.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-      osc.connect(oscG); oscG.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.28);
+      // ── David's Sling: CLUNK-hisssss ───────────────────
+      // Metallic clunk attack → sustained white-noise hiss tail
+      // Signature: chunky ignition thud, then you hear the rocket burning.
 
-      // Sub-bass thump on ignition
+      // Layer 1: Metallic clunk — two quick descending tones (like a latch releasing)
+      const clunk1 = ctx.createOscillator();
+      clunk1.type = 'square';
+      clunk1.frequency.setValueAtTime(400, now);
+      clunk1.frequency.exponentialRampToValueAtTime(150, now + 0.04);
+      const clunkG1 = ctx.createGain();
+      clunkG1.gain.setValueAtTime(volume * 0.5, now);
+      clunkG1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      clunk1.connect(clunkG1); clunkG1.connect(ctx.destination);
+      clunk1.start(now); clunk1.stop(now + 0.06);
+
+      const clunk2 = ctx.createOscillator();
+      clunk2.type = 'square';
+      clunk2.frequency.setValueAtTime(300, now + 0.03);
+      clunk2.frequency.exponentialRampToValueAtTime(100, now + 0.07);
+      const clunkG2 = ctx.createGain();
+      clunkG2.gain.setValueAtTime(volume * 0.35, now + 0.03);
+      clunkG2.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      clunk2.connect(clunkG2); clunkG2.connect(ctx.destination);
+      clunk2.start(now + 0.03); clunk2.stop(now + 0.09);
+
+      // Layer 2: Sustained hiss — bandpass-filtered noise, ramps up then decays
+      // This is the "rocket burn" that makes it sound totally different from Iron Dome
+      const hissLen = Math.floor(ctx.sampleRate * 0.35);
+      const hissBuf = ctx.createBuffer(1, hissLen, ctx.sampleRate);
+      const hissData = hissBuf.getChannelData(0);
+      for (let i = 0; i < hissLen; i++) {
+        hissData[i] = (Math.random() * 2 - 1) * 0.8;
+      }
+      const hiss = ctx.createBufferSource(); hiss.buffer = hissBuf;
+      const hissBP = ctx.createBiquadFilter();
+      hissBP.type = 'bandpass'; hissBP.frequency.value = 3500; hissBP.Q.value = 0.7;
+      const hissG = ctx.createGain();
+      hissG.gain.setValueAtTime(0.001, now);
+      hissG.gain.linearRampToValueAtTime(volume * 0.3, now + 0.06);
+      hissG.gain.setValueAtTime(volume * 0.25, now + 0.15);
+      hissG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      hiss.connect(hissBP); hissBP.connect(hissG); hissG.connect(ctx.destination);
+      hiss.start(now + 0.02); hiss.stop(now + 0.35);
+
+      // Layer 3: Low thump on ignition
+      const thump = ctx.createOscillator();
+      thump.type = 'sine';
+      thump.frequency.setValueAtTime(120, now);
+      thump.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+      const thumpG = ctx.createGain();
+      thumpG.gain.setValueAtTime(volume * 0.4, now);
+      thumpG.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      thump.connect(thumpG); thumpG.connect(ctx.destination);
+      thump.start(now); thump.stop(now + 0.12);
+
+    } else if (systemKey === 'arrow_2') {
+      // ── Arrow 2: THOOM-rumble ──────────────────────────
+      // Deep cannon-shot boom → rolling low-frequency rumble
+      // Signature: you FEEL this one. Massive bass punch, shakes the room.
+
+      // Layer 1: Cannon shot — powerful sine thud (55Hz, fast attack)
+      const cannon = ctx.createOscillator();
+      cannon.type = 'sine';
+      cannon.frequency.setValueAtTime(55, now);
+      cannon.frequency.exponentialRampToValueAtTime(28, now + 0.2);
+      const cannonG = ctx.createGain();
+      cannonG.gain.setValueAtTime(volume * 0.9, now);
+      cannonG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      cannon.connect(cannonG); cannonG.connect(ctx.destination);
+      cannon.start(now); cannon.stop(now + 0.3);
+
+      // Layer 2: Rolling rumble — low-pass filtered noise, slow buildup + long tail
+      const rumbleLen = Math.floor(ctx.sampleRate * 0.5);
+      const rumbleBuf = ctx.createBuffer(1, rumbleLen, ctx.sampleRate);
+      const rumbleData = rumbleBuf.getChannelData(0);
+      for (let i = 0; i < rumbleLen; i++) {
+        const t = i / rumbleLen;
+        rumbleData[i] = (Math.random() * 2 - 1) * (t < 0.1 ? t / 0.1 : Math.pow(1 - t, 0.6));
+      }
+      const rumble = ctx.createBufferSource(); rumble.buffer = rumbleBuf;
+      const rumbleLP = ctx.createBiquadFilter();
+      rumbleLP.type = 'lowpass'; rumbleLP.frequency.value = 400;
+      const rumbleG = ctx.createGain();
+      rumbleG.gain.setValueAtTime(volume * 0.45, now + 0.02);
+      rumbleG.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      rumble.connect(rumbleLP); rumbleLP.connect(rumbleG); rumbleG.connect(ctx.destination);
+      rumble.start(now + 0.02); rumble.stop(now + 0.5);
+
+      // Layer 3: Secondary bass pulse (staggered 30ms later for "double thud" feel)
+      const pulse = ctx.createOscillator();
+      pulse.type = 'sine';
+      pulse.frequency.setValueAtTime(40, now + 0.03);
+      pulse.frequency.exponentialRampToValueAtTime(20, now + 0.15);
+      const pulseG = ctx.createGain();
+      pulseG.gain.setValueAtTime(volume * 0.5, now + 0.03);
+      pulseG.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      pulse.connect(pulseG); pulseG.connect(ctx.destination);
+      pulse.start(now + 0.03); pulse.stop(now + 0.2);
+
+    } else if (systemKey === 'arrow_3') {
+      // ── Arrow 3: ZAP-weeeee ────────────────────────────
+      // Electric crackle/zap attack → ascending whistle fading into space
+      // Signature: sci-fi energy weapon feel. Nothing else sounds like this.
+
+      // Layer 1: Electric ZAP — rapid oscillating burst (FM synthesis feel)
+      const zap = ctx.createOscillator();
+      zap.type = 'sawtooth';
+      zap.frequency.setValueAtTime(2000, now);
+      zap.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+      const zapG = ctx.createGain();
+      zapG.gain.setValueAtTime(volume * 0.6, now);
+      zapG.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      zap.connect(zapG); zapG.connect(ctx.destination);
+      zap.start(now); zap.stop(now + 0.06);
+
+      // Layer 2: Electric crackle — very short high-freq noise burst
+      const crackLen = Math.floor(ctx.sampleRate * 0.025);
+      const crackBuf = ctx.createBuffer(1, crackLen, ctx.sampleRate);
+      const crackData = crackBuf.getChannelData(0);
+      for (let i = 0; i < crackLen; i++) {
+        crackData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / crackLen, 2);
+      }
+      const crack = ctx.createBufferSource(); crack.buffer = crackBuf;
+      const crackHP = ctx.createBiquadFilter();
+      crackHP.type = 'highpass'; crackHP.frequency.value = 5000;
+      const crackG = ctx.createGain();
+      crackG.gain.setValueAtTime(volume * 0.7, now);
+      crackG.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      crack.connect(crackHP); crackHP.connect(crackG); crackG.connect(ctx.destination);
+      crack.start(now); crack.stop(now + 0.04);
+
+      // Layer 3: Ascending whistle — the "going to space" signature
+      // Rises from 600Hz → 5000Hz over 0.4s, unique ascending character
+      const whistle = ctx.createOscillator();
+      whistle.type = 'sine';
+      whistle.frequency.setValueAtTime(600, now + 0.04);
+      whistle.frequency.exponentialRampToValueAtTime(5000, now + 0.45);
+      const whistleG = ctx.createGain();
+      whistleG.gain.setValueAtTime(0.001, now);
+      whistleG.gain.linearRampToValueAtTime(volume * 0.2, now + 0.08);
+      whistleG.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      whistle.connect(whistleG); whistleG.connect(ctx.destination);
+      whistle.start(now + 0.04); whistle.stop(now + 0.45);
+
+      // Layer 4: Sub thud — slight bass anchor so it doesn't feel weightless
       const sub = ctx.createOscillator();
       sub.type = 'sine';
       sub.frequency.setValueAtTime(80, now);
-      sub.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+      sub.frequency.exponentialRampToValueAtTime(30, now + 0.1);
       const subG = ctx.createGain();
-      subG.gain.setValueAtTime(volume * 0.35, now);
-      subG.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      subG.gain.setValueAtTime(volume * 0.3, now);
+      subG.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       sub.connect(subG); subG.connect(ctx.destination);
-      sub.start(now); sub.stop(now + 0.18);
-
-      // Broadband noise for rocket plume texture
-      const bufLen = Math.floor(ctx.sampleRate * 0.2);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen) * 0.8;
-      const ns = ctx.createBufferSource(); ns.buffer = buf;
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 0.5;
-      const nG = ctx.createGain();
-      nG.gain.setValueAtTime(volume * 0.15, now);
-      nG.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-      ns.connect(bp); bp.connect(nG); nG.connect(ctx.destination);
-      ns.start(now); ns.stop(now + 0.22);
-
-    } else if (systemKey === 'arrow_2') {
-      // Arrow 2 — heavy, booming thrust with atmospheric rumble
-      // Low powerful ignition + ascending roar
-      const osc = ctx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(100, now);
-      osc.frequency.exponentialRampToValueAtTime(400, now + 0.35);
-      const oscG = ctx.createGain();
-      oscG.gain.setValueAtTime(volume * 0.15, now);
-      oscG.gain.linearRampToValueAtTime(volume * 0.22, now + 0.1);
-      oscG.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
-      osc.connect(oscG); oscG.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.38);
-
-      // Deep boom on ignition
-      const boom = ctx.createOscillator();
-      boom.type = 'sine';
-      boom.frequency.setValueAtTime(60, now);
-      boom.frequency.exponentialRampToValueAtTime(25, now + 0.2);
-      const boomG = ctx.createGain();
-      boomG.gain.setValueAtTime(volume * 0.4, now);
-      boomG.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      boom.connect(boomG); boomG.connect(ctx.destination);
-      boom.start(now); boom.stop(now + 0.25);
-
-      // Rumbling noise — atmosphere shaking
-      const bufLen = Math.floor(ctx.sampleRate * 0.3);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 0.5);
-      const ns = ctx.createBufferSource(); ns.buffer = buf;
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2000;
-      const nG = ctx.createGain();
-      nG.gain.setValueAtTime(volume * 0.2, now);
-      nG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      ns.connect(lp); lp.connect(nG); nG.connect(ctx.destination);
-      ns.start(now); ns.stop(now + 0.3);
-
-    } else if (systemKey === 'arrow_3') {
-      // Arrow 3 — intense, high-pitched rocket with space-bound ascending tone
-      // Multi-stage: ignition thump → powerful ascending shriek → fading into space
-      const osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(2000, now + 0.4);
-      const oscG = ctx.createGain();
-      oscG.gain.setValueAtTime(volume * 0.1, now);
-      oscG.gain.linearRampToValueAtTime(volume * 0.18, now + 0.05);
-      oscG.gain.linearRampToValueAtTime(volume * 0.12, now + 0.2);
-      oscG.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-      osc.connect(oscG); oscG.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.45);
-
-      // Deep ignition thump
-      const boom = ctx.createOscillator();
-      boom.type = 'sine';
-      boom.frequency.setValueAtTime(50, now);
-      boom.frequency.exponentialRampToValueAtTime(20, now + 0.15);
-      const boomG = ctx.createGain();
-      boomG.gain.setValueAtTime(volume * 0.45, now);
-      boomG.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      boom.connect(boomG); boomG.connect(ctx.destination);
-      boom.start(now); boom.stop(now + 0.2);
-
-      // High-frequency ascending whistle — leaving atmosphere
-      const whistle = ctx.createOscillator();
-      whistle.type = 'sine';
-      whistle.frequency.setValueAtTime(800, now + 0.1);
-      whistle.frequency.exponentialRampToValueAtTime(4000, now + 0.4);
-      const whistleG = ctx.createGain();
-      whistleG.gain.setValueAtTime(0.001, now);
-      whistleG.gain.linearRampToValueAtTime(volume * 0.1, now + 0.15);
-      whistleG.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
-      whistle.connect(whistleG); whistleG.connect(ctx.destination);
-      whistle.start(now + 0.1); whistle.stop(now + 0.42);
-
-      // Intense broadband noise — rocket plume
-      const bufLen = Math.floor(ctx.sampleRate * 0.35);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 0.3);
-      const ns = ctx.createBufferSource(); ns.buffer = buf;
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 800; bp.Q.value = 0.3;
-      const nG = ctx.createGain();
-      nG.gain.setValueAtTime(volume * 0.2, now);
-      nG.gain.linearRampToValueAtTime(volume * 0.15, now + 0.15);
-      nG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      ns.connect(bp); bp.connect(nG); nG.connect(ctx.destination);
-      ns.start(now); ns.stop(now + 0.35);
+      sub.start(now); sub.stop(now + 0.12);
     }
   } catch (e) {
     // Silently fail
