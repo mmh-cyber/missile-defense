@@ -312,12 +312,16 @@ export default function useGameEngine() {
         interceptedIdsRef.current.add(target.id);
         const { x: blipX, y: blipY } = getBlipPosition(target);
 
-        // Brown beard strand trail from portrait center to threat
+        // Beard strand trail — start from beard tip area (bottom of portrait)
+        // Portrait is centered at (0.5, 0.5) in normalized coords;
+        // beard tips are ~14 SVG units below center = 0.14 in normalized coords
         const trailId = Date.now() + Math.random();
         const duration = 350;
+        const beardTipY = 0.5 + 0.14;
+        const beardSpread = (Math.random() - 0.5) * 0.06;
         setActiveTrails((prev) => [...prev, {
           id: trailId,
-          startX: 0.5, startY: 0.5,
+          startX: 0.5 + beardSpread, startY: beardTipY,
           endX: blipX, endY: blipY,
           color: '#8B4513',
           duration,
