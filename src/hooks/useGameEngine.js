@@ -257,14 +257,14 @@ export default function useGameEngine() {
 
   // Launch interceptor trail with delayed impact flash
   const addTrail = useCallback((action, threat, impactType) => {
-    // Pick nearest battery to the threat's target (for L5-7 multi-battery)
-    const targetPos = IMPACT_POSITIONS[threat.impact_zone];
-    const battery = targetPos
-      ? getNearestBattery(currentLevelRef.current, targetPos.x, targetPos.y)
-      : (getBatteryForLevel(currentLevelRef.current) || COMMAND_CENTER);
-    if (!battery) return;
-
     const { x: blipX, y: blipY } = getBlipPosition(threat);
+
+    // Pick nearest battery to the threat's current position (blip on radar).
+    // For L5-7 multi-battery: intercept from closest base to the incoming threat.
+    const battery = getNearestBattery(currentLevelRef.current, blipX, blipY)
+      || getBatteryForLevel(currentLevelRef.current)
+      || COMMAND_CENTER;
+    if (!battery) return;
 
     // Immediate launch sound feedback — distinct per interceptor type
     playLaunchSound(volumeRef.current, action);
