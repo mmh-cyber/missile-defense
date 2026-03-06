@@ -357,22 +357,15 @@ export default function App() {
         </div>
 
         <div className="text-center">
-          <div className="text-green-900 font-mono text-xs tracking-[1em] mb-4">
+          <div className="text-green-900 font-mono text-xs tracking-[1em] mb-6">
             &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
           </div>
 
-          <div className="text-green-500/50 font-mono text-xs tracking-[0.4em] mb-2">
-            ISRAEL DEFENSE FORCES
-          </div>
-
-          <h1 className="text-5xl md:text-6xl font-bold font-mono text-green-400 tracking-wider mb-2 drop-shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+          <h1 className="text-5xl md:text-6xl font-bold font-mono text-green-400 tracking-wider mb-3 drop-shadow-[0_0_20px_rgba(0,255,136,0.3)]">
             MISSILE DEFENSE
           </h1>
-          <div className="text-lg font-mono text-green-600 tracking-[0.3em] mb-1">
-            AIR DEFENSE COMMAND
-          </div>
-          <div className="text-2xl font-bold text-green-400/80 tracking-wider mb-10 drop-shadow-[0_0_10px_rgba(0,255,136,0.2)]" style={{ fontFamily: 'Arial, sans-serif' }}>
-            מָגֵן יִשְׂרָאֵל
+          <div className="text-4xl md:text-5xl font-bold text-green-400/90 tracking-wider mb-12 drop-shadow-[0_0_15px_rgba(0,255,136,0.25)]" style={{ fontFamily: 'Arial, sans-serif' }}>
+            הֲגַנַּת טִילִים
           </div>
 
           <button
@@ -401,6 +394,10 @@ export default function App() {
 
           <div className="text-green-900 font-mono text-xs tracking-[1em] mt-8">
             &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+          </div>
+
+          <div className="text-gray-700 font-mono text-[10px] tracking-widest mt-6">
+            &copy; HECHT STUDIO
           </div>
         </div>
 
@@ -522,8 +519,18 @@ export default function App() {
   // ========================
   return (
     <div className={`h-screen bg-[#0a0e1a] flex flex-col overflow-hidden relative ${screenShake ? 'screen-shake border-flash-red' : ''}`}>
-      {/* Escape Room Timer — floating overlay, visually separate from game */}
-      <div className="absolute top-2 right-4 z-30">
+      {/* Floating top-right: gear icon + escape room timer */}
+      <div className="absolute top-2 right-4 z-30 flex items-center gap-3">
+        <button
+          onClick={() => {
+            if (gameState === GAME_STATES.ACTIVE && !paused) togglePause();
+            setShowFacilitator(true);
+          }}
+          className="text-gray-600 hover:text-gray-300 transition-colors cursor-pointer text-lg opacity-50 hover:opacity-100"
+          title="Settings (ESC)"
+        >
+          &#9881;
+        </button>
         {escapeRoomMode && <EscapeRoomTimer escapeRoomTime={escapeRoomTime} />}
       </div>
 
@@ -712,7 +719,7 @@ export default function App() {
               PAUSED
             </div>
             <div className="text-sm font-mono text-gray-500 mt-4">
-              PRESS ESC TO RESUME
+              PRESS ESC OR &#9881; TO RESUME
             </div>
           </div>
         </div>

@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { getLevelConfig, TOTAL_LEVELS } from '../config/threats.js';
+import { playPerfectFanfare } from '../utils/soundEffects.js';
 
 function StatRow({ label, value, color = 'text-gray-300' }) {
   return (
@@ -17,23 +19,105 @@ function Stars({ count }) {
   );
 }
 
+// Gold shimmer particles for perfect defense
+function PerfectParticles() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.offsetWidth;
+    const H = canvas.height = canvas.offsetHeight;
+
+    const particles = Array.from({ length: 60 }, () => ({
+      x: Math.random() * W,
+      y: H + Math.random() * 40,
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: -(1.5 + Math.random() * 2.5),
+      size: 1.5 + Math.random() * 3,
+      alpha: 0.5 + Math.random() * 0.5,
+      hue: 40 + Math.random() * 20, // gold range
+      decay: 0.003 + Math.random() * 0.005,
+    }));
+
+    let raf;
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      let alive = false;
+      particles.forEach(p => {
+        if (p.alpha <= 0) return;
+        alive = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.01; // slight gravity
+        p.alpha -= p.decay;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 65%, ${Math.max(0, p.alpha)})`;
+        ctx.fill();
+      });
+      if (alive) raf = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none"
+      style={{ width: '100%', height: '100%' }}
+    />
+  );
+}
+
 export default function LevelComplete({ levelStats, campaignStats, onNextLevel, onViewResults }) {
   const config = getLevelConfig(levelStats.level);
   const nextConfig = getLevelConfig(levelStats.level + 1);
   const isLastLevel = levelStats.level >= TOTAL_LEVELS;
+  const isPerfect = levelStats.rating?.perfect;
+
+  // Play fanfare once on mount if perfect
+  const fanfarePlayed = useRef(false);
+  useEffect(() => {
+    if (isPerfect && !fanfarePlayed.current) {
+      fanfarePlayed.current = true;
+      playPerfectFanfare(0.7);
+    }
+  }, [isPerfect]);
 
   return (
     <div className="h-screen bg-[#0a0e1a] flex items-center justify-center relative overflow-y-auto">
-      <div className="max-w-2xl w-full py-8 px-4">
+      {isPerfect && <PerfectParticles />}
+      <div className="max-w-2xl w-full py-8 px-4 relative z-10">
+        {/* Perfect Defense Banner */}
+        {isPerfect && (
+          <div className="text-center mb-4 animate-pulse">
+            <div
+              className="inline-block px-6 py-2 rounded-lg border-2 font-mono font-bold text-lg tracking-[0.3em]"
+              style={{
+                borderColor: '#fbbf24',
+                color: '#fbbf24',
+                background: 'rgba(251, 191, 36, 0.08)',
+                boxShadow: '0 0 30px rgba(251, 191, 36, 0.2), 0 0 60px rgba(251, 191, 36, 0.1)',
+                textShadow: '0 0 10px rgba(251, 191, 36, 0.5)',
+              }}
+            >
+              ★ PERFECT DEFENSE ★
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="text-green-400 font-mono text-xs tracking-[0.4em] mb-2">
+          <div className={`font-mono text-xs tracking-[0.4em] mb-2 ${isPerfect ? 'text-yellow-400' : 'text-green-400'}`}>
             &#10003; LEVEL {levelStats.level} COMPLETE
           </div>
-          <h1 className="text-2xl font-bold font-mono text-green-400 tracking-wider mb-1">
+          <h1 className={`text-2xl font-bold font-mono tracking-wider mb-1 ${isPerfect ? 'text-yellow-400' : 'text-green-400'}`}>
             LEVEL {levelStats.level}
           </h1>
-          <div className="h-px bg-green-900 w-48 mx-auto mt-3" />
+          <div className={`h-px w-48 mx-auto mt-3 ${isPerfect ? 'bg-yellow-700' : 'bg-green-900'}`} />
         </div>
 
         {/* Rating */}
@@ -41,7 +125,7 @@ export default function LevelComplete({ levelStats, campaignStats, onNextLevel, 
           <div className="text-2xl mb-1">
             <Stars count={levelStats.rating.stars} />
           </div>
-          <div className="text-sm font-mono text-gray-400 tracking-widest">
+          <div className={`text-sm font-mono tracking-widest ${isPerfect ? 'text-yellow-400' : 'text-gray-400'}`}>
             {levelStats.rating.label}
           </div>
         </div>
@@ -60,8 +144,8 @@ export default function LevelComplete({ levelStats, campaignStats, onNextLevel, 
         <div className="border border-gray-800 rounded-lg p-4 mb-6 bg-gray-900/20">
           <StatRow label="THREATS INTERCEPTED" value={`${levelStats.correctIntercepts} / ${levelStats.populatedThreats}`}
             color={levelStats.correctIntercepts === levelStats.populatedThreats ? 'text-green-400' : 'text-yellow-400'} />
-          <StatRow label="CORRECT HOLDS" value={`${levelStats.correctHolds} / ${levelStats.openGroundThreats}`}
-            color={levelStats.correctHolds === levelStats.openGroundThreats ? 'text-green-400' : 'text-gray-300'} />
+          <StatRow label="INTERCEPTORS SAVED" value={Object.values(levelStats.ammoRemaining).reduce((s, v) => s + v, 0)}
+            color="text-cyan-400" />
           <StatRow label="SIRENS" value={levelStats.sirenCount}
             color={levelStats.sirenCount === 0 ? 'text-green-400' : 'text-red-400'} />
           <StatRow label="BEST STREAK" value={levelStats.bestStreak} color="text-yellow-400" />

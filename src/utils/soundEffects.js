@@ -910,3 +910,94 @@ export function playLaunchSound(volume = 0.7, systemKey = 'iron_dome') {
     // Silently fail
   }
 }
+
+
+// ── Perfect Level Fanfare ─────────────────────────────────────
+// Triumphant ascending brass chord + shimmer cascade (~2.3s)
+// Played when a level ends with 0 sirens, 0 wasted, 0 wrong system
+export function playPerfectFanfare(volume = 0.7) {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const v = volume;
+
+    // Layer 1: Ascending brass chord  C4 → E4 → G4 → C5
+    const brassNotes = [261.63, 329.63, 392.00, 523.25];
+    brassNotes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now + i * 0.18);
+
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'lowpass';
+      filt.frequency.setValueAtTime(1200, now + i * 0.18);
+      filt.Q.setValueAtTime(2, now);
+
+      const g = ctx.createGain();
+      const onset = now + i * 0.18;
+      g.gain.setValueAtTime(0.001, onset);
+      g.gain.linearRampToValueAtTime(v * 0.18, onset + 0.06);
+      g.gain.setValueAtTime(v * 0.18, onset + 0.4);
+      g.gain.exponentialRampToValueAtTime(0.001, onset + 1.8);
+
+      osc.connect(filt);
+      filt.connect(g);
+      g.connect(ctx.destination);
+      osc.start(onset);
+      osc.stop(onset + 1.8);
+    });
+
+    // Layer 2: Shimmer cascade — high sparkle notes
+    const shimmerFreqs = [1568, 2093, 2637, 3136, 2093];
+    shimmerFreqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + 0.7 + i * 0.1);
+
+      const g = ctx.createGain();
+      const onset = now + 0.7 + i * 0.1;
+      g.gain.setValueAtTime(0.001, onset);
+      g.gain.linearRampToValueAtTime(v * 0.08, onset + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, onset + 0.35);
+
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(onset);
+      osc.stop(onset + 0.35);
+    });
+
+    // Layer 3: Sustained power chord (C4+G4) — warm pad underneath
+    [261.63, 392.00].forEach((freq) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + 0.5);
+
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.001, now + 0.5);
+      g.gain.linearRampToValueAtTime(v * 0.12, now + 0.8);
+      g.gain.setValueAtTime(v * 0.12, now + 1.5);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 2.3);
+
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(now + 0.5);
+      osc.stop(now + 2.3);
+    });
+
+    // Layer 4: Victory thump — satisfying low-end punch
+    const thump = ctx.createOscillator();
+    thump.type = 'sine';
+    thump.frequency.setValueAtTime(100, now);
+    thump.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+    const thumpG = ctx.createGain();
+    thumpG.gain.setValueAtTime(v * 0.4, now);
+    thumpG.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    thump.connect(thumpG);
+    thumpG.connect(ctx.destination);
+    thump.start(now);
+    thump.stop(now + 0.25);
+  } catch (e) {
+    // Silently fail
+  }
+}

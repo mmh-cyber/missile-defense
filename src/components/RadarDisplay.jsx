@@ -649,11 +649,11 @@ export default function RadarDisplay({
   const visibleRegions = useMemo(() => getVisibleRegions(currentLevel), [currentLevel]);
   const visibleOrigins = useMemo(() => getVisibleThreatOrigins(currentLevel), [currentLevel]);
 
-  // Build set of cities currently targeted by active threats (for tier-2 label pop-up)
+  // Build set of cities currently targeted by active threats (for warning glow + label pop-up)
   const activeThreatTargets = useMemo(() => {
     const targets = new Set();
     activeThreats.forEach((t) => {
-      if (!t.intercepted && t.impactRevealed) targets.add(t.impact_zone);
+      if (!t.intercepted && !t.held) targets.add(t.impact_zone);
     });
     return targets;
   }, [activeThreats]);
@@ -771,6 +771,14 @@ export default function RadarDisplay({
                 let strokeColor = isBase ? 'rgba(234, 179, 8, 0.8)' : 'rgba(0, 255, 136, 0.7)';
                 let labelColor = isBase ? 'rgba(234, 179, 8, 0.85)' : 'rgba(0, 255, 136, 0.7)';
 
+                // Targeted warning — lights up immediately when a threat is heading here
+                const isTargeted = activeThreatTargets.has(name);
+                if (isTargeted && !flash) {
+                  dotColor = 'rgba(239, 68, 68, 0.6)';
+                  strokeColor = 'rgba(239, 68, 68, 0.9)';
+                  labelColor = 'rgba(239, 68, 68, 0.95)';
+                }
+
                 if (flash) {
                   if (flash.type === 'intercept') {
                     dotColor = 'rgba(34, 197, 94, 0.8)';
@@ -788,6 +796,14 @@ export default function RadarDisplay({
 
                 return (
                   <g key={name}>
+                    {/* Pulsing danger ring when targeted */}
+                    {isTargeted && !flash && (
+                      <circle
+                        cx={p.x} cy={p.y} r={r + 2.0}
+                        fill="none" stroke="rgba(239, 68, 68, 0.5)" strokeWidth="0.4"
+                        className="radar-pulse"
+                      />
+                    )}
                     {isBase ? (
                       // Diamond marker for military bases
                       <rect
@@ -839,17 +855,15 @@ export default function RadarDisplay({
                     fill="none" stroke="#22c55e" strokeWidth="0.4" opacity="0.7"
                     transform={`rotate(45, ${hq.x}, ${hq.y})`}
                   />
-                  {/* HQ label — shown for levels 1-3, hidden for 4+ to reduce clutter */}
-                  {currentLevel <= 3 && (
-                    <text
-                      x={hq.x} y={hq.y + 3.5}
-                      fill="#22c55e" fontSize="2.2" fontFamily="monospace"
-                      textAnchor="middle" dominantBaseline="hanging"
-                      opacity="0.7" fontWeight="bold"
-                    >
-                      HQ
-                    </text>
-                  )}
+                  {/* Battery label — uses name from config */}
+                  <text
+                    x={hq.x} y={hq.y + 3.5}
+                    fill="#22c55e" fontSize={battery.label.length > 10 ? '1.6' : '2.2'} fontFamily="monospace"
+                    textAnchor="middle" dominantBaseline="hanging"
+                    opacity="0.7" fontWeight="bold"
+                  >
+                    {battery.label}
+                  </text>
                 </g>
               );
             })()}

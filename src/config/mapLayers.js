@@ -87,19 +87,21 @@ export const LEVEL_VIEWPORTS = [
   { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L7: same
 ];
 
-// --- Per-Level Battery Positions (Regional HQs) ---
+// --- Per-Level Battery Positions ---
 // Iron Dome batteries deployed regionally near the front (L1-L2).
-// Upper-tier systems (David's Sling, Arrow) centralized (L3+).
+// David's Sling based at Hatzor AFB (L3).
+// Arrow systems based at Palmachim AFB (L4).
+// Nationwide: Air Defense Command (The Bor), central Israel (L5-7).
 
 export const LEVEL_BATTERIES = [
   null,
-  { x: 0.27, y: 0.46, label: 'Iron Dome' },    // L1: east of Otef Aza cluster, near radar center
-  { x: 0.38, y: 0.20, label: 'Iron Dome' },    // L2: near Haifa (northern front)
-  { x: 0.30, y: 0.38, label: 'Defense HQ' },   // L3: central Israel (David's Sling)
-  { x: 0.30, y: 0.38, label: 'Defense HQ' },   // L4: central (Arrow 2)
-  { x: 0.30, y: 0.38, label: 'Defense HQ' },   // L5: central (Arrow 3)
-  { x: 0.30, y: 0.38, label: 'Defense HQ' },   // L6
-  { x: 0.30, y: 0.38, label: 'Defense HQ' },   // L7
+  { x: 0.27, y: 0.46, label: 'Iron Dome' },       // L1: near Otef Aza cluster
+  { x: 0.38, y: 0.20, label: 'Iron Dome' },       // L2: near Haifa (northern front)
+  { x: 0.25, y: 0.39, label: 'Hatzor AFB' },      // L3: David's Sling home base
+  { x: 0.22, y: 0.37, label: 'Palmachim AFB' },   // L4: Arrow 2 primary site
+  { x: 0.28, y: 0.34, label: 'Air Defense HQ' },  // L5: nationwide (The Bor area)
+  { x: 0.28, y: 0.34, label: 'Air Defense HQ' },  // L6: nationwide
+  { x: 0.28, y: 0.34, label: 'Air Defense HQ' },  // L7: nationwide
 ];
 
 // --- Region Outlines ---

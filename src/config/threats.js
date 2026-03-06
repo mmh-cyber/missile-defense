@@ -15,8 +15,8 @@
 // is_final_salvo: Part of the named final salvo wave
 // ============================================================
 
-// Command center — single launch point for ALL interceptors
-export const COMMAND_CENTER = { x: 0.28, y: 0.38 };
+// Fallback command center — used when no per-level battery is set
+export const COMMAND_CENTER = { x: 0.28, y: 0.34 };
 
 export const THREAT_COLORS = {
   drone: '#eab308',
@@ -341,48 +341,42 @@ const THREATS_L3 = [
 
 // ============================================================
 // LEVEL 4: Strategic Targets — Ballistic + all previous, introduces Arrow 2
-// Duration: 150s | 30 threats
+// Duration: 120s | 25 threats
+// Pacing: warm-up 4-14s → first ballistic 20-27s → pairs 33-52s → triples 58-73s → surge 80-108s
 // Geography: Military bases across Israel. No civilian cities on map.
 // NEW: ballistic missiles from Iran targeting strategic military sites.
 // ============================================================
 const THREATS_L4 = [
-  // Warm-up with known types — 6s gaps
+  // === Warm-up — learn the new system (3 threats, 4-14s) ===
   threat(1,  4,  'drone',     'Ramat David AFB',  true,  11, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(2,  10, 'cruise',    'Tel Nof AFB',      true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(3,  16, 'drone',     'Negev Desert',     false, 11, 'full', 1.0, { origin: 'southeast' }),   // hold fire
-  // First ballistic! From Iran — the teaching moment
-  threat(4,  24, 'ballistic', 'Nevatim AFB',      true,  12, 'full', 0.40, { origin: 'east' }),       // Iran → F-35 base
-  threat(5,  32, 'cruise',    'Palmachim AFB',     true,  10, 'full', 1.0, { origin: 'east' }),        // Iran → missile defense HQ
-  threat(6,  38, 'ballistic', 'Tel Nof AFB',      true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → main IAF base
-  // Mixed pairs — targeting strategic sites
-  threat(7,  45, 'cruise',    'Ramat David AFB',  true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(8,  47, 'drone',     'Glilot (Unit 8200)', true, 11, 'full', 1.0, { origin: 'north' }),      // Lebanon → intel HQ
-  threat(9,  53, 'ballistic', 'Ramon AFB',        true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → deep south
-  threat(10, 58, 'drone',     'Golan Heights',    false, 11, 'full', 1.0, { origin: 'northeast' }),   // hold fire, Syria
-  threat(11, 63, 'cruise',    'Sdot Micha',       true,  10, 'full', 1.0, { origin: 'east' }),        // Iran → strategic missiles
-  // Triple — 3s gaps
-  threat(12, 69, 'ballistic', 'Sdot Micha',       true,  11, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
-  threat(13, 71, 'cruise',    'Palmachim AFB',    true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(14, 73, 'drone',     'Ramat David AFB',  true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  // Sustained pressure
-  threat(15, 80, 'drone',     'Nevatim AFB',      true,  10, 'full', 1.0, { origin: 'southeast' }),   // Yemen
-  threat(16, 85, 'ballistic', 'Ramat David AFB',  true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(17, 90, 'cruise',    'Negev Desert',     false, 9,  'full', 1.0, { origin: 'east' }),        // hold fire, Iran
-  threat(18, 95, 'drone',     'Tel Nof AFB',      true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(19, 99, 'cruise',    'Ramon AFB',        true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  // Closing quad — tight 2-3s gaps
-  threat(20, 105,'ballistic', 'Palmachim AFB',    true,  10, 'full', 0.35, { origin: 'east' }),       // Iran → Arrow site
-  threat(21, 107,'cruise',    'Ramat David AFB',  true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(22, 109,'cruise',    'Glilot (Unit 8200)', true, 9,  'full', 1.0, { origin: 'east' }),       // Iran → intel HQ
-  threat(23, 111,'drone',     'Northern Negev',   false, 10, 'full', 1.0, { origin: 'southeast' }),   // hold fire
-  // Extended tail — relentless
-  threat(24, 117,'ballistic', 'Tel Nof AFB',      true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(25, 121,'cruise',    'Sdot Micha',       true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(26, 125,'ballistic', 'Nevatim AFB',      true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(27, 129,'drone',     'Palmachim AFB',    true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(28, 133,'ballistic', 'Ramon AFB',        true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(29, 137,'cruise',    'Ramat David AFB',  true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(30, 141,'ballistic', 'Sdot Micha',       true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
+  threat(2,  9,  'cruise',    'Tel Nof AFB',      true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
+  threat(3,  14, 'drone',     'Negev Desert',     false, 11, 'full', 1.0, { origin: 'southeast' }),   // hold fire
+  // === First ballistic! Teaching moment (2 threats, 20-27s) ===
+  threat(4,  20, 'ballistic', 'Nevatim AFB',      true,  12, 'full', 0.40, { origin: 'east' }),       // Iran → F-35 base
+  threat(5,  27, 'cruise',    'Palmachim AFB',    true,  10, 'full', 1.0, { origin: 'east' }),        // Iran → missile defense
+  // === Mixed pairs — pressure builds (6 threats, 33-52s) ===
+  threat(6,  33, 'ballistic', 'Tel Nof AFB',      true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → main IAF base
+  threat(7,  38, 'cruise',    'Ramat David AFB',  true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
+  threat(8,  38, 'drone',     'Glilot (Unit 8200)', true, 11, 'full', 1.0, { origin: 'north' }),      // Lebanon → intel HQ (pair!)
+  threat(9,  44, 'ballistic', 'Ramon AFB',        true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → deep south
+  threat(10, 49, 'drone',     'Golan Heights',    false, 11, 'full', 1.0, { origin: 'northeast' }),   // hold fire, Syria
+  threat(11, 52, 'cruise',    'Sdot Micha',       true,  10, 'full', 1.0, { origin: 'east' }),        // Iran → strategic missiles
+  // === Triples — real pressure (6 threats, 58-73s) ===
+  threat(12, 58, 'ballistic', 'Sdot Micha',       true,  11, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
+  threat(13, 60, 'cruise',    'Palmachim AFB',    true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
+  threat(14, 60, 'drone',     'Ramat David AFB',  true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon (pair with cruise!)
+  threat(15, 67, 'drone',     'Nevatim AFB',      true,  10, 'full', 1.0, { origin: 'southeast' }),   // Yemen
+  threat(16, 70, 'ballistic', 'Ramat David AFB',  true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
+  threat(17, 73, 'cruise',    'Negev Desert',     false, 9,  'full', 1.0, { origin: 'east' }),        // hold fire, Iran
+  // === Final surge — tight multi-threat waves (8 threats, 80-108s) ===
+  threat(18, 80, 'drone',     'Tel Nof AFB',      true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
+  threat(19, 84, 'ballistic', 'Palmachim AFB',    true,  10, 'full', 0.35, { origin: 'east' }),       // Iran → Arrow site
+  threat(20, 88, 'cruise',    'Glilot (Unit 8200)', true, 9,  'full', 1.0, { origin: 'east' }),       // Iran → intel HQ
+  threat(21, 88, 'drone',     'Northern Negev',   false, 10, 'full', 1.0, { origin: 'southeast' }),   // hold fire (pair!)
+  threat(22, 94, 'ballistic', 'Tel Nof AFB',      true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
+  threat(23, 98, 'cruise',    'Sdot Micha',       true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
+  threat(24, 103,'ballistic', 'Nevatim AFB',      true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
+  threat(25, 108,'ballistic', 'Sdot Micha',       true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
 ];
 
 // ============================================================
@@ -595,8 +589,8 @@ export const LEVELS = [
   // Level 4: Strategic Targets — Ballistic Missiles + Arrow 2
   {
     id: 4,
-    duration: 150,
-    ammo: { iron_dome: 10, davids_sling: 6, arrow_2: 7 },
+    duration: 120,
+    ammo: { iron_dome: 6, davids_sling: 8, arrow_2: 10 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
     auto_end_delay: 5000,
     new_system: { key: 'arrow_2', name: 'ARROW 2', shortcut: '3', color: '#ef4444' },

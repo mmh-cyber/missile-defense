@@ -71,7 +71,7 @@ export default function useGameEngine() {
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [escapeRoomTime, setEscapeRoomTime] = useState(25 * 60);
   const [escapeRoomStartTime, setEscapeRoomStartTime] = useState(25 * 60);
-  const [escapeRoomMode, setEscapeRoomMode] = useState(true);
+  const [escapeRoomMode, setEscapeRoomMode] = useState(false);
   const [sirenCount, setSirenCount] = useState(0);
   const [wrongInterceptAttempts, setWrongInterceptAttempts] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -752,7 +752,7 @@ export default function useGameEngine() {
           const newThreat = {
             ...t,
             timeLeft: t.countdown,
-            impactRevealed: t.reveal_pct >= 1.0,
+            impactRevealed: true,  // Always reveal target immediately on spawn
             _corrected: false,
           };
           const newThreats = [...prev, newThreat];
@@ -965,18 +965,25 @@ export default function useGameEngine() {
     const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
     const holdOnPopulated = resultLog.filter((r) => r.result === 'hold_populated').length;
 
+    // Ammo bonus — reward efficiency with points for each unused interceptor
+    const ammoRemaining = Object.values(ammo).reduce((sum, v) => sum + v, 0);
+
     const score = Math.max(0,
       (correctIntercepts * 100)
-      + (correctHolds * 75)
+      + (ammoRemaining * 50)           // efficiency bonus: unused interceptors
       + (bestStreak * 25)
-      + (totalThreats * 10)          // base engagement bonus
+      + (totalThreats * 10)            // base engagement bonus
       - (sirenCount * 100)
       - (wrongInterceptAttempts * 50)
       - (wastedIntercepts * 25)
     );
 
+    // Perfect level: all populated threats intercepted, no wasted interceptors
+    const isPerfect = sirenCount === 0 && wastedIntercepts === 0 && wrongInterceptAttempts === 0;
+
     let rating;
-    if (sirenCount === 0) rating = { label: 'IRON WALL', stars: 5 };
+    if (isPerfect) rating = { label: 'PERFECT DEFENSE', stars: 5, perfect: true };
+    else if (sirenCount === 0) rating = { label: 'IRON WALL', stars: 5 };
     else if (sirenCount === 1) rating = { label: 'STEEL DOME', stars: 4 };
     else if (sirenCount <= 2) rating = { label: 'SOLID DEFENSE', stars: 3 };
     else if (sirenCount <= 4) rating = { label: 'BATTERED BUT STANDING', stars: 2 };
@@ -997,6 +1004,7 @@ export default function useGameEngine() {
       bestStreak,
       rating,
       score,
+      isPerfect,
     };
   }, [resultLog, ammo, sirenCount, wrongInterceptAttempts, bestStreak, currentLevel]);
 
@@ -1007,9 +1015,11 @@ export default function useGameEngine() {
     const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
     const totalProcessed = resultLog.length;
 
+    const ammoRemaining = Object.values(ammoRef.current).reduce((sum, v) => sum + v, 0);
+
     return Math.max(0,
       (correctIntercepts * 100)
-      + (correctHolds * 75)
+      + (ammoRemaining * 50)
       + (bestStreak * 25)
       + (totalProcessed * 10)
       - (sirenCount * 100)
