@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { IMPACT_POSITIONS, THREAT_COLORS } from '../config/threats.js';
 import {
   CITIES,
@@ -629,6 +629,76 @@ function TurtleSVG({ cx, cy }) {
   );
 }
 
+// ============================================
+// Cheat Code Countdown Timer
+// Self-contained component that tracks its own countdown when activated.
+// ============================================
+function CheatCountdown({ active, duration, label, color, yOffset = 0 }) {
+  const [timeLeft, setTimeLeft] = useState(0);
+  const startTimeRef = useRef(null);
+
+  useEffect(() => {
+    if (active && startTimeRef.current === null) {
+      startTimeRef.current = Date.now();
+      setTimeLeft(duration);
+    }
+    if (!active) {
+      startTimeRef.current = null;
+      setTimeLeft(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
+      const remaining = Math.max(0, duration - elapsed);
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        startTimeRef.current = null;
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [active, duration]);
+
+  if (!active || timeLeft <= 0) return null;
+
+  const seconds = Math.ceil(timeLeft);
+  const progress = timeLeft / duration;
+  // Arc for circular countdown
+  const radius = 4;
+  const cx = 50;
+  const cy = 62 + yOffset;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - progress);
+
+  return (
+    <g>
+      {/* Background circle */}
+      <circle cx={cx} cy={cy} r={radius} fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.3" />
+      {/* Countdown arc */}
+      <circle cx={cx} cy={cy} r={radius} fill="none" stroke={color} strokeWidth="0.7"
+        strokeDasharray={circumference} strokeDashoffset={dashOffset}
+        strokeLinecap="round" transform={`rotate(-90, ${cx}, ${cy})`}
+        opacity="0.9" />
+      {/* Seconds number */}
+      <text x={cx} y={cy + 1.2} textAnchor="middle" fill="white" fontSize="4" fontFamily="monospace" fontWeight="bold">
+        {seconds}
+      </text>
+      {/* Label below */}
+      <text x={cx} y={cy + radius + 2.5} textAnchor="middle" fill={color} fontSize="1.8" fontFamily="monospace"
+        letterSpacing="0.08em" opacity="0.8">
+        {label}
+      </text>
+      {/* Score penalty indicator */}
+      <text x={cx} y={cy + radius + 4.8} textAnchor="middle" fill="#ef4444" fontSize="1.5" fontFamily="monospace"
+        fontWeight="bold" opacity="0.9" letterSpacing="0.05em">
+        75% SCORE
+      </text>
+    </g>
+  );
+}
+
 export default function RadarDisplay({
   activeThreats,
   selectedThreatId,
@@ -703,21 +773,26 @@ export default function RadarDisplay({
             {visibleRegions.map((region) => {
               const labelP = mapToSVG(region.labelPos.x, region.labelPos.y, viewport);
               const fillColor = 'rgba(0, 200, 255, 0.35)';
+              // Smaller region labels when zoomed out (L5-7) to avoid overlap with city names
+              const regionFontSize = viewport.scale < 1.0 ? '2.0' : '2.8';
+              const regionLineHeight = viewport.scale < 1.0 ? '2.4' : '3.2';
+              const regionLetterSpacing = viewport.scale < 1.0 ? '0.8' : '1.5';
               // Stack multi-word region names vertically to save horizontal space
-              if (region.name === 'Otef Aza' || region.name === 'Golan Heights') {
+              if (region.name === 'Otef Aza' || region.name === 'Golan Heights' || region.name === 'Central Israel') {
                 const words = region.name.split(' ');
                 return (
                   <text
                     key={region.name}
                     x={labelP.x} y={labelP.y}
                     fill={fillColor}
-                    fontSize="2.8" fontFamily="monospace"
+                    fontSize={regionFontSize} fontFamily="monospace"
                     textAnchor="middle"
                     fontWeight="bold"
-                    letterSpacing="1.5"
+                    letterSpacing={regionLetterSpacing}
                   >
-                    <tspan x={labelP.x} dy="0">{words[0]}</tspan>
-                    <tspan x={labelP.x} dy="3.2">{words[1]}</tspan>
+                    {words.map((word, i) => (
+                      <tspan key={i} x={labelP.x} dy={i === 0 ? '0' : regionLineHeight}>{word}</tspan>
+                    ))}
                   </text>
                 );
               }
@@ -726,10 +801,10 @@ export default function RadarDisplay({
                   key={region.name}
                   x={labelP.x} y={labelP.y}
                   fill={fillColor}
-                  fontSize="2.8" fontFamily="monospace"
+                  fontSize={regionFontSize} fontFamily="monospace"
                   textAnchor="middle"
                   fontWeight="bold"
-                  letterSpacing="1.5"
+                  letterSpacing={regionLetterSpacing}
                 >
                   {region.name}
                 </text>
@@ -739,8 +814,11 @@ export default function RadarDisplay({
             {/* Cities & bases — progressive reveal with tier-based labels */}
             {(() => {
               // Scale dots and labels based on viewport zoom
-              const dotRadius = viewport.scale >= 2.0 ? 1.2 : viewport.scale >= 1.5 ? 1.0 : 0.7;
-              const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.5 : 1.2;
+              // L5-7 (scale < 1.0) use LARGER labels since the full map is packed into the same SVG space
+              const dotRadius = viewport.scale >= 2.0 ? 1.2 : viewport.scale >= 1.5 ? 1.0 : 0.9;
+              const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.5 : 2.2;
+              // Push labels further from dots when zoomed out to reduce overlap
+              const offsetScale = viewport.scale < 1.0 ? 1.3 : 1.0;
               // Bases get larger labels/dots when they're the focus (L4)
               const baseDotRadius = currentLevel === 4 ? 1.0 : dotRadius;
               const baseLabelSize = currentLevel === 4 ? 1.6 : labelSize;
@@ -793,6 +871,8 @@ export default function RadarDisplay({
 
                 // Per-city label direction offset
                 const offset = LABEL_OFFSETS[city.labelDir || 'e'];
+                // Bases have larger diamond markers — push labels further to clear them
+                const baseBoost = isBase && currentLevel >= 5 ? 1.5 : 1.0;
 
                 return (
                   <g key={name}>
@@ -824,12 +904,15 @@ export default function RadarDisplay({
                       />
                     )}
                     <text
-                      x={p.x + offset.dx} y={p.y + offset.dy}
+                      x={p.x + offset.dx * offsetScale * baseBoost} y={p.y + offset.dy * offsetScale * baseBoost}
                       fill={labelColor}
                       fontSize={fontSize}
                       fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
                       textAnchor={offset.anchor}
-                      fontWeight={isBase ? 'bold' : 'normal'}
+                      fontWeight={isBase || offsetScale > 1 ? 'bold' : 'normal'}
+                      stroke={offsetScale > 1 ? 'rgba(10, 14, 26, 0.8)' : 'none'}
+                      strokeWidth={offsetScale > 1 ? '0.4' : '0'}
+                      paintOrder="stroke"
                     >
                       {currentLevel === 7 && city.he ? city.he : (
                         currentLevel === 4 && isBase
@@ -867,7 +950,8 @@ export default function RadarDisplay({
                       transform={`rotate(45, ${hq.x}, ${hq.y})`}
                     />
                     {/* AFB label — positioned by labelDir to avoid overlap */}
-                    {(() => {
+                    {/* Hide battery labels at L5+ where keyBase city labels already show the names */}
+                    {currentLevel < 5 && (() => {
                       const dir = battery.labelDir || 's';
                       const lx = dir.includes('e') ? hq.x + 3.5 : dir.includes('w') ? hq.x - 3.5 : hq.x;
                       const ly = dir.includes('s') ? hq.y + 3.5 : dir.includes('n') ? hq.y - 3.5 : hq.y + 0.7;
@@ -1219,6 +1303,12 @@ export default function RadarDisplay({
                 </g>
               );
             })}
+
+            {/* === Cheat Code Countdown Timers === */}
+            <CheatCountdown active={tzurActive} duration={12} label="TZUR" color="#f59e0b" />
+            <CheatCountdown active={sashaActive} duration={12} label="SASHA" color="#8b5cf6" />
+            <CheatCountdown active={dvirActive} duration={12.5} label="DVIR" color="#22c55e" />
+            <CheatCountdown active={sufrinActive} duration={15.5} label="SUFRIN" color="#d97706" />
 
           </g>
           {/* === End clipped map content === */}

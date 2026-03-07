@@ -322,7 +322,7 @@ export default function useGameEngine() {
         ));
 
         // Log + streak
-        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false }]);
+        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
@@ -386,7 +386,7 @@ export default function useGameEngine() {
         ));
 
         // Log + streak
-        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false }]);
+        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
@@ -448,7 +448,7 @@ export default function useGameEngine() {
         ));
 
         // Log + streak
-        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false }]);
+        setResultLog((prev) => [...prev, { ...target, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
         setStreak((s) => {
           const next = s + 1;
           setBestStreak((b) => Math.max(b, next));
@@ -519,7 +519,7 @@ export default function useGameEngine() {
           if (pos) {
             addImpactFlash(threat.impact_zone, 'intercept', pos.x, pos.y, threat.type);
           }
-          setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
+          setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
           setStreak((s) => {
             const next = s + 1;
             setBestStreak((b) => Math.max(b, next));
@@ -590,7 +590,7 @@ export default function useGameEngine() {
     // DVIR TURTLE SHIELD — if active and threat targets a populated area, auto-deflect with bounce
     if (dvirActiveRef.current && threat.is_populated) {
       interceptedIdsRef.current.add(threat.id);
-      setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false }]);
+      setResultLog((prev) => [...prev, { ...threat, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
       addImpactFlash(threat.impact_zone, 'shield_deflect', threat.type);
       playShieldBounceSound(volumeRef.current);
       setStreak((s) => {
@@ -886,7 +886,7 @@ export default function useGameEngine() {
               t.frozenTimeLeft = t.timeLeft;
               setTimeout(() => {
                 setActiveThreats((prev) => prev.filter((at) => at.id !== t.id));
-                setResultLog((prev) => [...prev, { ...t, result: 'correct_intercept', siren: false }]);
+                setResultLog((prev) => [...prev, { ...t, result: 'correct_intercept', siren: false, cheatAssisted: true }]);
                 addImpactFlash(t.impact_zone, 'shield_deflect', t.type);
                 playShieldBounceSound(volumeRef.current);
                 setStreak((s) => {
@@ -956,6 +956,8 @@ export default function useGameEngine() {
   const getLevelStats = useCallback(() => {
     const totalThreats = resultLog.length;
     const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
+    const regularIntercepts = resultLog.filter((r) => r.result === 'correct_intercept' && !r.cheatAssisted).length;
+    const cheatIntercepts = resultLog.filter((r) => r.result === 'correct_intercept' && r.cheatAssisted).length;
     const populatedThreats = resultLog.filter((r) => r.is_populated).length;
     const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
     const openGroundThreats = resultLog.filter((r) => !r.is_populated).length;
@@ -968,7 +970,8 @@ export default function useGameEngine() {
 
     const score = Math.max(0,
       quizBonus                          // briefing intel bonus
-      + (correctIntercepts * 100)
+      + (regularIntercepts * 100)        // +100 per manual intercept
+      + (cheatIntercepts * 75)           // +75 per cheat-assisted intercept (25% penalty)
       + (ammoRemaining * 250)            // efficiency bonus: unused interceptors
       + (bestStreak * 25)
       - (sirenCount * 100)
@@ -989,6 +992,8 @@ export default function useGameEngine() {
       level: currentLevel,
       totalThreats,
       correctIntercepts,
+      regularIntercepts,
+      cheatIntercepts,
       populatedThreats,
       correctHolds,
       openGroundThreats,
@@ -1007,16 +1012,15 @@ export default function useGameEngine() {
 
   // Running score — same formula as getLevelStats, usable during gameplay
   const getRunningScore = useCallback(() => {
-    const correctIntercepts = resultLog.filter((r) => r.result === 'correct_intercept').length;
-    const correctHolds = resultLog.filter((r) => r.result === 'correct_hold').length;
-    const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
-    const totalProcessed = resultLog.length;
+    const regularIntercepts = resultLog.filter((r) => r.result === 'correct_intercept' && !r.cheatAssisted).length;
+    const cheatIntercepts = resultLog.filter((r) => r.result === 'correct_intercept' && r.cheatAssisted).length;
 
     const ammoRemaining = Object.values(ammoRef.current).reduce((sum, v) => sum + v, 0);
 
     return Math.max(0,
       quizBonus
-      + (correctIntercepts * 100)
+      + (regularIntercepts * 100)
+      + (cheatIntercepts * 75)
       + (ammoRemaining * 250)
       + (bestStreak * 25)
       - (sirenCount * 100)

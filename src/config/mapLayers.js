@@ -20,7 +20,7 @@
 export const CITIES = {
   // === L1: Otef Aza === (GPS-verified positions)
   'Sderot':         { x: 0.212, y: 0.467, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'e', he: 'שְׂדֵרוֹת' },
-  'Ashkelon':       { x: 0.202, y: 0.436, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'ne', he: 'אַשְׁקְלוֹן' },
+  'Ashkelon':       { x: 0.202, y: 0.436, region: 'otef_aza', tier: 1, revealLevel: 1, labelDir: 'w', he: 'אַשְׁקְלוֹן' },
   "Be'eri":         { x: 0.175, y: 0.490, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'se', he: 'בְּאֵרִי' },
   'Kfar Aza':       { x: 0.191, y: 0.477, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 'n', he: 'כְּפַר עַזָּה' },
   "Re'im":          { x: 0.162, y: 0.498, region: 'otef_aza', tier: 2, revealLevel: 1, labelDir: 's', he: 'רְעִים' },
@@ -28,20 +28,20 @@ export const CITIES = {
 
   // === L2: Galil + Golan Heights === (GPS-verified positions)
   'Haifa':          { x: 0.36, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w', he: 'חֵיפָה' },
-  'Nahariya':       { x: 0.40, y: 0.14, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'w', he: 'נַהֲרִיָּה' },
-  'Kiryat Shmona':  { x: 0.56, y: 0.10, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'sw', he: 'קִרְיַת שְׁמוֹנָה' },
+  'Nahariya':       { x: 0.40, y: 0.14, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'nw', he: 'נַהֲרִיָּה' },
+  'Kiryat Shmona':  { x: 0.56, y: 0.10, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'nw', he: 'קִרְיַת שְׁמוֹנָה' },
   'Teveriah':       { x: 0.55, y: 0.19, region: 'galil', tier: 1, revealLevel: 2, labelDir: 'e', he: 'טְבֶרְיָה' },
   'Akko':           { x: 0.39, y: 0.16, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'e', he: 'עַכּוֹ' },
   'Tzfat':          { x: 0.54, y: 0.15, region: 'galil', tier: 2, revealLevel: 2, labelDir: 'w', he: 'צְפַת' },
-  'Katzrin':        { x: 0.61, y: 0.14, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'e', he: 'קַצְרִין' },
+  'Katzrin':        { x: 0.61, y: 0.14, region: 'golan', tier: 1, revealLevel: 2, labelDir: 'e', he: 'קַצְרִין' },
   'Majdal Shams':   { x: 0.64, y: 0.08, region: 'golan', tier: 2, revealLevel: 2, labelDir: 'w', he: 'מַגְ׳דַל שַׁמְס' },
 
   // === L3: Central Israel (Tel Aviv metro, Jerusalem corridor, Judean foothills) ===
   // tier 1: major cities always labeled on zoomed-out maps (L5+)
   // tier 2: labeled only when zoomed in (L3) or when actively targeted (L5+)
-  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'central', tier: 1, revealLevel: 3, labelDir: 'w', he: 'תֵּל אָבִיב' },
+  'Tel Aviv':       { x: 0.28, y: 0.35, region: 'central', tier: 1, revealLevel: 3, labelDir: 'nw', he: 'תֵּל אָבִיב' },
   'Jerusalem':      { x: 0.44, y: 0.42, region: 'central', tier: 1, revealLevel: 3, labelDir: 'e', he: 'יְרוּשָׁלַיִם' },
-  'Netanya':        { x: 0.31, y: 0.30, region: 'central', tier: 2, revealLevel: 3, labelDir: 'ne', he: 'נְתַנְיָה' },
+  'Netanya':        { x: 0.31, y: 0.30, region: 'central', tier: 1, revealLevel: 3, labelDir: 'n', he: 'נְתַנְיָה' },
   "Ra'anana":       { x: 0.313, y: 0.323, region: 'central', tier: 2, revealLevel: 3, labelDir: 'w', he: 'רַעֲנַנָּה' },
   'Petah Tikva':    { x: 0.33, y: 0.34, region: 'central', tier: 2, revealLevel: 3, labelDir: 'e', he: 'פֶּתַח תִּקְוָה' },
   'Rishon LeZion':  { x: 0.27, y: 0.39, region: 'central', tier: 2, revealLevel: 3, labelDir: 'sw', he: 'רִאשׁוֹן לְצִיּוֹן' },
@@ -56,7 +56,7 @@ export const CITIES = {
   'Ramat David AFB':  { x: 0.43, y: 0.22, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, keyBase: true, he: 'רָמַת דָּוִד' },
   'Glilot (Unit 8200)': { x: 0.29, y: 0.33, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'w', isBase: true, he: 'גְּלִילוֹת 8200' },
   'Palmachim AFB':    { x: 0.24, y: 0.38, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'w', isBase: true, keyBase: true, he: 'פַּלְמַחִים' },
-  'Nevatim AFB':      { x: 0.36, y: 0.54, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, keyBase: true, he: 'נְבָטִים' },
+  'Nevatim AFB':      { x: 0.36, y: 0.51, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, keyBase: true, he: 'נְבָטִים' },
   'Tel Nof AFB':      { x: 0.31, y: 0.42, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, he: 'תֵּל נוֹף' },
   'Ramon AFB':        { x: 0.24, y: 0.62, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, he: 'רָמוֹן' },
   'Sdot Micha':       { x: 0.36, y: 0.46, region: 'bases', tier: 1, revealLevel: 4, labelDir: 'e', isBase: true, he: 'שְׂדוֹת מִיכָה' },
@@ -67,7 +67,7 @@ export const CITIES = {
   'Hadera':         { x: 0.331, y: 0.269, region: 'coast', tier: 2, revealLevel: 5, labelDir: 'e', he: 'חֲדֵרָה' },
   // Negev (pushed south for spacing from Otef Aza / Jerusalem)
   'Beersheba':      { x: 0.29, y: 0.57, region: 'negev', tier: 1, revealLevel: 5, labelDir: 'e', he: 'בְּאֵר שֶׁבַע' },
-  'Dimona':         { x: 0.37, y: 0.62, region: 'negev', tier: 1, revealLevel: 5, labelDir: 'e', he: 'דִּימוֹנָה' },
+  'Dimona':         { x: 0.37, y: 0.62, region: 'negev', tier: 1, revealLevel: 5, labelDir: 's', he: 'דִּימוֹנָה' },
   'Eilat':          { x: 0.35, y: 0.90, region: 'negev', tier: 1, revealLevel: 5, labelDir: 'e', he: 'אֵילַת' },
   'Arad':           { x: 0.42, y: 0.58, region: 'negev', tier: 2, revealLevel: 5, labelDir: 'ne', he: 'עֲרָד' },
 };
@@ -80,11 +80,11 @@ export const LEVEL_VIEWPORTS = [
   null, // index 0 unused (levels are 1-indexed)
   { centerX: 0.27, centerY: 0.48, scale: 2.5 },   // L1: tight on Otef Aza, cities near Gaza arc on left
   { centerX: 0.48, centerY: 0.15, scale: 1.8 },   // L2: Galil/Golan + battery (slightly wider)
-  { centerX: 0.34, centerY: 0.37, scale: 2.2 },   // L3: Central Israel zoom — Tel Aviv, Jerusalem, Modi'in, Gush Etzion
+  { centerX: 0.30, centerY: 0.37, scale: 2.0 },   // L3: Central Israel (wider) — Gaza border visible, Tel Aviv, Jerusalem corridor
   { centerX: 0.33, centerY: 0.44, scale: 0.80 },  // L4: military bases — full map, bases only
-  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L5: full geography — all cities + bases + Negev/coast
-  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L6: same
-  { centerX: 0.33, centerY: 0.46, scale: 0.78 },  // L7: same
+  { centerX: 0.43, centerY: 0.46, scale: 0.78 },  // L5: full geography — Jerusalem near center, Golan visible
+  { centerX: 0.43, centerY: 0.46, scale: 0.78 },  // L6: same
+  { centerX: 0.43, centerY: 0.46, scale: 0.78 },  // L7: same
 ];
 
 // --- Per-Level Battery Positions ---
@@ -103,17 +103,17 @@ export const LEVEL_BATTERIES = [
   [
     { x: 0.24, y: 0.38, label: 'Palmachim' },     // Central coast — Arrow 2/3 primary
     { x: 0.43, y: 0.22, label: 'Ramat David' },   // North — Iron Dome / air defense
-    { x: 0.36, y: 0.54, label: 'Nevatim' },       // South — strategic air base
+    { x: 0.36, y: 0.51, label: 'Nevatim' },       // South — strategic air base
   ],
   [
     { x: 0.24, y: 0.38, label: 'Palmachim' },
     { x: 0.43, y: 0.22, label: 'Ramat David' },
-    { x: 0.36, y: 0.54, label: 'Nevatim' },
+    { x: 0.36, y: 0.51, label: 'Nevatim' },
   ],
   [
     { x: 0.24, y: 0.38, label: 'Palmachim' },
     { x: 0.43, y: 0.22, label: 'Ramat David' },
-    { x: 0.36, y: 0.54, label: 'Nevatim' },
+    { x: 0.36, y: 0.51, label: 'Nevatim' },
   ],
 ];
 
@@ -140,7 +140,7 @@ export const REGIONS = [
       [0.35, 0.11], [0.52, 0.08], [0.55, 0.12],
       [0.55, 0.21], [0.36, 0.23], [0.33, 0.18],
     ],
-    labelPos: { x: 0.45, y: 0.17 },
+    labelPos: { x: 0.43, y: 0.17 },
   },
   {
     name: 'Golan Heights',
@@ -150,7 +150,7 @@ export const REGIONS = [
       [0.58, 0.05], [0.68, 0.06], [0.68, 0.18],
       [0.62, 0.22], [0.58, 0.18], [0.57, 0.10],
     ],
-    labelPos: { x: 0.63, y: 0.10 },
+    labelPos: { x: 0.69, y: 0.08 },
   },
   {
     name: 'Central Israel',
@@ -160,7 +160,7 @@ export const REGIONS = [
       [0.22, 0.28], [0.36, 0.28], [0.46, 0.38],
       [0.46, 0.46], [0.22, 0.46], [0.22, 0.34],
     ],
-    labelPos: { x: 0.32, y: 0.36 },
+    labelPos: { x: 0.42, y: 0.35 },
   },
   {
     name: 'Negev',
@@ -171,7 +171,7 @@ export const REGIONS = [
       [0.42, 0.80], [0.37, 0.92], [0.33, 0.92],
       [0.28, 0.75], [0.22, 0.62],
     ],
-    labelPos: { x: 0.30, y: 0.63 },
+    labelPos: { x: 0.33, y: 0.72 },
   },
   // L5 unpopulated regions — outlines only, no cities
   {
