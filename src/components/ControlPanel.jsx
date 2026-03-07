@@ -79,14 +79,14 @@ export default function ControlPanel({
               {/* Shortcut badge + system name + Hebrew — centered together */}
               <div className="flex items-center justify-center gap-2 mb-1">
                 <span
-                  className="w-6 h-6 rounded border-2 flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  className="w-7 h-7 rounded border-2 flex items-center justify-center text-sm font-bold flex-shrink-0"
                   style={{ borderColor: depleted ? '#4b5563' : color, color: depleted ? '#4b5563' : color }}
                 >
                   {shortcut}
                 </span>
                 <div className="text-center">
-                  <div className="text-xs font-bold tracking-wider" style={{ color: depleted ? '#4b5563' : color }}>{label}</div>
-                  <div className="text-xs font-bold" style={{ color: depleted ? '#4b5563' : color, fontFamily: 'Arial, sans-serif' }}>{hebrew}</div>
+                  <div className="text-sm font-bold tracking-wider leading-tight" style={{ color: depleted ? '#4b5563' : color }}>{label}</div>
+                  <div className="text-sm font-bold leading-tight" style={{ color: depleted ? '#4b5563' : color, fontFamily: 'Arial, sans-serif' }}>{hebrew}</div>
                 </div>
               </div>
               {/* Ammo count + dots — centered */}
@@ -125,10 +125,10 @@ export default function ControlPanel({
         >
           {/* Shortcut badge + label — centered together */}
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="w-6 h-6 rounded border-2 border-gray-500 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0">
+            <span className="w-7 h-7 rounded border-2 border-gray-500 flex items-center justify-center text-sm font-bold text-gray-400 flex-shrink-0">
               5
             </span>
-            <span className="text-xs font-bold tracking-wider text-gray-400">HOLD FIRE</span>
+            <span className="text-sm font-bold tracking-wider text-gray-400">HOLD FIRE</span>
           </div>
           <div className="text-center text-gray-300 text-2xl font-bold tracking-wider">
             —
