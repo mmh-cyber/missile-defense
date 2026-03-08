@@ -154,8 +154,8 @@ export default function LevelComplete({ levelStats, campaignStats, onNextLevel, 
             points={levelStats.correctIntercepts * 100}
             color={levelStats.correctIntercepts === levelStats.populatedThreats ? 'text-green-400' : 'text-yellow-400'} />
           <ScoreRow label="INTERCEPTORS SAVED"
-            stat={Object.values(levelStats.ammoRemaining).reduce((s, v) => s + v, 0)}
-            points={Object.values(levelStats.ammoRemaining).reduce((s, v) => s + v, 0) * 250}
+            stat={levelStats.creditableAmmo}
+            points={levelStats.creditableAmmo * 250}
             color="text-cyan-400" />
           <ScoreRow label="BEST STREAK"
             stat={levelStats.bestStreak}

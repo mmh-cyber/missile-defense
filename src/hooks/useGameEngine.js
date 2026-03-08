@@ -971,14 +971,19 @@ export default function useGameEngine() {
     const wastedIntercepts = resultLog.filter((r) => r.result === 'wasted_intercept').length;
     const holdOnPopulated = resultLog.filter((r) => r.result === 'hold_populated').length;
 
-    // Ammo bonus — reward efficiency with points for each unused interceptor
+    // Ammo bonus — only credit "extra" interceptors beyond what's needed for perfect play
     const ammoRemaining = Object.values(ammo).reduce((sum, v) => sum + v, 0);
+    const levelConfig = getLevelConfig(currentLevel);
+    const startingAmmo = Object.values(levelConfig.ammo).reduce((sum, v) => sum + v, 0);
+    const levelThreatCount = (selectedThreatsRef.current || []).length;
+    const extraInterceptors = Math.max(0, startingAmmo - levelThreatCount);
+    const creditableAmmo = Math.min(ammoRemaining, extraInterceptors);
 
     const score = Math.max(0,
       quizBonus                          // briefing intel bonus
       + (regularIntercepts * 100)        // +100 per manual intercept
       + (cheatIntercepts * 75)           // +75 per cheat-assisted intercept (25% penalty)
-      + (ammoRemaining * 250)            // efficiency bonus: unused interceptors
+      + (creditableAmmo * 250)           // efficiency bonus: only surplus interceptors count
       + (bestStreak * 25)
       - (sirenCount * 100)
     );
@@ -1007,6 +1012,7 @@ export default function useGameEngine() {
       timeouts: timeouts + holdOnPopulated,
       wastedIntercepts,
       ammoRemaining: ammo,
+      creditableAmmo,
       sirenCount,
       bestStreak,
       quizBonus,
@@ -1022,12 +1028,17 @@ export default function useGameEngine() {
     const cheatIntercepts = resultLog.filter((r) => r.result === 'correct_intercept' && r.cheatAssisted).length;
 
     const ammoRemaining = Object.values(ammoRef.current).reduce((sum, v) => sum + v, 0);
+    const levelConfig = getLevelConfig(currentLevelRef.current);
+    const startingAmmo = Object.values(levelConfig.ammo).reduce((sum, v) => sum + v, 0);
+    const levelThreatCount = (selectedThreatsRef.current || []).length;
+    const extraInterceptors = Math.max(0, startingAmmo - levelThreatCount);
+    const creditableAmmo = Math.min(ammoRemaining, extraInterceptors);
 
     return Math.max(0,
       quizBonus
       + (regularIntercepts * 100)
       + (cheatIntercepts * 75)
-      + (ammoRemaining * 250)
+      + (creditableAmmo * 250)
       + (bestStreak * 25)
       - (sirenCount * 100)
     );

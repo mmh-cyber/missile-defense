@@ -18,7 +18,7 @@ export default function ScoringIntro({ onContinue }) {
       icon: '🚀',
       label: 'INTERCEPTORS SAVED',
       points: '+250',
-      desc: 'Every unused interceptor at end of level earns bonus points',
+      desc: 'Bonus for extra interceptors saved beyond what the level requires',
       color: 'text-cyan-400',
     },
     {
