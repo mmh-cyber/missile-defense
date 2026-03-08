@@ -308,11 +308,19 @@ const THREATS_L2 = [
   threat(40, 93, 'rocket', 'Nahariya',         true,  5,  'full', 1.0, { origin: 'north' }),
   threat(41, 93, 'drone',  'Haifa',            true,  8,  'full', 1.0, { origin: 'north' }),
   threat(42, 93, 'rocket', 'Majdal Shams',     true,  5,  'full', 1.0, { origin: 'northeast' }),    // closing triple!
+  // === EXTENDED BARRAGE — fill the gap (6 threats, 100-112s) ===
+  threat(43, 100,'drone',  'Kiryat Shmona',    true,  8,  'full', 1.0, { origin: 'north' }),
+  threat(44, 100,'rocket', 'Tzfat',            true,  5,  'full', 1.0, { origin: 'north' }),        // pair!
+  threat(45, 105,'rocket', 'Haifa',            true,  5,  'full', 1.0, { origin: 'north' }),
+  threat(46, 105,'drone',  'Akko',             true,  8,  'full', 1.0, { origin: 'north' }),
+  threat(47, 105,'rocket', 'Katzrin',          true,  5,  'full', 1.0, { origin: 'northeast' }),    // triple!
+  threat(48, 112,'drone',  'Teveriah',         true,  7,  'full', 1.0, { origin: 'northeast' }),
+  threat(49, 112,'rocket', 'Nahariya',         true,  5,  'full', 1.0, { origin: 'north' }),        // closing pair!
 ];
 
 // ============================================================
 // LEVEL 3: Central Israel — Cruise Missiles + all previous
-// Duration: 120s | 36 threats | Introduces: David's Sling + cruise missiles
+// Duration: 120s | 43 threats | Introduces: David's Sling + cruise missiles
 // Geography: Wider Central Region — Gaza border visible, Tel Aviv, Jerusalem,
 // Modi'in, Ra'anana, Gush Etzion corridor.
 // Rockets from Gaza, cruise missiles from Iran, drones from Lebanon.
@@ -329,41 +337,48 @@ const THREATS_L3 = [
   threat(7,  27, 'rocket', 'Holon',           true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
   threat(8,  30, 'drone',  'Coastal Plain',   false, 11, 'full', 1.0, { origin: 'north' }),        // hold fire
   threat(9,  33, 'cruise', "Modi'in",         true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
-  // === Phase 3: Mixed triples — tempo up (8 threats, 37-54s) ===
+  // === Phase 3: Pairs and triples — tempo up (11 threats, 37-54s) ===
   threat(10, 37, 'rocket', 'Ashdod',          true,  7,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(11, 39, 'cruise', "Ra'anana",        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(11, 37, 'cruise', "Ra'anana",        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
   threat(12, 41, 'drone',  'Petah Tikva',     true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
   threat(13, 44, 'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(14, 46, 'cruise', 'Tel Aviv',        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(15, 48, 'drone',  'Holon',           true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(16, 51, 'cruise', 'Gush Etzion',     true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
-  threat(17, 54, 'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  // === Phase 4: Heavy overlap — heartland under fire (7 threats, 58-73s) ===
-  threat(18, 58, 'cruise', 'Jerusalem',       true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(19, 59, 'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(20, 61, 'drone',  'Judean Hills',    false, 10, 'full', 1.0, { origin: 'north' }),        // hold fire
-  threat(21, 64, 'cruise', "Modi'in",         true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(22, 66, 'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(23, 69, 'drone',  "Ra'anana",        true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(24, 73, 'cruise', 'Gush Etzion',     true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
-  // === Phase 5: Intense closing — rapid fire (12 threats, 77-110s) ===
-  threat(25, 77, 'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(26, 79, 'cruise', 'Tel Aviv',        true,  8,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(27, 81, 'drone',  'Petah Tikva',     true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(28, 84, 'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(29, 86, 'cruise', 'Coastal Plain',   false, 9,  'full', 1.0, { origin: 'east' }),         // hold fire
-  threat(30, 88, 'drone',  'Netanya',         true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(31, 91, 'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(32, 94, 'cruise', 'Jerusalem',       true,  8,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(33, 97, 'drone',  "Modi'in",         true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
-  threat(34, 100,'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
-  threat(35, 104,'cruise', "Ra'anana",        true,  8,  'full', 1.0, { origin: 'east' }),         // Iran
-  threat(36, 108,'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(14, 44, 'drone',  'Netanya',         true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon (pair!)
+  threat(15, 48, 'cruise', 'Tel Aviv',        true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(16, 48, 'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza (pair!)
+  threat(17, 51, 'cruise', 'Gush Etzion',     true,  10, 'full', 1.0, { origin: 'east' }),         // Iran
+  threat(18, 54, 'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(19, 54, 'cruise', "Modi'in",         true,  9,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
+  threat(20, 54, 'drone',  'Holon',           true,  10, 'full', 1.0, { origin: 'north' }),        // Lebanon (triple!)
+  // === Phase 4: Heavy overlap — heartland under fire (9 threats, 58-73s) ===
+  threat(21, 58, 'cruise', 'Jerusalem',       true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(22, 58, 'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza (pair!)
+  threat(23, 61, 'drone',  'Judean Hills',    false, 10, 'full', 1.0, { origin: 'north' }),        // hold fire
+  threat(24, 64, 'cruise', "Modi'in",         true,  9,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(25, 64, 'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza (pair!)
+  threat(26, 69, 'drone',  "Ra'anana",        true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
+  threat(27, 69, 'cruise', 'Gush Etzion',     true,  9,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
+  threat(28, 73, 'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(29, 73, 'cruise', 'Tel Aviv',        true,  8,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
+  // === Phase 5: Intense closing — triples and rapid fire (14 threats, 77-110s) ===
+  threat(30, 77, 'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(31, 77, 'cruise', 'Jerusalem',       true,  8,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(32, 77, 'drone',  'Petah Tikva',     true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon (triple!)
+  threat(33, 82, 'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(34, 82, 'cruise', 'Coastal Plain',   false, 9,  'full', 1.0, { origin: 'east' }),         // hold fire (pair)
+  threat(35, 86, 'drone',  'Netanya',         true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
+  threat(36, 86, 'rocket', 'Holon',           true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza (pair!)
+  threat(37, 91, 'cruise', "Ra'anana",        true,  8,  'full', 1.0, { origin: 'east' }),         // Iran
+  threat(38, 91, 'rocket', 'Rishon LeZion',   true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza (pair!)
+  threat(39, 96, 'drone',  "Modi'in",         true,  9,  'full', 1.0, { origin: 'north' }),        // Lebanon
+  threat(40, 96, 'cruise', 'Gush Etzion',     true,  8,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
+  threat(41, 101,'rocket', 'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
+  threat(42, 101,'cruise', 'Tel Aviv',        true,  8,  'full', 1.0, { origin: 'east' }),         // Iran (pair!)
+  threat(43, 106,'rocket', 'Netanya',         true,  6,  'full', 1.0, { origin: 'gaza' }),         // Gaza
 ];
 
 // ============================================================
 // LEVEL 4: Strategic Targets — Ballistic + all previous, introduces Arrow 2
-// Duration: 120s | 34 threats
+// Duration: 120s | 37 threats
 // Geography: Military bases across Israel. No civilian cities on map.
 // NEW: ballistic missiles from Iran targeting strategic military sites.
 // Drones from Lebanon/Syria, cruise from Iran, ballistic from Iran.
@@ -405,8 +420,11 @@ const THREATS_L4 = [
   threat(30, 99, 'cruise',    'Ramon AFB',        true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
   threat(31, 103,'ballistic', 'Sdot Micha',       true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
   threat(32, 106,'drone',     'Tel Nof AFB',      true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(33, 109,'ballistic', 'Nevatim AFB',      true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(34, 112,'cruise',    'Ramat David AFB',  true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
+  threat(33, 106,'cruise',    'Nevatim AFB',      true,  9,  'full', 1.0, { origin: 'east' }),        // Iran (pair!)
+  threat(34, 109,'ballistic', 'Nevatim AFB',      true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
+  threat(35, 109,'drone',     'Palmachim AFB',    true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon (pair!)
+  threat(36, 112,'cruise',    'Ramat David AFB',  true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
+  threat(37, 112,'ballistic', 'Tel Nof AFB',      true,  10, 'full', 0.40, { origin: 'east' }),       // Iran (pair!)
 ];
 
 // ============================================================
@@ -613,7 +631,7 @@ export const LEVELS = [
   {
     id: 2,
     duration: 120,
-    ammo: { iron_dome: 36 },
+    ammo: { iron_dome: 42 },
     available_systems: ['iron_dome'],
     auto_end_delay: 3000,
     new_system: null,
@@ -626,7 +644,7 @@ export const LEVELS = [
   {
     id: 3,
     duration: 120,
-    ammo: { iron_dome: 22, davids_sling: 14 },
+    ammo: { iron_dome: 24, davids_sling: 18 },
     available_systems: ['iron_dome', 'davids_sling'],
     auto_end_delay: 5000,
     new_system: { key: 'davids_sling', name: "DAVID'S SLING", shortcut: '2', color: '#3b82f6' },
@@ -639,7 +657,7 @@ export const LEVELS = [
   {
     id: 4,
     duration: 120,
-    ammo: { iron_dome: 10, davids_sling: 12, arrow_2: 14 },
+    ammo: { iron_dome: 10, davids_sling: 13, arrow_2: 15 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
     auto_end_delay: 5000,
     new_system: { key: 'arrow_2', name: 'ARROW 2', shortcut: '3', color: '#ef4444' },
@@ -652,7 +670,7 @@ export const LEVELS = [
   {
     id: 5,
     duration: 150,
-    ammo: { iron_dome: 14, davids_sling: 10, arrow_2: 12 },
+    ammo: { iron_dome: 16, davids_sling: 11, arrow_2: 12 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
     auto_end_delay: 5000,
     new_system: null,
@@ -665,7 +683,7 @@ export const LEVELS = [
   {
     id: 6,
     duration: 150,
-    ammo: { iron_dome: 14, davids_sling: 7, arrow_2: 9, arrow_3: 8 },
+    ammo: { iron_dome: 14, davids_sling: 7, arrow_2: 7, arrow_3: 8 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 6000,
     new_system: { key: 'arrow_3', name: 'ARROW 3', shortcut: '4', color: '#a855f7' },
@@ -678,7 +696,7 @@ export const LEVELS = [
   {
     id: 7,
     duration: 150,
-    ammo: { iron_dome: 13, davids_sling: 7, arrow_2: 7, arrow_3: 8 },
+    ammo: { iron_dome: 15, davids_sling: 8, arrow_2: 7, arrow_3: 8 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 8000,
     new_system: null,

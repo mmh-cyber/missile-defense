@@ -98,7 +98,7 @@ export const LEVEL_BATTERIES = [
   { x: 0.24, y: 0.455, label: 'Hatzerim AFB', labelDir: 'e' },      // L1: Iron Dome battery
   { x: 0.43, y: 0.22, label: 'Ramat David AFB', labelDir: 's' },  // L2: northern air defense
   { x: 0.25, y: 0.42, label: 'Hatzor AFB', labelDir: 's' },       // L3: David's Sling home base
-  { x: 0.22, y: 0.40, label: 'Palmachim AFB', labelDir: 'sw' },   // L4: Arrow 2 primary site
+  { x: 0.24, y: 0.38, label: '', labelDir: 'sw' },                  // L4: Arrow 2 (at Palmachim AFB — city label handles naming)
   // L5-7: array of distributed batteries — getNearestBattery picks the closest
   [
     { x: 0.24, y: 0.38, label: 'Palmachim' },     // Central coast — Arrow 2/3 primary
@@ -140,7 +140,7 @@ export const REGIONS = [
       [0.35, 0.11], [0.52, 0.08], [0.55, 0.12],
       [0.55, 0.21], [0.36, 0.23], [0.33, 0.18],
     ],
-    labelPos: { x: 0.43, y: 0.22 },
+    labelPos: { x: 0.43, y: 0.12 },
   },
   {
     name: 'Golan Heights',
@@ -160,7 +160,7 @@ export const REGIONS = [
       [0.22, 0.28], [0.36, 0.28], [0.46, 0.38],
       [0.46, 0.46], [0.22, 0.46], [0.22, 0.34],
     ],
-    labelPos: { x: 0.42, y: 0.35 },
+    labelPos: { x: 0.25, y: 0.32 },
   },
   {
     name: 'Negev',

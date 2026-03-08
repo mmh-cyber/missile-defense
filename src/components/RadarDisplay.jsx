@@ -896,7 +896,7 @@ export default function RadarDisplay({
               // Scale dots and labels based on viewport zoom
               // L5-7 (scale < 1.0) use LARGER labels since the full map is packed into the same SVG space
               const dotRadius = viewport.scale >= 2.0 ? 1.2 : viewport.scale >= 1.5 ? 1.0 : 0.9;
-              const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.5 : 2.2;
+              const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.8 : 2.2;
               // Push labels further from dots when zoomed out to reduce overlap
               const offsetScale = viewport.scale < 1.0 ? 1.3 : 1.0;
               // Bases get larger labels/dots when they're the focus (L4)
