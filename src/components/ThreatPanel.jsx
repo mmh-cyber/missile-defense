@@ -17,9 +17,20 @@ function formatTimeUntil(seconds) {
 
 function ThreatCard({ threat, isSelected, onSelect }) {
   const color = THREAT_COLORS[threat.type] || '#94a3b8';
-  const urgency = threat.timeLeft < 5 ? 'animate-pulse' : '';
+  const isCritical = threat.timeLeft < 5;
+  const isWarning = threat.timeLeft < 10 && !isCritical;
+  const urgency = isCritical ? 'animate-pulse' : '';
   const intel = threat.intel || 'full';
   const isHeld = threat.held;
+
+  // Urgency background tint
+  const urgencyBg = isCritical
+    ? 'bg-red-950/30'
+    : isWarning
+      ? 'bg-yellow-950/20'
+      : isSelected && !isHeld
+        ? 'bg-white/10'
+        : 'bg-gray-900/50';
 
   return (
     <div
@@ -30,18 +41,17 @@ function ThreatCard({ threat, isSelected, onSelect }) {
           ? 'opacity-50 cursor-default'
           : 'cursor-pointer'
         }
-        ${isSelected && !isHeld
-          ? 'bg-white/10 shadow-lg shadow-white/10'
-          : 'bg-gray-900/50 hover:border-gray-500'
-        }
+        ${urgencyBg}
+        ${!isSelected && !isHeld && !isCritical && !isWarning ? 'hover:border-gray-500' : ''}
+        ${isSelected && !isHeld && !isCritical && !isWarning ? 'shadow-lg shadow-white/10' : ''}
         ${urgency}
       `}
       style={{
-        borderTop: `2px solid ${isSelected ? color : '#374151'}`,
-        borderRight: `2px solid ${isSelected ? color : '#374151'}`,
-        borderBottom: `2px solid ${isSelected ? color : '#374151'}`,
-        borderLeft: `4px solid ${color}`,
-        boxShadow: isSelected ? `0 0 15px ${color}40` : 'none',
+        borderTop: `2px solid ${isCritical ? '#ef4444' : isSelected ? color : '#374151'}`,
+        borderRight: `2px solid ${isCritical ? '#ef4444' : isSelected ? color : '#374151'}`,
+        borderBottom: `2px solid ${isCritical ? '#ef4444' : isSelected ? color : '#374151'}`,
+        borderLeft: `4px solid ${isCritical ? '#ef4444' : color}`,
+        boxShadow: isCritical ? '0 0 20px rgba(239, 68, 68, 0.3)' : isSelected ? `0 0 15px ${color}40` : 'none',
       }}
     >
       {/* Prominent Threat ID */}
@@ -128,23 +138,27 @@ function ThreatCard({ threat, isSelected, onSelect }) {
 
       {/* Countdown */}
       <div className="mt-2 flex items-center justify-between">
-        <div className="text-xs text-gray-500 font-mono">TIME LEFT</div>
+        <div className={`text-xs font-mono ${isCritical ? 'text-red-400 font-bold tracking-widest' : 'text-gray-500'}`}>
+          {isCritical ? '⚠ TIME LEFT' : 'TIME LEFT'}
+        </div>
         <div
           className={`text-2xl font-bold font-mono tabular-nums ${
-            threat.timeLeft < 5 ? 'text-red-500' : threat.timeLeft < 10 ? 'text-yellow-500' : 'text-green-400'
+            isCritical ? 'text-red-500 animate-pulse' : isWarning ? 'text-yellow-500' : 'text-green-400'
           }`}
+          style={isCritical ? { textShadow: '0 0 12px rgba(239, 68, 68, 0.6)' } : isWarning ? { textShadow: '0 0 8px rgba(234, 179, 8, 0.3)' } : {}}
         >
           {formatTime(threat.timeLeft)}
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="mt-1 h-1 bg-gray-800 rounded-full overflow-hidden">
+      <div className={`mt-1 ${isCritical ? 'h-1.5' : 'h-1'} bg-gray-800 rounded-full overflow-hidden`}>
         <div
-          className="h-full transition-all duration-100"
+          className={`h-full transition-all duration-100 ${isCritical ? 'animate-pulse' : ''}`}
           style={{
             width: `${(threat.timeLeft / threat.countdown) * 100}%`,
-            backgroundColor: threat.timeLeft < 5 ? '#ef4444' : threat.timeLeft < 10 ? '#eab308' : '#22c55e',
+            backgroundColor: isCritical ? '#ef4444' : isWarning ? '#eab308' : '#22c55e',
+            boxShadow: isCritical ? '0 0 8px rgba(239, 68, 68, 0.5)' : 'none',
           }}
         />
       </div>

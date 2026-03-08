@@ -1,4 +1,4 @@
-import { getLevelConfig, THREAT_COLORS, INTERCEPTOR_COLORS } from '../config/threats.js';
+import { getLevelConfig, THREAT_COLORS, INTERCEPTOR_COLORS, LEVEL_ACCENT_COLORS } from '../config/threats.js';
 
 // ─── Threat Animation Components ───────────────────────────────────
 
@@ -244,28 +244,44 @@ export default function LevelIntro({ level, onReady }) {
     hypersonic: HypersonicMissileAnimation,
   }[config.new_threat?.type] || null;
 
+  const accentColor = LEVEL_ACCENT_COLORS[level] || '#22c55e';
+
   return (
-    <div className="h-screen bg-[#0a0e1a] flex items-center justify-center relative overflow-y-auto">
+    <div className="h-screen flex items-center justify-center relative overflow-y-auto"
+      style={{
+        background: `
+          radial-gradient(ellipse at 50% 0%, ${accentColor}12 0%, transparent 50%),
+          linear-gradient(180deg, #0a0e1a 0%, #080c17 100%)
+        `,
+      }}>
+      {/* Top accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, transparent)` }} />
       <div className="max-w-2xl w-full py-8 px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-green-500/30 font-mono text-xs tracking-[0.4em] mb-2">
+          <div className="font-mono text-xs tracking-[0.4em] mb-2"
+            style={{ color: `${accentColor}60` }}>
             {level === 1 ? 'MISSION READY' : 'INTEL BRIEFING'}
           </div>
-          <h1 className="text-3xl font-bold font-mono text-green-400 tracking-wider mb-1">
+          <h1 className="text-3xl font-bold font-mono tracking-wider mb-1"
+            style={{ color: accentColor }}>
             LEVEL {config.id}
           </h1>
           {LEVEL_TITLES[level] && (
-            <div className="text-lg font-mono text-green-600 tracking-[0.3em] mt-1">
+            <div className="text-lg font-mono tracking-[0.3em] mt-1"
+              style={{ color: `${accentColor}90` }}>
               {LEVEL_TITLES[level]}
             </div>
           )}
           {LEVEL_TITLES_HE[level] && (
-            <div className="text-lg font-bold text-green-500/80 mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>
+            <div className="text-lg font-bold mt-1"
+              style={{ fontFamily: 'Arial, sans-serif', color: `${accentColor}BF` }}>
               {LEVEL_TITLES_HE[level]}
             </div>
           )}
-          <div className="h-px bg-green-900 w-48 mx-auto mt-4" />
+          <div className="h-0.5 w-48 mx-auto mt-4"
+            style={{ background: `linear-gradient(90deg, transparent, ${accentColor}50, transparent)` }} />
         </div>
 
         {/* Level 1 — Your Weapon recap + gameplay reminder */}

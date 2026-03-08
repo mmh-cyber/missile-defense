@@ -615,7 +615,7 @@ export default function App() {
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[#080c16]"
-        style={{ borderBottom: `1px solid ${LEVEL_ACCENT_COLORS[currentLevel] || '#22c55e'}40` }}>
+        style={{ borderBottom: `2px solid ${LEVEL_ACCENT_COLORS[currentLevel] || '#22c55e'}70` }}>
         <div className="flex items-center gap-3 whitespace-nowrap">
           <span className="text-green-400 font-mono text-sm font-bold tracking-widest">
             LEVEL {currentLevel}

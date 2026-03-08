@@ -1686,33 +1686,39 @@ export default function EducationalBriefing({ level, onComplete }) {
       className="h-screen flex flex-col relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(ellipse at 50% 100%, ${briefingAccent.color}0A 0%, transparent 50%),
-          radial-gradient(ellipse at 0% 0%, ${briefingAccent.color}06 0%, transparent 40%),
+          radial-gradient(ellipse at 50% 100%, ${briefingAccent.color}18 0%, transparent 50%),
+          radial-gradient(ellipse at 0% 0%, ${briefingAccent.color}10 0%, transparent 40%),
+          radial-gradient(ellipse at 100% 50%, ${briefingAccent.color}08 0%, transparent 35%),
           linear-gradient(180deg, #0a0e1a 0%, #080c17 100%)
         `,
       }}
     >
-      {/* Decorative background grid — subtle topographic feel */}
+      {/* Decorative background grid — visible topographic feel */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(${briefingAccent.color}08 1px, transparent 1px),
-            linear-gradient(90deg, ${briefingAccent.color}08 1px, transparent 1px)
+            linear-gradient(${briefingAccent.color}15 1px, transparent 1px),
+            linear-gradient(90deg, ${briefingAccent.color}15 1px, transparent 1px)
           `,
           backgroundSize: '40px 40px',
-          maskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 20%, transparent 70%)',
+          maskImage: 'radial-gradient(ellipse at 50% 50%, black 30%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 30%, transparent 70%)',
         }}
+      />
+      {/* Accent glow bar at top — visible color strip */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${briefingAccent.color}60, transparent)` }}
       />
       {/* Corner accent — bottom-left classification stamp */}
       <div className="absolute bottom-16 left-4 pointer-events-none">
         <div
           className="font-mono text-[9px] tracking-[0.4em] px-2 py-0.5 rounded border"
           style={{
-            color: `${briefingAccent.color}40`,
-            borderColor: `${briefingAccent.color}20`,
-            background: `${briefingAccent.color}06`,
+            color: `${briefingAccent.color}70`,
+            borderColor: `${briefingAccent.color}35`,
+            background: `${briefingAccent.color}12`,
           }}
         >
           LVL {level} — {briefingAccent.label}
@@ -1742,8 +1748,8 @@ export default function EducationalBriefing({ level, onComplete }) {
             style={{ color: `${briefingAccent.color}80` }}>
             {levelInfo.subtitle}
           </div>
-          {/* Accent divider line */}
-          <div className="mx-auto mt-2 h-px w-32" style={{ background: `linear-gradient(90deg, transparent, ${briefingAccent.color}40, transparent)` }} />
+          {/* Accent divider line — visible */}
+          <div className="mx-auto mt-2 h-0.5 w-40" style={{ background: `linear-gradient(90deg, transparent, ${briefingAccent.color}80, transparent)` }} />
         </div>
 
         {/* Phase progress bar — right padding avoids Escape Room timer overlap */}

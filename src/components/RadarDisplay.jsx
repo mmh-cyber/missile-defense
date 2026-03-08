@@ -234,18 +234,22 @@ function TrailEffect({ trail, viewport }) {
   const { color, duration } = trail;
   return (
     <g>
-      {/* Glow line behind main trail */}
-      <line x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke={color} strokeWidth="1.5" opacity="0.15" className="trail-line"
+      {/* Wide glow trail — visible background glow */}
+      <line x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke={color} strokeWidth="3" opacity="0.12" className="trail-line"
         style={{ '--trail-duration': `${duration}ms`, filter: 'url(#trail-glow)' }} />
-      {/* Main trail line */}
-      <line x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke={color} strokeWidth="0.6" opacity="0.6" className="trail-line"
+      {/* Bright glow line */}
+      <line x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke={color} strokeWidth="1.5" opacity="0.3" className="trail-line"
+        style={{ '--trail-duration': `${duration}ms`, filter: 'url(#trail-glow)' }} />
+      {/* Main trail line — bright and visible */}
+      <line x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke={color} strokeWidth="0.8" opacity="0.8" className="trail-line"
         style={{ '--trail-duration': `${duration}ms` }} />
       {/* Warhead — outer colored glow + inner white core */}
-      <circle cx={s.x} cy={s.y} r="1.2" fill={color} opacity="0.5" className="trail-warhead"
+      <circle cx={s.x} cy={s.y} r="1.8" fill={color} opacity="0.4" className="trail-warhead"
         style={{ '--dx': `${e.x - s.x}px`, '--dy': `${e.y - s.y}px`, '--trail-duration': `${duration}ms` }} />
-      <circle cx={s.x} cy={s.y} r="0.5" fill="white" className="trail-warhead"
+      <circle cx={s.x} cy={s.y} r="0.7" fill="white" className="trail-warhead"
         style={{ '--dx': `${e.x - s.x}px`, '--dy': `${e.y - s.y}px`, '--trail-duration': `${duration}ms` }} />
-      <circle cx={s.x} cy={s.y} r="1.5" fill={color} opacity="0.5" className="trail-launch-flash" />
+      {/* Launch flash — brighter and bigger */}
+      <circle cx={s.x} cy={s.y} r="2.5" fill={color} opacity="0.6" className="trail-launch-flash" />
     </g>
   );
 }
@@ -744,7 +748,7 @@ export default function RadarDisplay({
         <svg
           viewBox="0 0 100 100"
           className="w-full h-full"
-          style={{ filter: `drop-shadow(0 0 20px rgba(0, 255, 136, 0.12)) drop-shadow(0 0 15px ${accentColor}18)` }}
+          style={{ filter: `drop-shadow(0 0 20px rgba(0, 255, 136, 0.15)) drop-shadow(0 0 25px ${accentColor}35)` }}
         >
           {/* Clip path for radar circle */}
           <defs>
@@ -764,20 +768,21 @@ export default function RadarDisplay({
             {/* CRT vignette — darkens edges of radar */}
             <radialGradient id="radar-vignette" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="65%" stopColor="transparent" />
-              <stop offset="88%" stopColor="rgba(0,0,0,0.25)" />
-              <stop offset="100%" stopColor="rgba(0,0,0,0.6)" />
+              <stop offset="55%" stopColor="transparent" />
+              <stop offset="80%" stopColor="rgba(0,0,0,0.3)" />
+              <stop offset="92%" stopColor="rgba(0,0,0,0.55)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0.75)" />
             </radialGradient>
-            {/* CRT scan lines pattern */}
-            <pattern id="radar-scanlines" x="0" y="0" width="100" height="1.5" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="100" height="0.5" fill="rgba(0,0,0,0.12)" />
+            {/* CRT scan lines pattern — visible horizontal bars */}
+            <pattern id="radar-scanlines" x="0" y="0" width="100" height="2" patternUnits="userSpaceOnUse">
+              <rect x="0" y="0" width="100" height="0.7" fill="rgba(0,0,0,0.18)" />
             </pattern>
             {/* CRT phosphor noise — fine static dots */}
             <filter id="radar-noise" x="0%" y="0%" width="100%" height="100%">
               <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="2" result="noise" />
               <feColorMatrix type="saturate" values="0" in="noise" result="gray" />
               <feComponentTransfer in="gray" result="faint">
-                <feFuncA type="linear" slope="0.04" />
+                <feFuncA type="linear" slope="0.06" />
               </feComponentTransfer>
               <feBlend in="SourceGraphic" in2="faint" mode="screen" />
             </filter>
@@ -798,14 +803,18 @@ export default function RadarDisplay({
           <line x1="15" y1="15" x2="85" y2="85" stroke="#0f3d0f" strokeWidth="0.15" opacity="0.3" />
           <line x1="85" y1="15" x2="15" y2="85" stroke="#0f3d0f" strokeWidth="0.15" opacity="0.3" />
 
-          {/* Accent tint overlay on grid — subtle per-level color shift */}
-          <g opacity="0.12">
+          {/* Accent tint overlay — prominent per-level color on radar grid */}
+          <g>
+            {/* Ambient color wash — fills radar with faint accent tint */}
+            <circle cx="50" cy="50" r="48" fill={accentColor} opacity="0.04" />
+            {/* Accent rings — visible color overlay on the green grid */}
             {rings.map((r, i) => (
               <circle key={`accent-${i}`} cx="50" cy="50" r={r * 0.49}
-                fill="none" stroke={accentColor} strokeWidth="0.3" />
+                fill="none" stroke={accentColor} strokeWidth="0.6" opacity="0.25" />
             ))}
-            <line x1="1" y1="50" x2="99" y2="50" stroke={accentColor} strokeWidth="0.2" />
-            <line x1="50" y1="1" x2="50" y2="99" stroke={accentColor} strokeWidth="0.2" />
+            {/* Accent crosshairs */}
+            <line x1="1" y1="50" x2="99" y2="50" stroke={accentColor} strokeWidth="0.4" opacity="0.2" />
+            <line x1="50" y1="1" x2="50" y2="99" stroke={accentColor} strokeWidth="0.4" opacity="0.2" />
           </g>
 
           {/* === All map content clipped to radar circle === */}
@@ -1417,12 +1426,12 @@ export default function RadarDisplay({
           <circle cx="50" cy="50" r="49" fill="url(#radar-scanlines)" style={{ pointerEvents: 'none' }} />
           {/* Vignette — darkened edges */}
           <circle cx="50" cy="50" r="49" fill="url(#radar-vignette)" style={{ pointerEvents: 'none' }} />
-          {/* Outer rim highlight — phosphor glow at edge */}
+          {/* Outer rim highlight — accent-colored glow ring */}
           <circle cx="50" cy="50" r="48.5" fill="none"
-            stroke={accentColor} strokeWidth="0.5" opacity="0.08"
+            stroke={accentColor} strokeWidth="1" opacity="0.2"
             style={{ pointerEvents: 'none' }} />
           <circle cx="50" cy="50" r="49" fill="none"
-            stroke="rgba(0,255,136,0.15)" strokeWidth="0.3"
+            stroke="rgba(0,255,136,0.2)" strokeWidth="0.5"
             style={{ pointerEvents: 'none' }} />
         </svg>
 
