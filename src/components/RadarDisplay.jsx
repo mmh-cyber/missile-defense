@@ -308,20 +308,26 @@ function ThreatOriginArc({ origin, currentLevel }) {
       {/* Label */}
       <text
         x={lx} y={currentLevel >= 4 && ORIGIN_HEBREW[origin.name] ? ly - 1.2 : ly}
-        fill="rgba(255, 180, 80, 0.7)"
+        fill="rgba(255, 180, 80, 0.9)"
         fontSize="2.2" fontFamily="monospace"
         textAnchor="middle" dominantBaseline="middle"
         fontWeight="bold"
+        stroke="rgba(10, 14, 26, 0.7)"
+        strokeWidth="0.4"
+        paintOrder="stroke"
       >
         {origin.name}
       </text>
       {currentLevel >= 4 && ORIGIN_HEBREW[origin.name] && (
         <text
           x={lx} y={ly + 2}
-          fill="rgba(255, 180, 80, 0.7)"
+          fill="rgba(255, 180, 80, 0.9)"
           fontSize="2.2" fontFamily="Arial, sans-serif"
           textAnchor="middle" dominantBaseline="middle"
           fontWeight="bold"
+          stroke="rgba(10, 14, 26, 0.7)"
+          strokeWidth="0.4"
+          paintOrder="stroke"
         >
           {ORIGIN_HEBREW[origin.name]}
         </text>
@@ -763,14 +769,14 @@ export default function RadarDisplay({
             {/* CRT vignette — darkens edges of radar */}
             <radialGradient id="radar-vignette" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="55%" stopColor="transparent" />
-              <stop offset="80%" stopColor="rgba(0,0,0,0.3)" />
-              <stop offset="92%" stopColor="rgba(0,0,0,0.55)" />
-              <stop offset="100%" stopColor="rgba(0,0,0,0.75)" />
+              <stop offset="60%" stopColor="transparent" />
+              <stop offset="80%" stopColor="rgba(0,0,0,0.2)" />
+              <stop offset="92%" stopColor="rgba(0,0,0,0.4)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
             </radialGradient>
             {/* CRT scan lines pattern — visible horizontal bars */}
             <pattern id="radar-scanlines" x="0" y="0" width="100" height="2" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="100" height="0.7" fill="rgba(0,0,0,0.18)" />
+              <rect x="0" y="0" width="100" height="0.7" fill="rgba(0,0,0,0.12)" />
             </pattern>
             {/* CRT phosphor noise — fine static dots */}
             <filter id="radar-noise" x="0%" y="0%" width="100%" height="100%">
@@ -818,7 +824,7 @@ export default function RadarDisplay({
             {/* Region labels — subtle map-style annotations, no polygons */}
             {visibleRegions.map((region) => {
               const labelP = mapToSVG(region.labelPos.x, region.labelPos.y, viewport);
-              const fillColor = 'rgba(0, 200, 255, 0.35)';
+              const fillColor = 'rgba(0, 200, 255, 0.55)';
               // Smaller region labels when zoomed out (L5-7) to avoid overlap with city names
               const regionFontSize = viewport.scale < 1.0 ? '2.0' : '2.8';
               const regionLineHeight = viewport.scale < 1.0 ? '2.4' : '3.2';
@@ -835,6 +841,9 @@ export default function RadarDisplay({
                     textAnchor="middle"
                     fontWeight="bold"
                     letterSpacing={regionLetterSpacing}
+                    stroke="rgba(10, 14, 26, 0.6)"
+                    strokeWidth="0.3"
+                    paintOrder="stroke"
                   >
                     {words.map((word, i) => (
                       <tspan key={i} x={labelP.x} dy={i === 0 ? '0' : regionLineHeight}>{word}</tspan>
@@ -851,6 +860,9 @@ export default function RadarDisplay({
                   textAnchor="middle"
                   fontWeight="bold"
                   letterSpacing={regionLetterSpacing}
+                  stroke="rgba(10, 14, 26, 0.6)"
+                  strokeWidth="0.3"
+                  paintOrder="stroke"
                 >
                   {region.name}
                 </text>
@@ -1401,11 +1413,6 @@ export default function RadarDisplay({
           </g>
           {/* === End clipped map content === */}
 
-          {/* Threat origin arcs — rendered ON TOP of clip, at the radar perimeter */}
-          {visibleOrigins.map((origin) => (
-            <ThreatOriginArc key={origin.name} origin={origin} viewport={viewport} currentLevel={currentLevel} />
-          ))}
-
           {/* Sweep line */}
           {showSweep && (
             <line
@@ -1421,6 +1428,11 @@ export default function RadarDisplay({
           <circle cx="50" cy="50" r="49" fill="url(#radar-scanlines)" style={{ pointerEvents: 'none' }} />
           {/* Vignette — darkened edges */}
           <circle cx="50" cy="50" r="49" fill="url(#radar-vignette)" style={{ pointerEvents: 'none' }} />
+
+          {/* Threat origin arcs — rendered ABOVE CRT overlays so labels stay readable */}
+          {visibleOrigins.map((origin) => (
+            <ThreatOriginArc key={origin.name} origin={origin} viewport={viewport} currentLevel={currentLevel} />
+          ))}
           {/* Outer rim highlight — accent-colored glow ring */}
           <circle cx="50" cy="50" r="48.5" fill="none"
             stroke={accentColor} strokeWidth="1" opacity="0.2"
