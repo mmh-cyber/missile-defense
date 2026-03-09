@@ -161,6 +161,85 @@ PRE_GAME → SCORING_INTRO → BRIEFING (L1 only, has quiz)
 
 **gh-pages structure is FLAT**: `index.html` + `assets/` at repo root, NOT inside `dist/`.
 
+## Difficulty Rating System (1.0-10.0 scale)
+
+Shared language for tuning level difficulty. Five weighted dimensions:
+
+| Category | Weight | What It Measures |
+|----------|--------|-----------------|
+| **A. Tempo & Volume** | 20% | Threats/min, countdown length, simultaneous spawns, peak active threats |
+| **B. Decision Complexity** | 30% | # interceptor systems, # threat types, HF ratio, delayed reveal % |
+| **C. Ammo Pressure** | 20% | Per-system surplus ratio (0% = zero margin) |
+| **D. Sustained Intensity** | 15% | Breathing gaps (>5s pauses), relentlessness, duration |
+| **E. Learning Curve** | 15% | New systems/types/mechanics introduced this level |
+
+### Current Scores
+
+| Level | A. Tempo | B. Decisions | C. Ammo | D. Intensity | E. Learning | **TOTAL** |
+|-------|---------|-------------|---------|-------------|-------------|-----------|
+| L1 | 5.5 | 3.5 | 1.0 | 7.0 | 4.0 | **4.0** |
+| L2 | 7.0 | 3.5 | 3.0 | 7.5 | 4.5 | **4.9** |
+| L3 | 4.5 | 5.5 | 4.0 | 7.0 | 7.0 | **5.5** |
+| L4 | 2.0 | 7.0 | 3.0 | 5.0 | 8.0 | **5.1** |
+| L5 | 2.5 | 9.0 | 6.0 | 2.0 | 8.5 | **6.0** |
+| L6 | 2.0 | 7.5 | 6.5 | 5.5 | 2.0 | **5.1** |
+| L7 | 6.0 | 7.0 | 10.0 | 5.0 | 1.5 | **6.3** |
+
+### Scoring Criteria Reference
+
+**A. Tempo & Volume (20%)** — How fast must you click?
+- Threats/min: L1=28.5, L2=30.5, L3=25.5, L4=19.0, L5=18.8, L6=19.2, L7=23.6
+- Avg countdown: L1=6.1s, L2=6.9s, L3=7.7s, L4=10.2s, L5=8.5s, L6=8.6s, L7=8.5s
+- Simultaneous 3+ waves: L1=2, L2=7, L3-L7=0
+- Peak active threats: L1=6, L2=7, L3=6, L4=6, L5=6, L6=5, L7=7
+
+**B. Decision Complexity (30%)** — How hard is each decision? (heaviest weight — wrong key press is #1 failure cause)
+- Systems: L1-2=1, L3=2, L4=3, L5-7=4
+- Threat types: L1=1, L2=2, L3=3, L4=3, L5-7=5
+- HF ratio (hold-fire decisions): L1=47%, L2=34%, L3=28%, L4=13%, L5=26%, L6=19%, L7=24%
+- Delayed reveal (% with reveal_pct < 1.0): L1-3=0%, L4=42%, L5=38%, L6=25%, L7=34%
+
+**C. Ammo Pressure (20%)** — How much room for error?
+- Surplus ratio: L1=20%, L2=10%, L3=10.8%, L4=18.2%, L5=11.4%, L6=10.3%, L7=0%
+- Zero margin (L7) = automatic 10.0 score — one wasted shot means guaranteed failure
+
+**D. Sustained Intensity (15%)** — How relentless is the pace?
+- Breathing gaps (>5s): L1=0, L2=1, L3=0, L4=0, L5=7, L6=2, L7=5
+- Zero gaps = relentless; many gaps = time to recover
+
+**E. Learning Curve (15%)** — How much is new?
+- L1: First level (intercept + hold fire concept)
+- L2: New type (drones), new origins (north, northeast)
+- L3: New system (David's Sling), new type (cruise), new origin (east)
+- L4: New system (Arrow 2), new type (ballistic), new mechanic (delayed reveal)
+- L5: New system (Arrow 3), new type (hypersonic), new origins (southeast)
+- L6-7: No new mechanics (practice/mastery)
+
+### How to Adjust Difficulty
+
+To make a level **easier** (lower score):
+- Remove live threats from simultaneous waves → lowers A (tempo)
+- Increase countdowns by 1-2s → lowers A (more reaction time)
+- Add +1-2 ammo surplus → lowers C (more room for error)
+- Add breathing gaps between dense waves → lowers D (recovery time)
+- Convert live threats to HF → lowers A but raises B slightly
+
+To make a level **harder** (higher score):
+- Add simultaneous threat waves → raises A
+- Shorten countdowns → raises A
+- Reduce ammo surplus → raises C (biggest impact at low surplus levels)
+- Remove breathing gaps → raises D
+- Add more delayed-reveal threats → raises B
+
+### Target Progression (ideal difficulty curve)
+- L1: 3.0-3.5 (gentle tutorial)
+- L2: 4.0-4.5 (comfortable)
+- L3: 5.0-5.5 (challenging)
+- L4: 5.5-6.0 (hard, despite slow tempo)
+- L5: 6.5-7.0 (very hard)
+- L6: 7.0-7.5 (intense)
+- L7: 8.5-9.5 (brutal finale)
+
 ## Important Conventions
 - `window.__game = game` debug hook exists in App.jsx — useful for testing (`window.__game.startLevel(3)`)
 - Sound files in `public/sounds/` (music-level-1.mp3 through music-level-7.mp3, briefing-music.mp3, siren.mp3, etc.)
