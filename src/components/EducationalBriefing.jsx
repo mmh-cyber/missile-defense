@@ -8,34 +8,34 @@ const BRIEFING_CONTENT = {
   1: {
     phases: ['threat', 'defense', 'quiz', 'exercise'],
     threat: {
-      title: 'SHORT-RANGE ROCKETS',
-      hebrewTitle: 'רַקֵּטוֹת',
-      subtitle: 'Qassam & Grad Rockets',
+      title: 'SOUTHERN ISRAEL',
+      hebrewTitle: 'דְּרוֹם יִשְׂרָאֵל',
+      subtitle: 'Communities in the Line of Fire',
       color: '#f97316',
       displayCount: 3,
       factPool: [
-        { id: 'l1t1', icon: '🚀', text: 'Qassam rockets are built in Gaza using basic materials like sugar and fertilizer' },
-        { id: 'l1t2', icon: '📏', text: 'Range: 5-45 km — designed to strike nearby Israeli cities like Sderot and Ashkelon' },
-        { id: 'l1t3', icon: '💰', text: 'A Qassam costs ~$800 to build. The Tamir that destroys it costs $50,000 — this cost imbalance is a strategic weapon' },
-        { id: 'l1t4', icon: '⚠️', text: 'Qassam rockets are unguided — once launched, they cannot steer, making their exact impact point unpredictable' },
-        { id: 'l1t5', icon: '⏱️', text: 'From launch to impact, a Qassam gives residents only 15-45 seconds to reach shelter, depending on distance' },
-        { id: 'l1t6', icon: '🔢', text: 'Over 20,000 rockets and mortars have been fired from Gaza into Israel since 2001' },
+        { id: 'l1t1', icon: '🏘️', text: 'Sderot (pop. ~35,000) sits less than a mile (1 km) from the Gaza fence — when a rocket launches, residents have just 15 seconds to reach shelter. Children grow up practicing emergency sprint drills daily' },
+        { id: 'l1t2', icon: '🏗️', text: 'Ashkelon (pop. ~150,000) is a coastal city 8 miles (13 km) from Gaza — home to a major power station and desalination plant, making it both a civilian center and a strategic target' },
+        { id: 'l1t3', icon: '🏙️', text: 'Beersheba (pop. ~210,000) is the capital of the Negev, 25 miles (40 km) from Gaza — home to Ben-Gurion University and Soroka Hospital, the region\'s only Level 1 trauma center' },
+        { id: 'l1t4', icon: '🌾', text: 'The "Gaza Envelope" includes over 50 small farming communities within 4 miles (7 km) of the border — places like Kfar Aza, Be\'eri, and Nir Oz were devastated on October 7, 2023' },
+        { id: 'l1t5', icon: '👥', text: 'Over one million Israelis — roughly 12% of the population — live within rocket range of Gaza. During major escalations, daily life across the entire south grinds to a halt' },
+        { id: 'l1t6', icon: '🚨', text: 'The "Color Red" (Tzeva Adom) alert system warns residents by siren and smartphone app — in border towns like Sderot, it can sound dozens of times in a single day during conflict' },
       ],
       animation: 'rocket',
     },
     defense: {
-      title: 'IRON DOME',
+      title: 'ROCKETS & IRON DOME',
       hebrewTitle: 'כִּפַּת בַּרְזֶל',
-      subtitle: 'Short-Range Air Defense System',
+      subtitle: 'The Cheapest Threat, The Smartest Shield',
       color: '#22c55e',
       displayCount: 3,
       factPool: [
-        { id: 'l1d1', icon: '📅', text: 'Became operational in 2011, after the 2006 Lebanon War' },
-        { id: 'l1d2', icon: '🚀', text: 'Fires Tamir interceptor missiles — each costs approximately $50,000' },
-        { id: 'l1d3', icon: '🎯', text: 'Over 90% success rate against rockets and drones' },
-        { id: 'l1d4', icon: '🏭', text: 'Developed by Rafael Advanced Defense Systems with financial backing from the United States' },
-        { id: 'l1d5', icon: '📡', text: 'Each battery includes a radar unit, a control center, and 3-4 launchers — a battery can protect a medium-sized city' },
-        { id: 'l1d6', icon: '🧠', text: 'Iron Dome calculates each rocket\'s trajectory and only fires if the rocket threatens a populated area — saving interceptors for real threats' },
+        { id: 'l1d1', icon: '🚀', text: 'Qassam rockets are built in Gaza from sugar, fertilizer, and metal pipes — costing about $800 each. They are completely unguided and cannot steer after launch' },
+        { id: 'l1d2', icon: '🔢', text: 'Over 20,000 rockets and mortars have been fired from Gaza since 2001 — with a range of 3-28 miles (5-45 km), they can strike anywhere from Sderot to Beersheba' },
+        { id: 'l1d3', icon: '💰', text: 'A Qassam costs ~$800 to build; the Tamir interceptor that destroys it costs ~$50,000 — this 62:1 cost ratio is itself a strategic weapon for the attacker' },
+        { id: 'l1d4', icon: '🛡️', text: 'Iron Dome became operational in 2011 with a 90%+ success rate — it calculates each rocket\'s trajectory and only fires if it threatens a populated area, saving interceptors for real threats' },
+        { id: 'l1d5', icon: '🏭', text: 'Developed by Rafael Advanced Defense Systems with US backing — each Iron Dome battery has a radar unit, control center, and 3-4 launchers, enough to protect a medium-sized city' },
+        { id: 'l1d6', icon: '🧠', text: 'Iron Dome\'s "selective fire" is its secret weapon — by letting rockets headed for open fields pass harmlessly, it saves its limited Tamir interceptors for the rockets that truly threaten lives' },
       ],
       animation: 'iron_dome',
     },
@@ -50,24 +50,39 @@ const BRIEFING_CONTENT = {
   },
 
   2: {
-    phases: ['threat', 'quiz'],
+    phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'ATTACK DRONES',
-      hebrewTitle: 'כטב"מ',
-      subtitle: 'Shahed-136 & Samad-3 Drones',
+      title: 'NORTHERN ISRAEL',
+      hebrewTitle: 'צְפוֹן יִשְׂרָאֵל',
+      subtitle: 'The Northern Border Under Threat',
       color: '#eab308',
       displayCount: 3,
       factPool: [
-        { id: 'l2t1', icon: '🇮🇷', text: 'Iran manufactures the Shahed-136 kamikaze drone — supplied to Hezbollah in Lebanon' },
-        { id: 'l2t2', icon: '💥', text: 'Kamikaze drones ARE the weapon — they crash directly into their target' },
-        { id: 'l2t3', icon: '🎯', text: 'Cheap to produce (~$20,000 each) — enemies launch them in swarms' },
-        { id: 'l2t4', icon: '📡', text: 'Drones fly at low altitude (under 1,000 m) and at slow speeds (~185 km/h) — making them hard to detect on radar but vulnerable to fighter jets' },
-        { id: 'l2t5', icon: '📏', text: 'The Shahed-136 has a range of up to 2,500 km — enough to reach Israel from Iran, Yemen, or Iraq' },
-        { id: 'l2t6', icon: '⏱️', text: 'A Shahed-136 drone takes over 4 hours to fly from Iran to Israel — giving defenders time to prepare if detected early' },
+        { id: 'l2t1', icon: '🏘️', text: 'Kiryat Shmona (pop. ~24,000) sits just 3 miles (5 km) from the Lebanese border — in October 2023, the entire city was evacuated and residents couldn\'t return for over a year' },
+        { id: 'l2t2', icon: '📍', text: 'Metula (pop. ~2,000) is Israel\'s northernmost town — literally built against the border fence. Its residents can see Hezbollah positions from their backyards' },
+        { id: 'l2t3', icon: '⚓', text: 'Haifa (pop. ~285,000, metro ~1 million) is Israel\'s third-largest city and main port — Hezbollah fired over 4,000 rockets at northern Israel during the 2006 war, many aimed at Haifa' },
+        { id: 'l2t4', icon: '🏖️', text: 'Nahariya (pop. ~60,000) is a coastal city just 6 miles (10 km) from the Lebanese border — during the 2006 war, rockets struck its hospital, and it has been targeted in every northern conflict' },
+        { id: 'l2t5', icon: '👥', text: 'Over 80,000 northern residents were evacuated in October 2023 and couldn\'t return for over a year — entire communities became ghost towns while rockets and drones crossed the border daily' },
+        { id: 'l2t6', icon: '🏔️', text: 'The Galilee holds the Sea of Galilee — Israel\'s largest freshwater lake — plus major farmland. Hezbollah\'s arsenal of 150,000+ rockets puts all of northern Israel at risk' },
       ],
       animation: 'drone',
     },
-    defense: null,
+    defense: {
+      title: 'ATTACK DRONES',
+      hebrewTitle: 'כטב"מ תַּקִּיפָה',
+      subtitle: 'Slow, Cheap, and Deadly in Swarms',
+      color: '#eab308',
+      displayCount: 3,
+      factPool: [
+        { id: 'l2d1', icon: '🇮🇷', text: 'Iran manufactures the Shahed-136 "kamikaze" drone and supplies it to Hezbollah and allied groups — the drone IS the weapon, crashing directly into its target and detonating on impact' },
+        { id: 'l2d2', icon: '📡', text: 'Attack drones cruise at 300-6,000 feet (100-2,000 m) and fly slow (~115 mph / 185 km/h) — they hug the terrain to avoid radar, making them harder to detect than rockets or missiles' },
+        { id: 'l2d3', icon: '📏', text: 'The Shahed-136 has a range of 1,550 miles (2,500 km) — launched from Iran, it takes 7+ hours to reach Israel, but from Lebanon the flight time is just minutes' },
+        { id: 'l2d4', icon: '🐝', text: 'Drones are launched in swarms of 10-50+ to overwhelm air defenses — even if most are shot down, the few that get through can strike power plants, radar stations, or airfields' },
+        { id: 'l2d5', icon: '💰', text: 'At ~$20,000 each, drones are 2.5× cheaper than the interceptors used to destroy them — attackers can afford to lose dozens while draining the defender\'s missile supply' },
+        { id: 'l2d6', icon: '🎯', text: 'Unlike unguided Qassam rockets, drones use GPS navigation and can be pre-programmed to hit specific buildings — turning a cheap weapon into a precision-guided threat' },
+      ],
+      animation: 'iron_dome',
+    },
     exerciseConfig: {
       exerciseThreats: [
         { systemName: 'IRON DOME', shortcut: '1', threatLabel: 'DRONE', threatColor: '#eab308', startX: 30, startY: 55 },
@@ -79,34 +94,34 @@ const BRIEFING_CONTENT = {
   3: {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'CRUISE MISSILES',
-      hebrewTitle: 'טִילֵי שִׁיּוּט',
-      subtitle: 'Paveh & Quds Cruise Missiles',
+      title: 'CENTRAL ISRAEL',
+      hebrewTitle: 'מֶרְכַּז יִשְׂרָאֵל',
+      subtitle: 'The Heart of the Nation',
       color: '#3b82f6',
       displayCount: 3,
       factPool: [
-        { id: 'l3t1', icon: '🇮🇷', text: 'Iran developed the Paveh and Quds cruise missiles for long-range strikes' },
-        { id: 'l3t2', icon: '✈️', text: 'Cruise missiles fly like small aircraft — jet-powered, with wings for sustained flight' },
-        { id: 'l3t3', icon: '🎯', text: 'Unlike rockets, cruise missiles are guided — they can navigate to precise targets' },
-        { id: 'l3t4', icon: '📏', text: 'The Paveh cruise missile has a range of over 1,600 km — enough to reach Israel from deep inside Iranian territory' },
-        { id: 'l3t5', icon: '📡', text: 'Cruise missiles hug the terrain at low altitude, flying under radar coverage — this makes them extremely difficult to detect early' },
-        { id: 'l3t6', icon: '🛰️', text: 'Modern cruise missiles use GPS and terrain-matching navigation to strike targets with accuracy within a few meters' },
+        { id: 'l3t1', icon: '🏙️', text: 'Tel Aviv (pop. ~460,000, metro 4+ million) is Israel\'s economic engine — home to the stock exchange, most major tech companies, and the country\'s busiest cultural scene' },
+        { id: 'l3t2', icon: '🕌', text: 'Jerusalem (pop. ~1 million) is holy to Judaism, Christianity, and Islam — home to the Western Wall, Church of the Holy Sepulchre, and Al-Aqsa Mosque, making it one of the most sensitive targets on Earth' },
+        { id: 'l3t3', icon: '📐', text: 'At its narrowest point near Netanya, Israel is just 9 miles (15 km) wide — a cruise missile launched from the east could cross the entire country in under a minute' },
+        { id: 'l3t4', icon: '✈️', text: 'Ben Gurion Airport near Tel Aviv is Israel\'s only major international airport — missile attacks force it to shut down, instantly cutting the country off from the outside world' },
+        { id: 'l3t5', icon: '👥', text: 'Nearly 5 million people — close to half of Israel\'s population — live in the narrow central corridor between Tel Aviv and Jerusalem, making it the most densely populated target zone' },
+        { id: 'l3t6', icon: '💻', text: 'The "Silicon Wadi" tech corridor from Tel Aviv to Herzliya hosts thousands of startups and R&D centers for Google, Apple, and Microsoft — a strike here would ripple through the global tech economy' },
       ],
       animation: 'cruise',
     },
     defense: {
-      title: "DAVID'S SLING",
+      title: "CRUISE MISSILES & DAVID'S SLING",
       hebrewTitle: 'קֶלַע דָּוִד',
-      subtitle: 'Medium-Range Air Defense System',
+      subtitle: 'Low-Flying Threat, Precision Shield',
       color: '#3b82f6',
       displayCount: 3,
       factPool: [
-        { id: 'l3d1', icon: '📅', text: 'Declared operational in 2017, filling the gap between Iron Dome and Arrow' },
-        { id: 'l3d2', icon: '🚀', text: 'Fires Stunner interceptors — uses hit-to-kill technology (no explosive warhead)' },
-        { id: 'l3d3', icon: '💰', text: 'Each Stunner interceptor costs approximately $1 million' },
-        { id: 'l3d4', icon: '🏭', text: 'Jointly developed by Rafael (Israel) and Raytheon (US) — a major US-Israel defense partnership' },
-        { id: 'l3d5', icon: '📏', text: 'Effective range of 40-300 km — designed to intercept cruise missiles, large rockets, and short-range ballistic missiles' },
-        { id: 'l3d6', icon: '👁️', text: 'The Stunner has a dual-seeker system — it uses both infrared and radar guidance to track and hit maneuvering targets' },
+        { id: 'l3d1', icon: '✈️', text: 'Cruise missiles fly like small aircraft — jet-powered with wings, they hug terrain at low altitude to sneak under radar, and use GPS to strike targets with meter-level accuracy' },
+        { id: 'l3d2', icon: '🇮🇷', text: 'Iran\'s Paveh cruise missile has a range of over 1,000 miles (1,600 km) — enough to reach central Israel from deep inside Iranian territory, flying low the entire way' },
+        { id: 'l3d3', icon: '📡', text: 'Unlike ballistic missiles that arc high into the sky, cruise missiles stay low and hug the terrain — making them nearly invisible to distant radar until they\'re dangerously close' },
+        { id: 'l3d4', icon: '🛡️', text: "David's Sling became operational in 2017, filling the gap between Iron Dome and Arrow — it fires Stunner interceptors that use hit-to-kill technology with no explosive warhead" },
+        { id: 'l3d5', icon: '👁️', text: "The Stunner has a dual-seeker system — both infrared and radar guidance — allowing it to track and hit maneuvering cruise missiles at ranges of 25-185 miles (40-300 km)" },
+        { id: 'l3d6', icon: '🏭', text: "David's Sling was jointly developed by Rafael (Israel) and Raytheon (US). Each Stunner interceptor costs about $1 million — expensive, but far cheaper than what it protects" },
       ],
       animation: 'davids_sling',
     },
@@ -122,34 +137,34 @@ const BRIEFING_CONTENT = {
   4: {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'THE HOME FRONT',
-      hebrewTitle: 'חֲזִית הָעוֹרֶף',
-      subtitle: 'Defending 9.8 Million People',
+      title: 'STRATEGIC TARGETS',
+      hebrewTitle: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת',
+      subtitle: 'Why Missile Defense Matters',
       color: '#ef4444',
       displayCount: 3,
       factPool: [
-        { id: 'l4t1', icon: '🏙️', text: 'Israel has ~9.8 million people in one of the world\'s smallest countries — about the size of New Jersey' },
-        { id: 'l4t2', icon: '🌊', text: 'The coastal plain from Haifa to Ashdod holds over 70% of Israel\'s population in a strip only 15-20 km wide' },
-        { id: 'l4t3', icon: '📏', text: 'At its narrowest point near Netanya, Israel is only 15 km from the Mediterranean Sea to the West Bank border' },
-        { id: 'l4t4', icon: '🏘️', text: 'Gush Dan — the greater Tel Aviv metropolitan area — contains nearly 4 million people, almost half the country\'s population' },
-        { id: 'l4t5', icon: '🚀', text: 'A Shahab-3 ballistic missile launched from Iran reaches any city in Israel in under 12 minutes — arcing through space at Mach 7-10' },
-        { id: 'l4t6', icon: '💥', text: 'Ballistic missiles plunge from space at extreme speed with enormous kinetic energy — devastating against densely populated areas' },
+        { id: 'l4t1', icon: '🗺️', text: 'Israel is roughly the size of New Jersey and only 15 km (9 miles) wide at its narrowest point — nearly all critical infrastructure sits along a tiny coastal strip, within range of enemy missiles' },
+        { id: 'l4t2', icon: '⛽', text: 'The BAZAN refinery in Haifa Bay supplies about 65% of Israel\'s diesel fuel. In 2016, Hezbollah\'s leader threatened that striking its ammonia tanks would have "the effect of a nuclear bomb" — Israel shut down the ammonia storage facility by 2017' },
+        { id: 'l4t3', icon: '💧', text: 'Israel gets over 80% of its drinking water from desalination — the Sorek plant south of Tel Aviv is one of the world\'s largest, providing water for millions. Losing it would create a national crisis within days' },
+        { id: 'l4t4', icon: '⚡', text: 'Orot Rabin in Hadera is Israel\'s largest power station at 2,590 megawatts — a single complex powering over a million homes. Israel\'s grid depends on just a handful of plants like this' },
+        { id: 'l4t5', icon: '☢️', text: 'The Dimona nuclear reactor in the Negev is one of Iran\'s top stated strategic targets — Iranian missiles landed in the Dimona area during the October 2024 attack on Israel' },
+        { id: 'l4t6', icon: '🏛️', text: 'The Kirya in central Tel Aviv is Israel\'s Pentagon — housing IDF headquarters, the Ministry of Defense, and top intelligence offices. In October 2024, an Iranian ballistic missile landed just 500 meters (5 football fields) away' },
       ],
       animation: 'ballistic',
     },
     defense: {
-      title: 'ARROW 2',
+      title: 'BALLISTIC MISSILES & ARROW 2',
       hebrewTitle: 'חֵץ 2',
-      subtitle: 'Upper-Atmosphere Interceptor',
+      subtitle: 'High Arc Threat, High Altitude Shield',
       color: '#ef4444',
       displayCount: 3,
       factPool: [
-        { id: 'l4d1', icon: '📅', text: "First operational in 2000 — the world's first deployed anti-ballistic missile system" },
-        { id: 'l4d2', icon: '🚀', text: 'Intercepts ballistic missiles in the upper atmosphere during their descent' },
-        { id: 'l4d3', icon: '📏', text: 'Effective range: up to 90 km altitude — targets are destroyed high above populated areas' },
-        { id: 'l4d4', icon: '🏭', text: 'Jointly developed by Israel Aerospace Industries (IAI) and Boeing as part of a US-Israel cooperation program' },
-        { id: 'l4d5', icon: '💥', text: 'Arrow 2 uses a directed fragmentation warhead — it detonates near the target, shredding it with shrapnel rather than requiring a direct hit' },
-        { id: 'l4d6', icon: '📡', text: 'Paired with the Green Pine radar — one of the most powerful tracking radars in the world, able to detect missiles at ranges over 500 km' },
+        { id: 'l4d1', icon: '🎯', text: 'Ballistic missiles follow a high arc into the upper atmosphere, then dive toward their target at extreme speed — Iran\'s Emad and Khorramshahr missiles can reach Israel in under 12 minutes' },
+        { id: 'l4d2', icon: '💥', text: 'Iran launched approximately 200 ballistic missiles at Israel in October 2024 — the largest ballistic missile attack in history. Arrow 2 and Arrow 3 intercepted many of them at altitude' },
+        { id: 'l4d3', icon: '📅', text: 'Arrow 2 became operational in 2000 — the world\'s first modern anti-ballistic missile system. Iraq\'s 39 Scud strikes on Israel in 1991 made building it a national priority' },
+        { id: 'l4d4', icon: '🚀', text: 'Arrow 2 flies at Mach 9 and intercepts at up to 30 miles (50 km) altitude — 5x the cruising altitude of an airliner. It uses a directed fragmentation warhead that destroys targets within a 165-foot (50 m) radius' },
+        { id: 'l4d5', icon: '🏭', text: 'Jointly developed by Israel Aerospace Industries (IAI) and Boeing — the US has funded 50-80% of the Arrow program, investing over $2.4 billion since 1989' },
+        { id: 'l4d6', icon: '📡', text: 'Paired with the Green Pine radar — able to detect missiles at 300+ miles (500+ km), track 30 targets simultaneously, and guide the Arrow to within 13 feet (4 m) of its target' },
       ],
       animation: 'arrow_2',
     },
@@ -164,34 +179,34 @@ const BRIEFING_CONTENT = {
   5: {
     phases: ['threat', 'defense', 'quiz'],
     threat: {
-      title: 'HYPERSONIC GLIDE VEHICLES',
-      hebrewTitle: 'טִילִים הִיפֶּרְסוֹנִיִּם',
-      subtitle: 'DF-ZF Class',
+      title: 'ARMY BASES',
+      hebrewTitle: 'בְּסִיסֵי צָבָא',
+      subtitle: 'Why Enemies Target the Bases',
       color: '#a855f7',
       displayCount: 3,
       factPool: [
-        { id: 'l5t1', icon: '⚡', text: 'Hypersonic weapons travel at Mach 5+ — over 6,000 km/h' },
-        { id: 'l5t2', icon: '🌍', text: 'They boost to the edge of space, then glide back at extreme speed while maneuvering' },
-        { id: 'l5t3', icon: '📡', text: 'Their ability to change course mid-flight makes them nearly impossible to predict' },
-        { id: 'l5t4', icon: '🇷🇺', text: 'Russia, China, Iran, and North Korea are all developing hypersonic weapons — Russia\'s Avangard can reportedly reach Mach 20' },
-        { id: 'l5t5', icon: '🔥', text: 'At Mach 5+, air friction heats the weapon\'s surface to over 2,000\u00b0C — requiring special heat-resistant materials to survive the flight' },
-        { id: 'l5t6', icon: '⏱️', text: 'A hypersonic weapon at Mach 7 crosses 100 km in about 50 seconds — leaving almost no time for traditional defense systems to react' },
+        { id: 'l5t1', icon: '✈️', text: 'Nevatim AFB in the Negev is home to Israel\'s entire F-35 "Adir" stealth fighter fleet — Iran fired missiles directly at it in October 2024, and satellite images showed damage to the base' },
+        { id: 'l5t2', icon: '🚀', text: 'Palmachim AFB on the coast is Israel\'s spaceport — it launches satellites, tests Arrow interceptors, and is one of only a handful of orbital launch sites in the world. Israel launches westward over the sea to avoid overflying hostile neighbors' },
+        { id: 'l5t3', icon: '🕵️', text: 'Glilot base near Tel Aviv houses Unit 8200, Israel\'s signals intelligence unit — often compared to the NSA. Its alumni have founded hundreds of tech companies worth over $160 billion combined' },
+        { id: 'l5t4', icon: '☢️', text: 'Sdot Micha is believed to house Israel\'s Jericho ballistic missiles — the country\'s ultimate strategic deterrent. It has no runway, only underground missile storage, and is itself protected by Arrow batteries' },
+        { id: 'l5t5', icon: '🛩️', text: 'Ramat David AFB in the Jezreel Valley is the northernmost fighter base — just 30 miles (50 km) from the Lebanese border, making it Hezbollah\'s first target in any northern war' },
+        { id: 'l5t6', icon: '🦅', text: 'Tel Nof AFB near Rehovot houses Israel\'s F-15 long-range strike fleet. Israel was the first country outside the US to fly the F-15 — receiving its first Eagles in 1976' },
       ],
       animation: 'hypersonic',
     },
     defense: {
-      title: 'ARROW 3',
+      title: 'HYPERSONICS & ARROW 3',
       hebrewTitle: 'חֵץ 3',
-      subtitle: 'Exo-Atmospheric Interceptor',
+      subtitle: 'Fastest Threat, Highest Shield',
       color: '#a855f7',
       displayCount: 3,
       factPool: [
-        { id: 'l5d1', icon: '🌌', text: 'Intercepts targets in space — outside the atmosphere, before reentry' },
-        { id: 'l5d2', icon: '🚀', text: 'Uses hit-to-kill technology — pure kinetic energy, no explosive warhead needed' },
-        { id: 'l5d3', icon: '📏', text: 'Can engage threats at altitudes over 100 km — the highest layer of Israeli defense' },
-        { id: 'l5d4', icon: '🏭', text: 'Developed by Israel Aerospace Industries (IAI) with support from the US Missile Defense Agency' },
-        { id: 'l5d5', icon: '🧪', text: 'Successfully tested against a real ballistic target in space in 2019 — proving the system works in actual combat conditions' },
-        { id: 'l5d6', icon: '🌐', text: 'Destroying threats in space means debris burns up on reentry — protecting people on the ground from falling warhead fragments' },
+        { id: 'l5d1', icon: '⚡', text: 'Hypersonic weapons travel at Mach 5+ — over 3,700 mph. They boost to the edge of space, then glide back while maneuvering, making them nearly impossible to predict' },
+        { id: 'l5d2', icon: '⏱️', text: 'A hypersonic weapon at Mach 7 crosses 60 miles (100 km) in about 40 seconds — air friction heats its surface to over 3,600°F, requiring special materials to survive' },
+        { id: 'l5d3', icon: '🇷🇺', text: 'Russia, China, Iran, and North Korea are all developing hypersonic weapons — Russia\'s Avangard reportedly reaches Mach 20, and Iran has tested its own Fattah hypersonic missile' },
+        { id: 'l5d4', icon: '🌌', text: 'Arrow 3 intercepts threats in space — outside the atmosphere, before reentry. It uses hit-to-kill technology: pure kinetic energy, no explosive warhead needed' },
+        { id: 'l5d5', icon: '📏', text: 'Arrow 3 engages threats at altitudes over 62 miles (100 km) — the highest layer of Israeli defense. It was successfully tested against a real target in space in 2019' },
+        { id: 'l5d6', icon: '🌐', text: 'Destroying threats in space means debris burns up on reentry — protecting people below. Arrow 3 was developed by IAI with the US Missile Defense Agency' },
       ],
       animation: 'arrow_3',
     },
@@ -212,11 +227,11 @@ const BRIEFING_CONTENT = {
       color: '#a855f7',
       displayCount: 3,
       factPool: [
-        { id: 'l6t1', icon: '🗺️', text: 'Israel faces threats from 5 directions simultaneously — Gaza (west), Lebanon (north), Syria (northeast), Iran (east), and Yemen (southeast)' },
-        { id: 'l6t2', icon: '🇾🇪', text: 'Yemen\'s Houthi rebels, backed by Iran, have launched ballistic missiles and drones at Israel from over 2,000 km away — the farthest threat origin' },
+        { id: 'l6t1', icon: '🗺️', text: 'Israel faces threats from 5 directions simultaneously — Gaza (southwest), Lebanon (north), Syria (northeast), Iran (east), and Yemen (southeast)' },
+        { id: 'l6t2', icon: '🇾🇪', text: 'Yemen\'s Houthi rebels, backed by Iran, have launched ballistic missiles and drones at Israel from over 2,000 km (1,250 miles) away — the farthest threat origin' },
         { id: 'l6t3', icon: '🔗', text: 'Iran\'s "Axis of Resistance" coordinates attacks across all fronts — Gaza, Lebanon, Syria, Iraq, and Yemen can strike simultaneously' },
         { id: 'l6t4', icon: '📐', text: 'Defending 360° is exponentially harder than one front — operators must constantly scan the entire radar for threats from any direction' },
-        { id: 'l6t5', icon: '🌍', text: 'Israel is one of the smallest countries facing multi-front missile threats — the entire country is only 470 km long and 135 km wide at its widest' },
+        { id: 'l6t5', icon: '🌍', text: 'Israel is one of the smallest countries facing multi-front missile threats — the entire country is only 290 miles (470 km) long and 85 miles (135 km) wide at its widest' },
         { id: 'l6t6', icon: '⏱️', text: 'A ballistic missile from Iran reaches Israel in under 12 minutes, while a drone from Yemen takes 4+ hours — defenders must handle vastly different timelines' },
       ],
       animation: 'layered',
@@ -266,7 +281,7 @@ const BRIEFING_CONTENT = {
       displayCount: 3,
       factPool: [
         { id: 'l7d1', icon: '💰', text: 'A Qassam rocket costs $800 to build — the Tamir that destroys it costs $50,000 (a 62:1 cost ratio favoring the attacker)' },
-        { id: 'l7d2', icon: '🚀', text: 'An Arrow 3 interceptor costs ~$3.5 million — adversaries can force a launch with a much cheaper decoy missile' },
+        { id: 'l7d2', icon: '🚀', text: 'An Arrow 3 interceptor costs ~$2-3 million — adversaries can force a launch with a much cheaper decoy missile' },
         { id: 'l7d3', icon: '🔦', text: 'Iron Beam is a laser defense system under development — each shot costs roughly $3.50 in electricity vs $50,000 for a Tamir' },
         { id: 'l7d4', icon: '⚡', text: 'Iron Beam has no ammunition limit — as long as there is power, it can keep firing, eliminating the supply exhaustion problem' },
         { id: 'l7d5', icon: '🌧️', text: 'Iron Beam\'s main limitation is weather — lasers lose effectiveness in heavy cloud cover, rain, or sandstorms' },
@@ -282,8 +297,8 @@ const BRIEFING_CONTENT = {
 // Phase label mapping
 // ============================================================
 const PHASE_LABELS = {
-  threat: 'THREAT BRIEFING',
-  defense: 'DEFENSE BRIEFING',
+  threat: 'TARGETS AT RISK',
+  defense: 'THREATS & DEFENSES',
   quiz: 'INTEL CHECK',
   exercise: 'FIELD EXERCISE',
 };
@@ -1584,8 +1599,8 @@ const LEVEL_NAMES = {
   1: { name: 'SOUTHERN FRONT', hebrewName: 'חֲזִית הַדָּרוֹם', subtitle: 'Otef Aza — Gaza Border Communities' },
   2: { name: 'NORTHERN FRONT', hebrewName: 'חֲזִית הַצָּפוֹן', subtitle: 'Galil & Golan Heights' },
   3: { name: 'CENTRAL FRONT', hebrewName: 'חֲזִית הַמֶּרְכָּז', subtitle: 'Tel Aviv — Jerusalem Corridor' },
-  4: { name: 'THE HOME FRONT', hebrewName: 'חֲזִית הָעוֹרֶף', subtitle: 'Defending Population Centers' },
-  5: { name: 'STRATEGIC TARGETS', hebrewName: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', subtitle: 'Defending Military Installations' },
+  4: { name: 'STRATEGIC TARGETS', hebrewName: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', subtitle: 'Defending Critical Infrastructure' },
+  5: { name: 'ARMY BASES', hebrewName: 'בְּסִיסֵי צָבָא', subtitle: 'Defending Military Installations' },
   6: { name: 'WAVE ASSAULT', hebrewName: 'מִתְקֶפֶת גַּלִּים', subtitle: 'Coordinated Multi-Front Attack' },
   7: { name: 'APRIL 13', hebrewName: 'שְׁלוֹשָׁה עָשָׂר בְּאַפְּרִיל', subtitle: 'The Night Everything Fired' },
 };
@@ -1602,13 +1617,13 @@ function selectRandom(arr, count) {
 
 // Per-level briefing accent colors — drives background gradient, borders, and decorative elements
 const BRIEFING_ACCENTS = {
-  1: { color: '#f97316', label: 'SOUTH' },    // Orange — rockets/Gaza
-  2: { color: '#eab308', label: 'NORTH' },     // Amber — drones/Lebanon
-  3: { color: '#3b82f6', label: 'CENTER' },     // Blue — cruise/central
-  4: { color: '#ef4444', label: 'STRATEGIC' },  // Red — ballistic/bases
-  5: { color: '#a855f7', label: 'ALL FRONTS' }, // Purple — full defense
-  6: { color: '#06b6d4', label: 'MULTI' },      // Cyan — wave assault
-  7: { color: '#f43f5e', label: 'FINAL' },      // Rose — final stand
+  1: { color: '#f97316', label: 'SOUTH' },    // Orange — southern Israel / rockets & Iron Dome
+  2: { color: '#eab308', label: 'NORTH' },     // Amber — northern Israel / attack drones
+  3: { color: '#3b82f6', label: 'CENTER' },     // Blue — central Israel / cruise missiles & David's Sling
+  4: { color: '#ef4444', label: 'STRATEGIC' },  // Red — strategic infrastructure / ballistic & Arrow 2
+  5: { color: '#a855f7', label: 'BASES' },      // Purple — army bases / hypersonics & Arrow 3
+  6: { color: '#06b6d4', label: 'MULTI' },      // Cyan — multi-front / layered defense
+  7: { color: '#f43f5e', label: 'FINAL' },      // Rose — April 13 / cost problem & Iron Beam
 };
 
 export default function EducationalBriefing({ level, onComplete }) {

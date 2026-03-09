@@ -216,8 +216,8 @@ const LEVEL_TITLES = {
   1: 'SOUTHERN FRONT',
   2: 'NORTHERN FRONT',
   3: 'CENTRAL FRONT',
-  4: 'THE HOME FRONT',
-  5: 'STRATEGIC TARGETS',
+  4: 'STRATEGIC TARGETS',
+  5: 'ARMY BASES',
   6: 'WAVE ASSAULT',
   7: 'APRIL 13',
 };
@@ -226,8 +226,8 @@ const LEVEL_TITLES_HE = {
   1: 'חֲזִית הַדָּרוֹם',
   2: 'חֲזִית הַצָּפוֹן',
   3: 'חֲזִית הַמֶּרְכָּז',
-  4: 'חֲזִית הָעוֹרֶף',
-  5: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת',
+  4: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת',
+  5: 'בְּסִיסֵי צָבָא',
   6: 'מִתְקֶפֶת גַּלִּים',
   7: 'שְׁלוֹשָׁה עָשָׂר בְּאַפְּרִיל',
 };

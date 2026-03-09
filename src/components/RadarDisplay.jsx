@@ -847,10 +847,11 @@ export default function RadarDisplay({
             {visibleRegions.map((region) => {
               const labelP = mapToSVG(region.labelPos.x, region.labelPos.y, viewport);
               const fillColor = 'rgba(0, 200, 255, 0.55)';
-              // Smaller region labels when zoomed out (L5-7) to avoid overlap with city names
-              const regionFontSize = viewport.scale < 1.0 ? '2.0' : '2.8';
-              const regionLineHeight = viewport.scale < 1.0 ? '2.4' : '3.2';
-              const regionLetterSpacing = viewport.scale < 1.0 ? '0.8' : '1.5';
+              // Smaller region labels when zoomed out to avoid overlap with city/infra names
+              // L6-7 (scale < 1.0): smallest. L4-5 (scale 1.0-1.2): medium. L1-3 (scale >= 1.5): largest.
+              const regionFontSize = viewport.scale < 1.0 ? '2.0' : viewport.scale < 1.5 ? '2.0' : '2.8';
+              const regionLineHeight = viewport.scale < 1.0 ? '2.4' : viewport.scale < 1.5 ? '2.4' : '3.2';
+              const regionLetterSpacing = viewport.scale < 1.0 ? '0.8' : viewport.scale < 1.5 ? '0.6' : '1.5';
               // Stack multi-word region names vertically to save horizontal space
               if (region.name === 'Otef Aza' || region.name === 'Golan Heights' || region.name === 'Central Israel') {
                 const words = region.name.split(' ');
@@ -899,18 +900,24 @@ export default function RadarDisplay({
               const labelSize = viewport.scale >= 2.0 ? 1.8 : viewport.scale >= 1.5 ? 1.8 : 2.2;
               // Push labels further from dots when zoomed out to reduce overlap
               const offsetScale = viewport.scale < 1.0 ? 1.3 : 1.0;
-              // Bases get larger labels/dots when they're the focus (L4)
-              const baseDotRadius = currentLevel === 4 ? 1.0 : dotRadius;
-              const baseLabelSize = currentLevel === 4 ? 1.6 : labelSize;
+              // Bases/infra get larger labels/dots when they're the focus
+              const baseDotRadius = currentLevel === 5 ? 1.2 : dotRadius;
+              const baseLabelSize = currentLevel === 5 ? 2.2 : labelSize;
+              // Infrastructure gets slightly prominent labels at L4 (but not oversized)
+              const infraDotRadius = currentLevel === 4 ? 1.0 : dotRadius;
+              const infraLabelSize = currentLevel === 4 ? 1.8 : labelSize;
 
               // Visibility filtering:
               // - Tier 1 cities: always shown
               // - Tier 2 cities: shown when zoomed in or actively targeted
               // - Key bases (keyBase): always shown at L6+ (Ramat David, Palmachim, Nevatim)
               // - Other bases at L6+: hidden unless actively targeted (prevent clutter)
+              // - Infrastructure at L6+: hidden unless actively targeted (only prominent at L4)
               const citiesToRender = Object.entries(visibleCities).filter(([name, city]) => {
                 // At L6+, hide non-key bases unless being targeted (clutter control)
                 if (city.isBase && currentLevel >= 6 && !city.keyBase && !activeThreatTargets.has(name)) return false;
+                // At L6+, hide infrastructure unless being targeted (only featured at L4)
+                if (city.isInfra && currentLevel >= 6 && !activeThreatTargets.has(name)) return false;
                 if (city.tier === 1) return true;
                 if (viewport.scale >= 1.5) return true; // zoomed in (L1/L2)
                 if (activeThreatTargets.has(name)) return true; // being targeted
@@ -921,13 +928,16 @@ export default function RadarDisplay({
                 const p = mapToSVG(city.x, city.y, viewport);
                 const flash = impactFlashes.find((f) => f.zone === name);
 
-                // Base-specific colors (amber/gold) vs city colors (green)
+                // Marker type: base (amber ◆), infra (orange ▲), city (green ●)
                 const isBase = city.isBase;
-                const r = isBase ? baseDotRadius : dotRadius;
-                const fontSize = isBase ? baseLabelSize : labelSize;
-                let dotColor = isBase ? 'rgba(234, 179, 8, 0.4)' : 'rgba(0, 255, 136, 0.3)';
-                let strokeColor = isBase ? 'rgba(234, 179, 8, 0.8)' : 'rgba(0, 255, 136, 0.7)';
-                let labelColor = isBase ? 'rgba(234, 179, 8, 0.85)' : 'rgba(0, 255, 136, 0.7)';
+                const isInfra = city.isInfra;
+                // Is this a landmark reference city at L4-L5? (dimmed for context, not focus)
+                const isLandmark = (currentLevel === 4 || currentLevel === 5) && !isBase && !isInfra && city.revealLevel < currentLevel;
+                const r = isInfra ? infraDotRadius : isBase ? baseDotRadius : dotRadius;
+                const fontSize = isInfra ? infraLabelSize : isBase ? baseLabelSize : isLandmark ? labelSize * 0.8 : labelSize;
+                let dotColor = isInfra ? 'rgba(251, 146, 60, 0.5)' : isBase ? 'rgba(234, 179, 8, 0.4)' : isLandmark ? 'rgba(0, 255, 136, 0.2)' : 'rgba(0, 255, 136, 0.3)';
+                let strokeColor = isInfra ? 'rgba(251, 146, 60, 0.95)' : isBase ? 'rgba(234, 179, 8, 0.8)' : isLandmark ? 'rgba(0, 255, 136, 0.4)' : 'rgba(0, 255, 136, 0.7)';
+                let labelColor = isInfra ? 'rgba(251, 146, 60, 0.95)' : isBase ? 'rgba(234, 179, 8, 0.85)' : isLandmark ? 'rgba(0, 255, 136, 0.5)' : 'rgba(0, 255, 136, 0.7)';
 
                 // Targeted warning — lights up immediately when a threat is heading here
                 const isTargeted = activeThreatTargets.has(name);
@@ -950,9 +960,11 @@ export default function RadarDisplay({
                 }
 
                 // Per-city label direction offset
-                const offset = LABEL_OFFSETS[city.labelDir || 'e'];
-                // Bases have larger diamond markers — push labels further to clear them
-                const baseBoost = isBase && currentLevel >= 6 ? 1.5 : 1.0;
+                // Haifa: 'se' at L4-5 (avoid BAZAN), 'w' at L6-7 (avoid Ramat David)
+                const effectiveLabelDir = (name === 'Haifa' && currentLevel >= 6) ? 'w' : (city.labelDir || 'e');
+                const offset = LABEL_OFFSETS[effectiveLabelDir];
+                // Bases/infra have larger markers — push labels further to clear them
+                const baseBoost = (isBase || isInfra) && currentLevel >= 5 ? 1.5 : 1.0;
 
                 return (
                   <g key={name}>
@@ -964,8 +976,16 @@ export default function RadarDisplay({
                         className="radar-pulse"
                       />
                     )}
-                    {isBase ? (
-                      // Diamond marker for military bases
+                    {isInfra ? (
+                      // Triangle marker for infrastructure targets ▲
+                      <polygon
+                        points={`${p.x},${p.y - r * 1.3} ${p.x - r * 1.2},${p.y + r * 0.8} ${p.x + r * 1.2},${p.y + r * 0.8}`}
+                        fill={dotColor}
+                        stroke={strokeColor}
+                        strokeWidth="0.4"
+                      />
+                    ) : isBase ? (
+                      // Diamond marker for military bases ◆
                       <rect
                         x={p.x - r} y={p.y - r}
                         width={r * 2} height={r * 2}
@@ -975,7 +995,7 @@ export default function RadarDisplay({
                         transform={`rotate(45, ${p.x}, ${p.y})`}
                       />
                     ) : (
-                      // Circle marker for cities
+                      // Circle marker for cities ●
                       <circle
                         cx={p.x} cy={p.y} r={r}
                         fill={dotColor}
@@ -983,35 +1003,47 @@ export default function RadarDisplay({
                         strokeWidth="0.3"
                       />
                     )}
-                    <text
-                      x={p.x + offset.dx * offsetScale * baseBoost} y={p.y + offset.dy * offsetScale * baseBoost}
-                      fill={labelColor}
-                      fontSize={fontSize}
-                      fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
-                      textAnchor={offset.anchor}
-                      fontWeight={isBase || offsetScale > 1 ? 'bold' : 'normal'}
-                      stroke={offsetScale > 1 ? 'rgba(10, 14, 26, 0.8)' : 'none'}
-                      strokeWidth={offsetScale > 1 ? '0.4' : '0'}
-                      paintOrder="stroke"
-                    >
-                      {currentLevel === 7 && city.he ? city.he : (
-                        currentLevel === 5 && isBase
-                          ? (name.includes('AFB') ? name.replace('AFB', 'Base') : name + ' Base')
-                          : name
-                      )}
-                    </text>
-                    {/* Population label — shown only at L4 (Home Front) for cities with population data */}
-                    {currentLevel === 4 && city.population && !isBase && (
+                    {(() => {
+                      const displayText = currentLevel === 7 && city.he ? city.he : (
+                        isInfra && city.shortLabel ? city.shortLabel : (
+                          currentLevel === 5 && isBase
+                            ? (name.includes('AFB') ? name.replace('AFB', 'Base') : name + ' Base')
+                            : name
+                        )
+                      );
+                      const labelX = p.x + offset.dx * offsetScale * baseBoost;
+                      const labelY = p.y + offset.dy * offsetScale * baseBoost;
+                      const lines = displayText.split('\n');
+                      return (
+                        <text
+                          x={labelX} y={labelY}
+                          fill={labelColor}
+                          fontSize={fontSize}
+                          fontFamily={currentLevel === 7 && city.he ? 'Arial, sans-serif' : 'monospace'}
+                          textAnchor={offset.anchor}
+                          fontWeight={isBase || isInfra || isLandmark || offsetScale > 1 ? 'bold' : 'normal'}
+                          stroke={(offsetScale > 1 || isInfra) ? 'rgba(10, 14, 26, 0.85)' : 'none'}
+                          strokeWidth={(offsetScale > 1 || isInfra) ? '0.5' : '0'}
+                          paintOrder="stroke"
+                        >
+                          {lines.length > 1 ? lines.map((line, li) => (
+                            <tspan key={li} x={labelX} dy={li === 0 ? '0' : `${fontSize * 1.15}`}>{line}</tspan>
+                          )) : displayText}
+                        </text>
+                      );
+                    })()}
+                    {/* Population label — shown for cities with population data at L3 only */}
+                    {currentLevel === 3 && city.population && !isBase && (
                       <text
                         x={p.x + offset.dx * offsetScale * baseBoost}
-                        y={p.y + offset.dy * offsetScale * baseBoost + fontSize * 1.1}
-                        fill="rgba(200, 220, 255, 0.4)"
-                        fontSize={fontSize * 0.6}
+                        y={p.y + offset.dy * offsetScale * baseBoost + fontSize * 1.15}
+                        fill="rgba(180, 210, 255, 0.55)"
+                        fontSize={fontSize * 0.65}
                         fontFamily="monospace"
                         textAnchor={offset.anchor}
                         paintOrder="stroke"
-                        stroke="rgba(10, 14, 26, 0.6)"
-                        strokeWidth="0.3"
+                        stroke="rgba(10, 14, 26, 0.7)"
+                        strokeWidth="0.35"
                       >
                         pop. {city.population}
                       </text>
@@ -1046,8 +1078,8 @@ export default function RadarDisplay({
                       transform={`rotate(45, ${hq.x}, ${hq.y})`}
                     />
                     {/* AFB label — positioned by labelDir to avoid overlap */}
-                    {/* Hide battery labels at L6+ where keyBase city labels already show the names */}
-                    {currentLevel < 6 && (() => {
+                    {/* Hide battery labels at L5+ where base/city labels already show the names */}
+                    {currentLevel <= 4 && (() => {
                       const dir = battery.labelDir || 's';
                       const lx = dir.includes('e') ? hq.x + 3.5 : dir.includes('w') ? hq.x - 3.5 : hq.x;
                       const ly = dir.includes('s') ? hq.y + 3.5 : dir.includes('n') ? hq.y - 3.5 : hq.y + 0.7;

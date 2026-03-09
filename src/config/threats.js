@@ -60,7 +60,16 @@ export const IMPACT_POSITIONS = {
   'Katzrin': { x: 0.61, y: 0.14 },
   'Majdal Shams': { x: 0.64, y: 0.08 },
   'Arad': { x: 0.42, y: 0.58 },
-  // === Military Bases (L4) ===
+  // === Strategic Infrastructure (L4) ===
+  'BAZAN Oil Refinery': { x: 0.34, y: 0.20 },           // Haifa Bay
+  'Orot Rabin Power Station': { x: 0.32, y: 0.27 },     // Hadera
+  'Rutenberg Power Station': { x: 0.20, y: 0.44 },      // Ashkelon
+  'Sorek Desalination Plant': { x: 0.23, y: 0.39 },     // Palmachim coast
+  'Ashdod Port': { x: 0.23, y: 0.42 },                  // Ashdod
+  'Dimona Nuclear Reactor': { x: 0.37, y: 0.62 },       // Negev
+  'The Kirya (IDF HQ)': { x: 0.28, y: 0.35 },           // Tel Aviv
+  'Ben Gurion Airport': { x: 0.32, y: 0.37 },        // Central
+  // === Military Bases (L5) ===
   'Ramat David AFB': { x: 0.43, y: 0.22 },
   'Glilot (Unit 8200)': { x: 0.29, y: 0.33 },
   'Palmachim AFB': { x: 0.24, y: 0.38 },
@@ -377,54 +386,58 @@ const THREATS_L3 = [
 ];
 
 // ============================================================
-// LEVEL 4: The Home Front — Ballistic + all previous, introduces Arrow 2
+// LEVEL 4: Strategic Threats — Ballistic + all previous, introduces Arrow 2
 // Duration: 120s | 37 threats
-// Geography: Population corridor (scale 1.3). Cities revealed, no bases yet.
-// NEW: ballistic missiles from Iran targeting population centers.
-// Drones from Lebanon/Syria, cruise from Iran, ballistic from Iran.
+// Geography: Full country view. Critical infrastructure targets.
+// NEW: ballistic missiles from Iran targeting strategic infrastructure.
+// Targets: Jerusalem, Tel Aviv, Haifa (population centers),
+//   BAZAN Oil Refinery, Orot Rabin, Rutenberg (energy),
+//   Sorek Desalination Plant (water), Ashdod Port (transport),
+//   Dimona Nuclear Reactor (nuclear), The Kirya/IDF HQ, IAI (command/defense).
+// Educational: teaches WHY missile defense matters — it's not just cities.
 // ============================================================
 const THREATS_L4 = [
   // === Warm-up — drone + cruise, then first ballistic (5 threats, 4-22s) ===
-  threat(1,  4,  'drone',     'Haifa',            true,  11, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(2,  9,  'cruise',    'Jerusalem',        true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(3,  14, 'drone',     'Negev Desert',     false, 11, 'full', 1.0, { origin: 'east' }),        // hold fire
-  threat(4,  18, 'ballistic', 'Tel Aviv',         true,  12, 'full', 0.40, { origin: 'east' }),       // ★ First ballistic! Iran
-  threat(5,  22, 'cruise',    'Ashkelon',         true,  10, 'full', 1.0, { origin: 'west' }),        // Gaza
+  threat(1,  4,  'drone',     'BAZAN Oil Refinery',       true,  11, 'full', 1.0, { origin: 'north' }),        // Hezbollah → energy
+  threat(2,  9,  'cruise',    'The Kirya (IDF HQ)',       true,  10, 'full', 1.0, { origin: 'east' }),         // Iran → command
+  threat(3,  14, 'drone',     'Negev Desert',             false, 11, 'full', 1.0, { origin: 'east' }),         // hold fire
+  threat(4,  18, 'ballistic', 'Dimona Nuclear Reactor',   true,  12, 'full', 0.40, { origin: 'east', priority: true }),  // ★ First ballistic! Iran → nuclear
+  threat(5,  22, 'cruise',    'Orot Rabin Power Station', true,  10, 'full', 1.0, { origin: 'east' }),         // Iran → energy
   // === Mixed pairs — pressure builds (8 threats, 27-48s) ===
-  threat(6,  27, 'ballistic', 'Jerusalem',        true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(7,  30, 'drone',     'Netanya',          true,  11, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(8,  33, 'cruise',    'Haifa',            true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(9,  33, 'drone',     'Golan Heights',    false, 11, 'full', 1.0, { origin: 'northeast' }),   // hold fire (pair!)
-  threat(10, 37, 'ballistic', 'Beersheba',        true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(11, 40, 'cruise',    'Petah Tikva',      true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(12, 44, 'drone',     'Sderot',           true,  10, 'full', 1.0, { origin: 'west' }),        // Gaza
-  threat(13, 48, 'ballistic', 'Tel Aviv',         true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
+  threat(6,  27, 'ballistic', 'Tel Aviv',                 true,  11, 'full', 0.40, { origin: 'east' }),        // Iran → population
+  threat(7,  30, 'drone',     'Rutenberg Power Station',  true,  11, 'full', 1.0, { origin: 'north' }),        // Hezbollah → energy
+  threat(8,  33, 'cruise',    'Haifa',                    true,  10, 'full', 1.0, { origin: 'east' }),         // Iran → population
+  threat(9,  33, 'drone',     'Coastal Plain',            false, 11, 'full', 1.0, { origin: 'north' }),        // hold fire (pair!)
+  threat(10, 37, 'ballistic', 'Sorek Desalination Plant', true,  11, 'full', 0.40, { origin: 'east' }),        // Iran → water
+  threat(11, 40, 'cruise',    'Ben Gurion Airport',    true,  10, 'full', 1.0, { origin: 'east' }),         // Iran → defense industry
+  threat(12, 44, 'drone',     'Ashdod Port',              true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → transport
+  threat(13, 48, 'ballistic', 'Jerusalem',                true,  11, 'full', 0.40, { origin: 'east' }),        // Iran → population
   // === Triples — real pressure (8 threats, 53-72s) ===
-  threat(14, 53, 'ballistic', 'Jerusalem',        true,  11, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
-  threat(15, 55, 'cruise',    'Rishon LeZion',    true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(16, 55, 'drone',     'Haifa',            true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon (pair with cruise!)
-  threat(17, 59, 'ballistic', 'Netanya',          true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(18, 62, 'cruise',    'Northern Negev',   false, 9,  'full', 1.0, { origin: 'east' }),        // hold fire, Iran
-  threat(19, 65, 'drone',     'Ashdod',           true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(20, 68, 'ballistic', 'Haifa',            true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(21, 72, 'cruise',    'Beersheba',        true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
+  threat(14, 53, 'ballistic', 'Dimona Nuclear Reactor',   true,  11, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → nuclear
+  threat(15, 55, 'cruise',    'BAZAN Oil Refinery',       true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → energy
+  threat(16, 55, 'drone',     'The Kirya (IDF HQ)',       true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → command (pair!)
+  threat(17, 59, 'ballistic', 'Orot Rabin Power Station', true,  11, 'full', 0.40, { origin: 'east' }),        // Iran → energy
+  threat(18, 62, 'cruise',    'Northern Negev',           false, 9,  'full', 1.0, { origin: 'east' }),         // hold fire
+  threat(19, 65, 'drone',     'Sorek Desalination Plant', true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → water
+  threat(20, 68, 'ballistic', 'Haifa',                    true,  10, 'full', 0.40, { origin: 'east' }),        // Iran → population
+  threat(21, 72, 'cruise',    'Rutenberg Power Station',  true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → energy
   // === Final surge — tight multi-threat waves (16 threats, 77-112s) ===
-  threat(22, 77, 'drone',     'Nahariya',         true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(23, 80, 'ballistic', 'Tel Aviv',         true,  10, 'full', 0.35, { origin: 'east' }),       // Iran
-  threat(24, 83, 'cruise',    'Netanya',          true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(25, 83, 'drone',     'Northern Negev',   false, 10, 'full', 1.0, { origin: 'east' }),        // hold fire (pair!)
-  threat(26, 87, 'ballistic', 'Beersheba',        true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(27, 90, 'cruise',    'Jerusalem',        true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(28, 93, 'drone',     'Ashkelon',         true,  10, 'full', 1.0, { origin: 'west' }),        // Gaza
-  threat(29, 96, 'ballistic', 'Ashdod',           true,  11, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(30, 99, 'cruise',    'Sderot',           true,  9,  'full', 1.0, { origin: 'west' }),        // Gaza
-  threat(31, 103,'ballistic', 'Tel Aviv',         true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → strategic
-  threat(32, 106,'drone',     'Haifa',            true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(33, 106,'cruise',    'Beersheba',        true,  9,  'full', 1.0, { origin: 'east' }),        // Iran (pair!)
-  threat(34, 109,'ballistic', 'Jerusalem',        true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(35, 109,'drone',     'Tel Aviv',         true,  10, 'full', 1.0, { origin: 'north' }),       // Lebanon (pair!)
-  threat(36, 112,'cruise',    'Netanya',          true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(37, 112,'ballistic', 'Haifa',            true,  10, 'full', 0.40, { origin: 'east' }),       // Iran (pair!)
+  threat(22, 77, 'drone',     'Ben Gurion Airport',    true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → defense industry
+  threat(23, 80, 'ballistic', 'Tel Aviv',                 true,  10, 'full', 0.35, { origin: 'east' }),        // Iran → population
+  threat(24, 83, 'cruise',    'Ashdod Port',              true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → transport
+  threat(25, 83, 'drone',     'Judean Hills',             false, 10, 'full', 1.0, { origin: 'east' }),         // hold fire (pair!)
+  threat(26, 87, 'ballistic', 'Sorek Desalination Plant', true,  10, 'full', 0.40, { origin: 'east' }),        // Iran → water
+  threat(27, 90, 'cruise',    'Jerusalem',                true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → population
+  threat(28, 93, 'drone',     'BAZAN Oil Refinery',       true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → energy
+  threat(29, 96, 'ballistic', 'The Kirya (IDF HQ)',       true,  11, 'full', 0.40, { origin: 'east' }),        // Iran → command
+  threat(30, 99, 'cruise',    'Orot Rabin Power Station', true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → energy
+  threat(31, 103,'ballistic', 'Dimona Nuclear Reactor',   true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran → nuclear
+  threat(32, 106,'drone',     'Haifa',                    true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → population
+  threat(33, 106,'cruise',    'Rutenberg Power Station',  true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → energy (pair!)
+  threat(34, 109,'ballistic', 'Ben Gurion Airport',    true,  10, 'full', 0.40, { origin: 'east' }),        // Iran → defense industry
+  threat(35, 109,'drone',     'Ashdod Port',              true,  10, 'full', 1.0, { origin: 'north' }),        // Hezbollah → transport (pair!)
+  threat(36, 112,'cruise',    'Tel Aviv',                 true,  9,  'full', 1.0, { origin: 'east' }),         // Iran → population
+  threat(37, 112,'ballistic', 'Jerusalem',                true,  10, 'full', 0.40, { origin: 'east' }),        // Iran → population (pair!)
 ];
 
 // ============================================================
@@ -485,62 +498,62 @@ const THREATS_L5 = [
 ];
 
 // ============================================================
-// THREATS_L6 array — Used by LEVEL 5 (Strategic Targets)
+// THREATS_L6 array — Used by LEVEL 5 (Army Bases)
 // Duration: 150s | 41 threats in clear waves
 // Hypersonic glide vehicles from Iran → requires Arrow 3.
 // Teaching moment at t=22, then escalating integration.
-// Military base targets + all threat types including hypersonic.
+// Army base targets ONLY + all threat types including hypersonic.
 // ============================================================
 const THREATS_L6 = [
-  // WAVE 1: Warm-up — familiar threats (3 threats, 4-12s)
-  threat(1,  4,  'drone',      'Arad',            true,  13, 'full', 1.0, { origin: 'southeast' }),   // Yemen
-  threat(2,  8,  'rocket',     'Be\'eri',         true,  7,  'full', 1.0, { origin: 'gaza' }),        // Gaza
-  threat(3,  12, 'cruise',     'Tel Aviv',        true,  10, 'full', 1.0, { origin: 'east' }),        // Iran
+  // WAVE 1: Warm-up — familiar threats at bases (3 threats, 4-12s)
+  threat(1,  4,  'drone',      'Nevatim AFB',       true,  13, 'full', 1.0, { origin: 'southeast' }),   // Yemen → south base
+  threat(2,  8,  'rocket',     'Palmachim AFB',     true,  7,  'full', 1.0, { origin: 'gaza' }),        // Gaza → coastal base
+  threat(3,  12, 'cruise',     'Glilot (Unit 8200)',true,  10, 'full', 1.0, { origin: 'east' }),        // Iran → intelligence HQ
   // WAVE 2: First hypersonic! (single, clear teaching moment)
-  threat(4,  22, 'hypersonic', 'Jerusalem',       true,  10, 'full', 0.40, { origin: 'east' }),       // ★ First hypersonic! Iran
-  threat(5,  28, 'ballistic',  'Negev Desert',    false, 11, 'full', 0.45, { origin: 'east' }),       // hold fire
+  threat(4,  22, 'hypersonic', 'Sdot Micha',        true,  10, 'full', 0.40, { origin: 'east' }),       // ★ First hypersonic! Iran → strategic missile base
+  threat(5,  28, 'ballistic',  'Negev Desert',      false, 11, 'full', 0.45, { origin: 'east' }),       // hold fire
   // WAVE 3: Second hypersonic + familiar mix
-  threat(6,  34, 'cruise',     'Akko',            true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(7,  36, 'hypersonic', 'Haifa',           true,  9,  'full', 0.40, { origin: 'east' }),       // Iran
-  threat(8,  38, 'rocket',     'Kfar Aza',        true,  7,  'full', 1.0, { origin: 'gaza' }),        // Gaza
+  threat(6,  34, 'cruise',     'Ramat David AFB',   true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon → northern air base
+  threat(7,  36, 'hypersonic', 'Palmachim AFB',     true,  9,  'full', 0.40, { origin: 'east' }),       // Iran → missile test base
+  threat(8,  38, 'rocket',     'Nevatim AFB',       true,  7,  'full', 1.0, { origin: 'gaza' }),        // Gaza → south base
   // WAVE 4: Pressure builds — ballistic + hypersonic pair
-  threat(9,  46, 'ballistic',  'Nevatim AFB',     true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → base
-  threat(10, 48, 'hypersonic', 'Tel Aviv',        true,  9,  'full', 0.40, { origin: 'east' }),       // Iran
-  threat(11, 48, 'drone',      'Arava Valley',    false, 11, 'full', 1.0, { origin: 'southeast' }),   // hold fire
+  threat(9,  46, 'ballistic',  'Nevatim AFB',       true,  11, 'full', 0.40, { origin: 'east' }),       // Iran → south base
+  threat(10, 48, 'hypersonic', 'Glilot (Unit 8200)',true,  9,  'full', 0.40, { origin: 'east' }),       // Iran → intelligence HQ
+  threat(11, 48, 'drone',      'Arava Valley',      false, 11, 'full', 1.0, { origin: 'southeast' }),   // hold fire
   // WAVE 5: Heavy pressure — 4 simultaneous
-  threat(12, 57, 'cruise',     'Petah Tikva',     true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(13, 57, 'rocket',     'Sderot',          true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
-  threat(14, 59, 'ballistic',  'Dimona',          true,  10, 'full', 0.35, { origin: 'east', priority: true }),  // Iran
-  threat(15, 59, 'hypersonic', 'Haifa',           true,  8,  'full', 0.35, { origin: 'east' }),       // Iran
+  threat(12, 57, 'cruise',     'Tel Nof AFB',       true,  9,  'full', 1.0, { origin: 'east' }),        // Iran → central air base
+  threat(13, 57, 'rocket',     'Palmachim AFB',     true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza → coastal base
+  threat(14, 59, 'ballistic',  'Nevatim AFB',       true,  10, 'full', 0.35, { origin: 'east' }),                   // Iran → south base (F-35s)
+  threat(15, 59, 'hypersonic', 'Ramat David AFB',   true,  8,  'full', 0.35, { origin: 'east' }),       // Iran → northern air base
   // WAVE 6: Mixed with hold fires
-  threat(16, 69, 'drone',      'Rishon LeZion',   true,  11, 'full', 1.0, { origin: 'east' }),        // Iran
-  threat(17, 69, 'cruise',     'Dead Sea Region', false, 9,  'full', 1.0, { origin: 'east' }),        // hold fire
-  threat(18, 71, 'ballistic',  'Jerusalem',       true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(19, 71, 'rocket',     'Ashkelon',        true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
+  threat(16, 69, 'drone',      'Palmachim AFB',     true,  11, 'full', 1.0, { origin: 'east' }),        // Iran → coastal base
+  threat(17, 69, 'cruise',     'Dead Sea Region',   false, 9,  'full', 1.0, { origin: 'east' }),        // hold fire
+  threat(18, 71, 'ballistic',  'Sdot Micha',        true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → strategic missile base
+  threat(19, 71, 'rocket',     'Tel Nof AFB',       true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza → central base
   // WAVE 7: Escalation
-  threat(20, 82, 'hypersonic', 'Beersheba',       true,  8,  'full', 0.40, { origin: 'east' }),       // Iran
-  threat(21, 84, 'cruise',     'Holon',           true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(22, 85, 'rocket',     'Netivot',         true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
+  threat(20, 82, 'hypersonic', 'Nevatim AFB',       true,  8,  'full', 0.40, { origin: 'east' }),       // Iran → south base
+  threat(21, 84, 'cruise',     'Glilot (Unit 8200)',true,  9,  'full', 1.0, { origin: 'east' }),        // Iran → intelligence HQ
+  threat(22, 85, 'rocket',     'Ramon AFB',         true,  6,  'full', 1.0, { origin: 'southeast' }),   // Yemen → deep south base
   // WAVE 8: Sustained pressure
-  threat(23, 94, 'ballistic',  'Ramat David AFB', true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → base
-  threat(24, 95, 'drone',      'Katzrin',         true,  10, 'full', 1.0, { origin: 'northeast' }),   // Syria
-  threat(25, 97, 'hypersonic', 'Jerusalem',       true,  8,  'full', 0.35, { origin: 'east' }),       // Iran
-  threat(26, 97, 'rocket',     'Ashdod',          true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
+  threat(23, 94, 'ballistic',  'Ramat David AFB',   true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → northern air base
+  threat(24, 95, 'drone',      'Sdot Micha',        true,  10, 'full', 1.0, { origin: 'northeast' }),   // Syria → missile base
+  threat(25, 97, 'hypersonic', 'Sdot Micha',        true,  8,  'full', 0.35, { origin: 'east' }),                   // Iran → strategic missile base
+  threat(26, 97, 'rocket',     'Palmachim AFB',     true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza → coastal base
   // WAVE 9: Heavy quad
-  threat(27, 108,'cruise',     'Netanya',         true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(28, 108,'ballistic',  'Palmachim AFB',   true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → base
-  threat(29, 110,'hypersonic', 'Dimona',          true,  8,  'full', 0.35, { origin: 'east', priority: true }),  // Iran
-  threat(30, 110,'rocket',     'Majdal Shams',    true,  6,  'full', 1.0, { origin: 'northeast' }),   // Syria
+  threat(27, 108,'cruise',     'Glilot (Unit 8200)',true,  9,  'full', 1.0, { origin: 'north' }),       // Lebanon → intelligence HQ
+  threat(28, 108,'ballistic',  'Palmachim AFB',     true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → coastal base
+  threat(29, 110,'hypersonic', 'Tel Nof AFB',       true,  8,  'full', 0.35, { origin: 'east' }),                   // Iran → central air base
+  threat(30, 110,'rocket',     'Ramat David AFB',   true,  6,  'full', 1.0, { origin: 'north' }),       // Hezbollah → northern base
   // WAVE 10: Final massive wave
-  threat(31, 122,'hypersonic', 'Tel Aviv',        true,  8,  'full', 0.35, { origin: 'east' }),       // Iran
-  threat(32, 122,'ballistic',  'Haifa',           true,  10, 'full', 0.40, { origin: 'east' }),       // Iran
-  threat(33, 124,'cruise',     'Beersheba',       true,  9,  'full', 1.0, { origin: 'east' }),        // Iran
-  threat(34, 124,'drone',      'Nahariya',        true,  11, 'full', 1.0, { origin: 'north' }),       // Lebanon
-  threat(35, 126,'rocket',     'Re\'im',          true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
-  threat(36, 126,'hypersonic', 'Central Negev',   false, 8,  'full', 0.50, { origin: 'east' }),       // hold fire
+  threat(31, 122,'hypersonic', 'Sdot Micha',        true,  8,  'full', 0.35, { origin: 'east' }),       // Iran → strategic missile base
+  threat(32, 122,'ballistic',  'Ramat David AFB',   true,  10, 'full', 0.40, { origin: 'east' }),       // Iran → northern air base
+  threat(33, 124,'cruise',     'Nevatim AFB',       true,  9,  'full', 1.0, { origin: 'east' }),        // Iran → south base
+  threat(34, 124,'drone',      'Tel Nof AFB',       true,  11, 'full', 1.0, { origin: 'north' }),       // Lebanon → central base
+  threat(35, 126,'rocket',     'Ramon AFB',         true,  6,  'full', 1.0, { origin: 'southeast' }),   // Yemen → deep south base
+  threat(36, 126,'hypersonic', 'Central Negev',     false, 8,  'full', 0.50, { origin: 'east' }),       // hold fire
   // Trailing threats
-  threat(37, 135,'ballistic',  'Jerusalem',       true,  10, 'full', 0.35, { origin: 'east' }),       // Iran
-  threat(38, 138,'rocket',     'Sderot',          true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza
+  threat(37, 135,'ballistic',  'Sdot Micha',        true,  10, 'full', 0.35, { origin: 'east' }),       // Iran → strategic missile base
+  threat(38, 138,'rocket',     'Nevatim AFB',       true,  6,  'full', 1.0, { origin: 'gaza' }),        // Gaza → south base
   // Additional hold-fire threats — all 5 threat types covered
   threat(39, 40, 'rocket',    'Sinai Border Region',  false, 7,  'full', 1.0, { origin: 'gaza' }),        // hold fire — rocket dud
   threat(40, 62, 'ballistic', 'Judean Desert',        false, 10, 'full', 0.45, { origin: 'east' }),       // hold fire — ballistic dud
@@ -632,7 +645,7 @@ export const LEVELS = [
   {
     id: 2,
     duration: 120,
-    ammo: { iron_dome: 42 },
+    ammo: { iron_dome: 44 },
     available_systems: ['iron_dome'],
     auto_end_delay: 3000,
     new_system: null,
@@ -645,7 +658,7 @@ export const LEVELS = [
   {
     id: 3,
     duration: 120,
-    ammo: { iron_dome: 24, davids_sling: 18 },
+    ammo: { iron_dome: 24, davids_sling: 16 },
     available_systems: ['iron_dome', 'davids_sling'],
     auto_end_delay: 5000,
     new_system: { key: 'davids_sling', name: "DAVID'S SLING", shortcut: '2', color: '#3b82f6' },
@@ -654,11 +667,11 @@ export const LEVELS = [
     final_salvo_start_time: null,
     threats: THREATS_L3,
   },
-  // Level 4: The Home Front — Ballistic Missiles + Arrow 2
+  // Level 4: Strategic Threats — Ballistic Missiles + Arrow 2
   {
     id: 4,
     duration: 120,
-    ammo: { iron_dome: 12, davids_sling: 13, arrow_2: 15 },
+    ammo: { iron_dome: 10, davids_sling: 12, arrow_2: 14 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2'],
     auto_end_delay: 5000,
     new_system: { key: 'arrow_2', name: 'ARROW 2', shortcut: '3', color: '#ef4444' },
@@ -667,11 +680,11 @@ export const LEVELS = [
     final_salvo_start_time: null,
     threats: THREATS_L4,
   },
-  // Level 5: Strategic Targets — Hypersonic Missiles + Arrow 3 (uses THREATS_L6 array)
+  // Level 5: Army Bases — Hypersonic Missiles + Arrow 3 (uses THREATS_L6 array)
   {
     id: 5,
     duration: 150,
-    ammo: { iron_dome: 16, davids_sling: 8, arrow_2: 8, arrow_3: 10 },
+    ammo: { iron_dome: 14, davids_sling: 7, arrow_2: 8, arrow_3: 9 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 6000,
     new_system: { key: 'arrow_3', name: 'ARROW 3', shortcut: '4', color: '#a855f7' },
@@ -684,7 +697,7 @@ export const LEVELS = [
   {
     id: 6,
     duration: 150,
-    ammo: { iron_dome: 18, davids_sling: 13, arrow_2: 8, arrow_3: 7 },
+    ammo: { iron_dome: 17, davids_sling: 12, arrow_2: 7, arrow_3: 6 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 6000,
     new_system: null,
@@ -697,7 +710,7 @@ export const LEVELS = [
   {
     id: 7,
     duration: 150,
-    ammo: { iron_dome: 15, davids_sling: 8, arrow_2: 7, arrow_3: 8 },
+    ammo: { iron_dome: 16, davids_sling: 8, arrow_2: 6, arrow_3: 8 },
     available_systems: ['iron_dome', 'davids_sling', 'arrow_2', 'arrow_3'],
     auto_end_delay: 8000,
     new_system: null,

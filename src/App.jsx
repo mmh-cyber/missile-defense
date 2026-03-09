@@ -31,6 +31,8 @@ function formatCountdown(seconds) {
 
 export default function App() {
   const game = useGameEngine();
+  // TEMP DEBUG: expose game to console for visual testing
+  window.__game = game;
   const [showFacilitator, setShowFacilitator] = useState(false);
   const showFacilitatorRef = useRef(false);
   useEffect(() => { showFacilitatorRef.current = showFacilitator; }, [showFacilitator]);
@@ -183,6 +185,7 @@ export default function App() {
         { keys: ['h', 'a', 'c', 'k'], trigger: showHackOverlay, blocked: false, hackOnly: true },
         { keys: ['b', 'h'], trigger: triggerHHMode, blocked: false },
         { keys: ['b', 's', 'd'], trigger: triggerRLMode, blocked: false },
+        { keys: ['p', 'p'], trigger: togglePause, blocked: false },
       ];
       // "hack" works on more screens (level start, level end, active); combat cheats only during ACTIVE
       const hackScreens = [GAME_STATES.ACTIVE, GAME_STATES.LEVEL_INTRO, GAME_STATES.LEVEL_COMPLETE];
@@ -622,10 +625,10 @@ export default function App() {
           </span>
           <span className="text-gray-600 font-mono text-sm">|</span>
           <span className="font-mono text-sm tracking-wider text-green-400 font-bold">
-            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'THE HOME FRONT', 5: 'STRATEGIC TARGETS', 6: 'WAVE ASSAULT', 7: 'APRIL 13' })[currentLevel] || ''}
+            {({ 1: 'SOUTHERN FRONT', 2: 'NORTHERN FRONT', 3: 'CENTRAL FRONT', 4: 'STRATEGIC TARGETS', 5: 'ARMY BASES', 6: 'WAVE ASSAULT', 7: 'APRIL 13' })[currentLevel] || ''}
           </span>
           <span className="text-green-400/80 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
-            {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'חֲזִית הָעוֹרֶף', 5: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'שְׁלוֹשָׁה עָשָׂר בְּאַפְּרִיל' })[currentLevel] || ''}
+            {({ 1: 'חֲזִית הַדָּרוֹם', 2: 'חֲזִית הַצָּפוֹן', 3: 'חֲזִית הַמֶּרְכָּז', 4: 'מַטָּרוֹת אִסְטְרָטֶגִיּוֹת', 5: 'בְּסִיסֵי צָבָא', 6: 'מִתְקֶפֶת גַּלִּים', 7: 'שְׁלוֹשָׁה עָשָׂר בְּאַפְּרִיל' })[currentLevel] || ''}
           </span>
         </div>
 
@@ -794,17 +797,11 @@ export default function App() {
       {/* HACK HUD overlay — shows remaining cheat uses */}
       {hackOverlay}
 
-      {/* PAUSE overlay */}
+      {/* PAUSE indicator — minimal banner so full game screen stays visible */}
       {paused && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="text-center">
-            <div className="text-5xl font-bold font-mono text-yellow-500 tracking-[0.5em] animate-pulse">
-              PAUSED
-            </div>
-            <div className="text-sm font-mono text-gray-500 mt-4">
-              PRESS ESC OR &#9881; TO RESUME
-            </div>
-          </div>
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 px-6 py-2 bg-black/80 border border-yellow-500/50 rounded-lg">
+          <span className="font-bold font-mono text-yellow-500 tracking-[0.3em] text-lg animate-pulse">PAUSED</span>
+          <span className="font-mono text-gray-500 text-xs ml-4">PP or ESC to resume</span>
         </div>
       )}
 
